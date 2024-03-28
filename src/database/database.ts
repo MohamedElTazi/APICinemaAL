@@ -10,10 +10,10 @@ export const AppDataSource = new DataSource({
     database: "CinemaNode",
     logging: true,
     synchronize: true,
-    /*entities: [
-        process.env.NODE_ENV === "dev" ? "src/database/entities/*.ts" : "dist/database/entities/*.js"
-    ],*/
-    /*migrations: [
-        process.env.NODE_ENV === "dev" ? "src/database/migrations/*.ts" : "dist/database/migrations/*.js"
-    ]*/
+    entities: [
+        "src/database/entities/*.ts"
+    ],
+    migrations: [
+        process.env.NODE_ENV === "dev" ? "src/database/entities/*.ts" : "dist/database/migrations/*.js"
+    ]
 })
