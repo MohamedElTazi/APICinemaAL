@@ -1,37 +1,70 @@
-DROP DATABASE IF EXISTS `cinema`;
-CREATE DATABASE `cinema`;
+DROP DATABASE IF EXISTS CinemaNode;
+CREATE DATABASE CinemaNode;
 
-USE `cinema`;
+USE CinemaNode;
 
-CREATE TABLE `film` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `titre` varchar(255) NOT NULL,
-  `duree` int(11) NOT NULL,
-  `dateSortie` date NOT NULL,
-  `note` int(11) NOT NULL,
-  `ageMinimal` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE cinemas (
+    cinema_id INT PRIMARY KEY AUTO_INCREMENT ,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    type VARCHAR(100),
+    capacity INT CHECK (capacity BETWEEN 15 AND 30),
+    access_disabled BOOLEAN DEFAULT FALSE,
+    maintenance_status BOOLEAN DEFAULT FALSE
+);
 
-CREATE TABLE `seance` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `date` date NOT NULL,
-  `heure_deb` time NOT NULL,
-  `id_film` int(11) NOT NULL,
-  `duree` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_film` (`id_film`),
-  CONSTRAINT `seance_ibfk_1` FOREIGN KEY (`id_film`) REFERENCES `film` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE movies (
+    movie_id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    duration INT NOT NULL,
+    genre VARCHAR(100)
+);
 
-CREATE TABLE `salle` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_seance` int(11) NOT NULL,
-  `nom` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `images` varchar(255) NOT NULL,
-  `type` varchar(255) NOT NULL,
-  `capacite` int(11) NOT NULL,
+CREATE TABLE showtimes (
+    showtime_id INT PRIMARY KEY AUTO_INCREMENT,
+    cinema_id INT REFERENCES cinemas(cinema_id),
+    movie_id INT REFERENCES movies(movie_id),
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    special_notes TEXT
+);
 
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE users (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    balance DECIMAL(10, 2) DEFAULT 0.00,
+    email VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE TABLE tickets (
+    ticket_id INT PRIMARY KEY AUTO_INCREMENT,
+    showtime_id INT REFERENCES showtimes(showtime_id),
+    user_id INT REFERENCES users(user_id),
+    status VARCHAR(50) NOT NULL,
+    is_super BOOLEAN DEFAULT FALSE
+);
+
+
+CREATE TABLE super_ticket_accesses (
+    access_id INT PRIMARY KEY AUTO_INCREMENT,
+    ticket_id INT REFERENCES tickets(ticket_id),
+    showtime_id INT REFERENCES showtimes(showtime_id)
+);
+
+CREATE TABLE transactions (
+    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT REFERENCES users(user_id),
+    amount DECIMAL(10, 2) NOT NULL,
+    transaction_type VARCHAR(50) NOT NULL,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE employees (
+    employee_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    position VARCHAR(100) NOT NULL,
+    working_hours TEXT NOT NULL
+);
