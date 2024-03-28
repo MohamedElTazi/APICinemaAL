@@ -3,8 +3,8 @@ CREATE DATABASE CinemaNode;
 
 USE CinemaNode;
 
-CREATE TABLE cinemas (
-    cinema_id INT PRIMARY KEY AUTO_INCREMENT ,
+CREATE TABLE salles (
+    salle_id INT PRIMARY KEY AUTO_INCREMENT ,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     type VARCHAR(100),
@@ -23,7 +23,7 @@ CREATE TABLE movies (
 
 CREATE TABLE showtimes (
     showtime_id INT PRIMARY KEY AUTO_INCREMENT,
-    cinema_id INT REFERENCES cinemas(cinema_id),
+    salle_id INT REFERENCES salles(salle_id),
     movie_id INT REFERENCES movies(movie_id),
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NOT NULL,
