@@ -9,11 +9,11 @@ export const AppDataSource = new DataSource({
     password: "azerty",
     database: "CinemaNode",
     logging: true,
-    synchronize: true,
+    synchronize: false,
     entities: [
         "src/database/entities/*.ts"
     ],
     migrations: [
-        process.env.NODE_ENV === "dev" ? "src/database/entities/*.ts" : "dist/database/migrations/*.js"
+        "src/database/entities/*.ts"
     ]
 })
