@@ -35,7 +35,7 @@ CREATE TABLE user(
     email VARCHAR(255) UNIQUE NOT NULL,
     password TEXT NOT NULL,
     role ENUM('user', 'administrator') NOT NULL,
-    balance DECIMAL(10, 2) DEFAULT 0.00
+    balance INT DEFAULT 0
 );
 
 CREATE TABLE ticket (

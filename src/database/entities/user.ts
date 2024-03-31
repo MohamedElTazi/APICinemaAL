@@ -28,8 +28,8 @@ export class User {
     })
     role: UserRole;
 
-    @Column()
-    balance: number
+    @Column({type: "int", default:0})
+    balance: number = 0
 
     @OneToMany(() => Token, token => token.user)
     tokens: Token[];

@@ -15,6 +15,11 @@ export interface UpdateSalleParams {
      capacity?: number
 }
 
+export interface UpdateSalleMaintenanceParams {
+    maintenance_status: boolean
+}
+
+
 export class SalleUsecase {
     constructor(private readonly db: DataSource) { }
 
@@ -41,6 +46,19 @@ export class SalleUsecase {
 
         if (capacity) {
             Sallefound.capacity = capacity
+        }
+
+        const SalleUpdate = await repo.save(Sallefound)
+        return SalleUpdate
+    }
+
+    async updateMaintenanceSalle(salle_id: number, { maintenance_status }: UpdateSalleMaintenanceParams): Promise<Salle | null> {
+        const repo = this.db.getRepository(Salle)
+        const Sallefound = await repo.findOneBy({ salle_id })
+        if (Sallefound === null) return null
+
+        if (maintenance_status===true || maintenance_status===false) {
+            Sallefound.maintenance_status = maintenance_status
         }
 
         const SalleUpdate = await repo.save(Sallefound)

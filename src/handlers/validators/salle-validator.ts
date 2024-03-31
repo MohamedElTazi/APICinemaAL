@@ -40,10 +40,20 @@ export interface SalleIdRequest {
 
 export const updateSalleValidation = Joi.object<UpdateSalleRequest>({
     id: Joi.number().required(),
-    capacity: Joi.number().min(1).optional()
+    capacity: Joi.number().min(1).required()
 })
 
 export interface UpdateSalleRequest {
     id: number
     capacity?: number
+}
+
+export const updateSalleMaintenanceValidation = Joi.object<UpdateSalleMaintenanceRequest>({
+    id: Joi.number().required(),
+    maintenance_status: Joi.boolean().required()
+})
+
+export interface UpdateSalleMaintenanceRequest {
+    id: number
+    maintenance_status: boolean
 }

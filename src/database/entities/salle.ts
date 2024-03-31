@@ -5,22 +5,22 @@ export class Salle {
     @PrimaryGeneratedColumn()
     salle_id: number;
 
-    @Column({ type: "varchar", length: 255 })
+    @Column()
     name: string;
 
-    @Column({ type: "text" })
+    @Column()
     description: string;
 
-    @Column({ type: "varchar", length: 100 })
+    @Column()
     type: string;
 
-    @Column({ type: "int" })
+    @Column()
     capacity: number;
 
-    @Column({ type: "boolean", default: false })
+    @Column({type: "tinyint", default: false})
     access_disabled: boolean = false;
 
-    @Column({ type: "boolean", default: false })
+    @Column({type: "tinyint",default: false})
     maintenance_status: boolean = false;
 
     constructor(salle_id: number, name: string, description: string, type: string, capacity:number) {

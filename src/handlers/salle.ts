@@ -1,10 +1,11 @@
 import express, { Request, Response } from "express";
 import { generateValidationErrorMessage } from "./validators/generate-validation-message";
-import { createSalleValidation, listSalleValidation, salleIdValidation, updateSalleValidation } from "./validators/salle-validator";
+import { createSalleValidation, listSalleValidation, salleIdValidation, updateSalleMaintenanceValidation, updateSalleValidation } from "./validators/salle-validator";
 import { AppDataSource } from "../database/database";
 import { Salle } from "../database/entities/salle";
 import { SalleUsecase } from "../domain/-usecase";
 import { UserHandler } from "./user";
+import { authMiddleware } from "./middleware/auth-middleware";
 export const SalleHandler = (app: express.Express) => {
    
 
@@ -134,6 +135,42 @@ export const SalleHandler = (app: express.Express) => {
 
 
             res.status(200).send(updatedSalle)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+
+
+    app.patch("/salles/maintenance/:id",authMiddleware, async (req: Request, res: Response) => {
+
+        console.log("zmelkmz: " + authMiddleware)
+        const validation = updateSalleMaintenanceValidation.validate({ ...req.params, ...req.body })
+        
+        if (validation.error) {
+            res.status(400).send(generateValidationErrorMessage(validation.error.details))
+            return
+        }
+
+        const updateSalleMaintenanceRequest = validation.value
+
+        try {
+            const salleUsecase = new SalleUsecase(AppDataSource);
+
+            if (updateSalleMaintenanceRequest.maintenance_status === undefined) {
+                res.status(404).send("error: Maintenance status required")
+                return
+            }
+
+            const updatedMaintenanceSalle = await salleUsecase.updateMaintenanceSalle(updateSalleMaintenanceRequest.id, updateSalleMaintenanceRequest )
+            
+            if (updatedMaintenanceSalle === null) {
+                res.status(404).send({ "error": `Salle ${updateSalleMaintenanceRequest.id} not found` })
+                return
+            }
+
+
+            res.status(200).send(updatedMaintenanceSalle)
         } catch (error) {
             console.log(error)
             res.status(500).send({ error: "Internal error" })
