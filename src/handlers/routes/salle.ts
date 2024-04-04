@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
-import { generateValidationErrorMessage } from "./validators/generate-validation-message";
-import { createSalleValidation, listSalleValidation, salleIdValidation, updateSalleMaintenanceValidation, updateSalleValidation } from "./validators/salle-validator";
-import { AppDataSource } from "../database/database";
-import { Salle } from "../database/entities/salle";
-import { SalleUsecase } from "../domain/-usecase";
+import { generateValidationErrorMessage } from "../validators/generate-validation-message";
+import { createSalleValidation, listSalleValidation, salleIdValidation, updateSalleMaintenanceValidation, updateSalleValidation } from "../validators/salle-validator";
+import { AppDataSource } from "../../database/database";
+import { Salle } from "../../database/entities/salle";
+import { SalleUsecase } from "../../domain/-usecase";
 import { UserHandler } from "./user";
-import { authMiddleware } from "./middleware/auth-middleware";
+import { authMiddlewareAdmin } from "../middleware/auth-middleware";
 export const SalleHandler = (app: express.Express) => {
    
 
@@ -142,9 +142,8 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/salles/maintenance/:id",authMiddleware, async (req: Request, res: Response) => {
+    app.patch("/salles/maintenance/:id",authMiddlewareAdmin, async (req: Request, res: Response) => {
 
-        console.log("zmelkmz: " + authMiddleware)
         const validation = updateSalleMaintenanceValidation.validate({ ...req.params, ...req.body })
         
         if (validation.error) {

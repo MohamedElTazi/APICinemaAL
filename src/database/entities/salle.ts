@@ -17,10 +17,10 @@ export class Salle {
     @Column()
     capacity: number;
 
-    @Column({type: "tinyint", default: false})
+    @Column({default: false})
     access_disabled: boolean = false;
 
-    @Column({type: "tinyint",default: false})
+    @Column({default: false})
     maintenance_status: boolean = false;
 
     constructor(salle_id: number, name: string, description: string, type: string, capacity:number) {

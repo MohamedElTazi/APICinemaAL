@@ -1,30 +1,33 @@
 import express, { Request, Response } from "express"
-import { AppDataSource } from "../database/database"
+import { AppDataSource } from "../../database/database"
 import { compare, hash } from "bcrypt";
-import { createUserValidation, LoginUserValidation } from "./validators/user-validator"
-import { generateValidationErrorMessage } from "./validators/generate-validation-message";
-import { User } from "../database/entities/user";
+import { createUserValidation, LoginUserValidation } from "../validators/user-validator"
+import { generateValidationErrorMessage } from "../validators/generate-validation-message";
+import { User } from "../../database/entities/user";
 import { sign } from "jsonwebtoken";
-import { Token } from "../database/entities/token";
+import { Token } from "../../database/entities/token";
 
 export const UserHandler = (app: express.Express) => {
     app.post('/auth/signup', async (req: Request, res: Response) => {
         try {
+            console.log(req.body)
             const validationResult = createUserValidation.validate(req.body)
             if (validationResult.error) {
                 res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
                 return
             }
-            const createUserRequest = validationResult.value
+
+            const createUserRequest = validationResult.value;
             const hashedPassword = await hash(createUserRequest.password, 10);
 
-            const userRepository = AppDataSource.getRepository(User)
+            const userRepository = AppDataSource.getRepository(User);
             const user = await userRepository.save({
                 email: createUserRequest.email,
-                password: hashedPassword
+                password: hashedPassword,
+                role: req.body.role
             });
 
-            res.status(201).send({ id: user.user_id, email: user.email})
+            res.status(201).send({ id: user.user_id, email: user.email, role: user.role });
             return
         } catch (error) {
             console.log(error)

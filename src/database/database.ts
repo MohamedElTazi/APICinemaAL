@@ -9,7 +9,7 @@ export const AppDataSource = new DataSource({
     password: "azerty",
     database: "CinemaNode",
     logging: true,
-    synchronize: true,
+    synchronize: false,
     entities: [
         "src/database/entities/*.ts"
     ],
