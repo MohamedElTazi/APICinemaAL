@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Showtime } from "./showtime";
 
 @Entity()
 export class Salle {
@@ -23,12 +24,15 @@ export class Salle {
     @Column({default: false})
     maintenance_status: boolean = false;
 
-    constructor(salle_id: number, name: string, description: string, type: string, capacity:number) {
+    @OneToMany(() => Showtime, showtime => showtime.salle)
+    showtimes: Showtime[];
+
+    constructor(salle_id: number, name: string, description: string, type: string, capacity:number,showtimes: Showtime[]) {
         this.salle_id = salle_id, 
         this.name = name
         this.description = description
         this.type = type
         this.capacity = capacity
-
+        this.showtimes = showtimes;
     }
 }

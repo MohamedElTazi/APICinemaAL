@@ -3,7 +3,7 @@ CREATE DATABASE CinemaNode;
 
 USE CinemaNode;
 
-/*CREATE TABLE salle (
+CREATE TABLE salle (
     salle_id INT PRIMARY KEY AUTO_INCREMENT ,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
@@ -25,8 +25,9 @@ CREATE TABLE showtime (
     showtime_id INT PRIMARY KEY AUTO_INCREMENT,
     salle_id INT REFERENCES salle(salle_id),
     movie_id INT REFERENCES movie(movie_id),
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL,
+    date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
     special_notes TEXT
 );
 
@@ -72,4 +73,6 @@ CREATE TABLE token (
     `token_id` INT AUTO_INCREMENT PRIMARY KEY,
     `token` VARCHAR(255) NOT NULL,
     `user_id` INT REFERENCES user(user_id)
-);*/
+);
+
+

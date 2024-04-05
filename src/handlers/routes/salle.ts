@@ -1,15 +1,16 @@
 import express, { Request, Response } from "express";
 import { generateValidationErrorMessage } from "../validators/generate-validation-message";
-import { createSalleValidation, listSalleValidation, salleIdValidation, updateSalleMaintenanceValidation, updateSalleValidation } from "../validators/salle-validator";
+import { createSalleValidation, listSalleValidation, salleIdValidation, sallePlanningValidation, updateSalleMaintenanceValidation, updateSalleValidation } from "../validators/salle-validator";
 import { AppDataSource } from "../../database/database";
 import { Salle } from "../../database/entities/salle";
-import { SalleUsecase } from "../../domain/-usecase";
+import { SalleUsecase } from "../../domain/salle-usecase";
 import { UserHandler } from "./user";
-import { authMiddlewareAdmin } from "../middleware/auth-middleware";
+import { authMiddlewareAdmin, authMiddlewareUser } from "../middleware/auth-middleware";
+import { Showtime } from "../../database/entities/showtime";
 export const SalleHandler = (app: express.Express) => {
    
 
-    app.post("/salles" ,async (req: Request, res: Response) => {
+    app.post("/salles",authMiddlewareAdmin ,async (req: Request, res: Response) => {
         console.log(UserHandler.name)
         const validation = createSalleValidation.validate(req.body)
 
@@ -56,6 +57,55 @@ export const SalleHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
+
+
+    app.get("/salles/planning", async (req: Request, res: Response) => {
+        const { startDate, endDate, startTime, endTime } = req.query;
+
+
+        const validationResult = sallePlanningValidation.validate(req.params)
+
+
+        if (validationResult.error) {
+            res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+            return
+        }
+
+        let query = AppDataSource
+        .getRepository(Showtime)
+        .createQueryBuilder("showtime")
+        .leftJoinAndSelect("showtime.salle", "salle")
+        .leftJoinAndSelect("showtime.movie", "movie")
+        .select([
+            "salle.name",
+            "salle.description",
+            "salle.type",
+            "movie.title",
+            "movie.description",
+            "showtime.start_time",
+            "showtime.end_time",
+            "showtime.special_notes"
+        ])
+        .where("salle.maintenance_status = false");
+
+        if (startDate && endDate) {
+            query = query.andWhere("showtime.date BETWEEN :startDate AND :endDate", { startDate, endDate });
+        }
+
+        if (startTime && endTime) {
+            query = query.andWhere("showtime.start_time BETWEEN :startTime AND :endTime", { startTime, endTime });
+        }
+
+        try {
+            const planning = query.orderBy("showtime.date", "ASC").getMany();
+    
+            res.status(200).send(planning);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
 
     app.get("/salles/:id", async (req: Request, res: Response) => {
         try {
@@ -150,7 +200,7 @@ export const SalleHandler = (app: express.Express) => {
             res.status(400).send(generateValidationErrorMessage(validation.error.details))
             return
         }
-
+        
         const updateSalleMaintenanceRequest = validation.value
 
         try {
@@ -175,5 +225,6 @@ export const SalleHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
+
 
 }

@@ -101,7 +101,6 @@ export const authMiddlewareUser = async (req: Request, res: Response, next: Next
         return res.status(403).json({"error": "Access Forbidden"});
     }
 
-    console.log(tokenFound.user.role);
     if (tokenFound.user.role !== "user") {
         return res.status(403).json({"error": "Access Denied: Administrator role required"});
     }
