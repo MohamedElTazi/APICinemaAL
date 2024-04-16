@@ -4,7 +4,7 @@ import { Showtime } from "./showtime";
 @Entity()
 export class Movie {
     @PrimaryGeneratedColumn()
-    movie_id: number;
+    id: number;
 
     @Column()
     title: string;
@@ -22,8 +22,8 @@ export class Movie {
     showtimes: Showtime[];
 
 
-    constructor(movie_id: number, title: string, description: string, duration: number, genre:string, showtimes: Showtime[]) {
-        this.movie_id = movie_id, 
+    constructor(id: number, title: string, description: string, duration: number, genre:string, showtimes: Showtime[]) {
+        this.id = id, 
         this.title = title
         this.description = description
         this.duration = duration

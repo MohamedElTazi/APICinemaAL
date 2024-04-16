@@ -14,13 +14,13 @@ export interface CreateSalleValidationRequest {
     capacity: number
 }
 
-export const listSalleValidation = Joi.object<ListSalleSalleRequest>({
+export const listSalleValidation = Joi.object<ListSalleRequest>({
     page: Joi.number().min(1).optional(),
     limit: Joi.number().min(1).optional(),
     capacityMax: Joi.number().min(1).optional()
 })
 
-export interface ListSalleSalleRequest {
+export interface ListSalleRequest {
     page?: number
     limit?: number
     capacityMax?: number
@@ -61,13 +61,10 @@ export interface UpdateSalleMaintenanceRequest {
 export const sallePlanningValidation = Joi.object<SallePlanningRequest>({
     startDate : Joi.date().optional(),
     endDate: Joi.date().optional(),
-    startTime: Joi.date().optional(),
-    endTime: Joi.date().optional()
+
 })
 
 export interface SallePlanningRequest {
     startDate?: Date,
     endDate?: Date,
-    startTime?: Date,
-    endTime?: Date
 }

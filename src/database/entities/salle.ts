@@ -4,7 +4,7 @@ import { Showtime } from "./showtime";
 @Entity()
 export class Salle {
     @PrimaryGeneratedColumn()
-    salle_id: number;
+    id: number;
 
     @Column()
     name: string;
@@ -27,8 +27,8 @@ export class Salle {
     @OneToMany(() => Showtime, showtime => showtime.salle)
     showtimes: Showtime[];
 
-    constructor(salle_id: number, name: string, description: string, type: string, capacity:number,showtimes: Showtime[]) {
-        this.salle_id = salle_id, 
+    constructor(id: number, name: string, description: string, type: string, capacity:number,showtimes: Showtime[]) {
+        this.id = id, 
         this.name = name
         this.description = description
         this.type = type

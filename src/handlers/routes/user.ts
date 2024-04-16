@@ -27,7 +27,7 @@ export const UserHandler = (app: express.Express) => {
                 role: req.body.role
             });
 
-            res.status(201).send({ id: user.user_id, email: user.email, role: user.role });
+            res.status(201).send({ id: user.id, email: user.email, role: user.role });
             return
         } catch (error) {
             console.log(error)
@@ -64,7 +64,7 @@ export const UserHandler = (app: express.Express) => {
             const secret = process.env.JWT_SECRET ?? "azerty"
             console.log(secret)
             // generate jwt
-            const token = sign({ userId: user.user_id, email: user.email }, secret, { expiresIn: '1d' });
+            const token = sign({ user_id: user.id, email: user.email }, secret, { expiresIn: '1d' });
             // store un token pour un user
             await AppDataSource.getRepository(Token).save({ token: token, user: user})
             res.status(200).json({ token });

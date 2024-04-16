@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { invalidPathHandler } from "../errors/invalid-path-handler";
 import { UserHandler } from "./user";
 import { SalleHandler } from "./salle";
+import { ShowtimeHandler } from "./showtime";
 
 export const initRoutes = (app: express.Express) => {
 
@@ -12,6 +13,7 @@ export const initRoutes = (app: express.Express) => {
 
     UserHandler(app)
     SalleHandler(app)
+    ShowtimeHandler(app)
 
     app.use(invalidPathHandler);
 }

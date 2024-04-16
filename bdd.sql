@@ -4,7 +4,7 @@ CREATE DATABASE CinemaNode;
 USE CinemaNode;
 
 CREATE TABLE salle (
-    salle_id INT PRIMARY KEY AUTO_INCREMENT ,
+    id INT PRIMARY KEY AUTO_INCREMENT ,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     type VARCHAR(100) NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE salle (
 );
 
 CREATE TABLE movie (
-    movie_id INT PRIMARY KEY AUTO_INCREMENT,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     duration INT NOT NULL,
@@ -22,57 +22,57 @@ CREATE TABLE movie (
 );
 
 CREATE TABLE showtime (
-    showtime_id INT PRIMARY KEY AUTO_INCREMENT,
-    salle_id INT REFERENCES salle(salle_id),
-    movie_id INT REFERENCES movie(movie_id),
-    date DATE NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    salleId INT NOT NULL REFERENCES salle(id),
+    movieId INT NOT NULL REFERENCES movie(id),
+    date DATETIME NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     special_notes TEXT
 );
 
 CREATE TABLE user(
-    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password TEXT NOT NULL,
+    password VARCHAR(255) NOT NULL,
     role ENUM('user', 'administrator') NOT NULL,
     balance INT DEFAULT 0
 );
 
 CREATE TABLE ticket (
-    ticket_id INT PRIMARY KEY AUTO_INCREMENT,
-    showtime_id INT REFERENCES showtime(showtime_id),
-    user_id INT REFERENCES user(user_id),
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    showtimeId INT REFERENCES showtime(id),
+    userId INT REFERENCES user(id),
     status VARCHAR(50) NOT NULL,
     is_super BOOLEAN DEFAULT FALSE
 );
 
 
 CREATE TABLE super_ticket_accesse (
-    access_id INT PRIMARY KEY AUTO_INCREMENT,
-    ticket_id INT REFERENCES ticket(ticket_id),
-    showtime_id INT REFERENCES showtime(showtime_id)
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    ticketId INT REFERENCES ticket(id),
+    showtimeId INT REFERENCES showtime(id)
 );
 
 CREATE TABLE transaction (
-    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT REFERENCES user(user_id),
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    userId INT REFERENCES user(id),
     amount DECIMAL(10, 2) NOT NULL,
     transaction_type VARCHAR(50) NOT NULL,
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE employee (
-    employee_id INT PRIMARY KEY AUTO_INCREMENT,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     position VARCHAR(100) NOT NULL,
     working_hours TEXT NOT NULL
 );
 
 CREATE TABLE token (
-    `token_id` INT AUTO_INCREMENT PRIMARY KEY,
-    `token` VARCHAR(255) NOT NULL,
-    `user_id` INT REFERENCES user(user_id)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    userId INT REFERENCES user(id)
 );
 
 

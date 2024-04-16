@@ -11,7 +11,7 @@ export enum UserRole {
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
-    user_id: number
+    id: number
 
     @Column({
         unique: true
@@ -35,8 +35,8 @@ export class User {
     tokens: Token[];
 
 
-    constructor(user_id: number, password: string, role: UserRole,balance: number, email: string, tokens: Token[]) {
-        this.user_id = user_id;
+    constructor(id: number, password: string, role: UserRole,balance: number, email: string, tokens: Token[]) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.role = role;

@@ -39,9 +39,9 @@ export class SalleUsecase {
         }
     }
 
-    async updateSalle(salle_id: number, { capacity }: UpdateSalleParams): Promise<Salle | null> {
+    async updateSalle(id: number, { capacity }: UpdateSalleParams): Promise<Salle | null> {
         const repo = this.db.getRepository(Salle)
-        const Sallefound = await repo.findOneBy({ salle_id })
+        const Sallefound = await repo.findOneBy({ id })
         if (Sallefound === null) return null
 
         if (capacity) {
@@ -52,9 +52,9 @@ export class SalleUsecase {
         return SalleUpdate
     }
 
-    async updateMaintenanceSalle(salle_id: number, { maintenance_status }: UpdateSalleMaintenanceParams): Promise<Salle | null> {
+    async updateMaintenanceSalle(id: number, { maintenance_status }: UpdateSalleMaintenanceParams): Promise<Salle | null> {
         const repo = this.db.getRepository(Salle)
-        const Sallefound = await repo.findOneBy({ salle_id })
+        const Sallefound = await repo.findOneBy({ id })
         if (Sallefound === null) return null
 
         if (maintenance_status===true || maintenance_status===false) {

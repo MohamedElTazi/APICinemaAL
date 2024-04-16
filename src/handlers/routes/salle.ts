@@ -59,17 +59,35 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.get("/salles/planning", async (req: Request, res: Response) => {
-        const { startDate, endDate, startTime, endTime } = req.query;
+    app.get("/salles/planning/:id",authMiddlewareUser ,async (req: Request, res: Response) => {
 
+        const validationResultParams = salleIdValidation.validate(req.params)
 
-        const validationResult = sallePlanningValidation.validate(req.params)
-
-
-        if (validationResult.error) {
-            res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+        if (validationResultParams.error) {
+            res.status(400).send(generateValidationErrorMessage(validationResultParams.error.details))
             return
         }
+        const salleId = validationResultParams.value
+
+        const salleRepository = AppDataSource.getRepository(Salle)
+        const salle = await salleRepository.findOneBy({ id: salleId.id })
+        if (salle === null) {
+            res.status(404).send({ "error": `salle ${salleId.id} not found` })
+            return
+        }
+        
+        const { startDate, endDate} = req.query;
+
+
+
+        const validationResultQuery = sallePlanningValidation.validate(req.query)
+
+
+        if (validationResultQuery.error) {
+            res.status(400).send(generateValidationErrorMessage(validationResultQuery.error.details))
+            return
+        }
+
 
         let query = AppDataSource
         .getRepository(Showtime)
@@ -86,19 +104,22 @@ export const SalleHandler = (app: express.Express) => {
             "showtime.end_time",
             "showtime.special_notes"
         ])
-        .where("salle.maintenance_status = false");
+        .where("salle.maintenance_status = false")
+        .andWhere("salle.id = :id", { id: salleId.id });
 
         if (startDate && endDate) {
             query = query.andWhere("showtime.date BETWEEN :startDate AND :endDate", { startDate, endDate });
+        }else if(startDate && !endDate){
+            query = query.andWhere("showtime.date >= :startDate", { startDate });
+        }else if(!startDate && endDate){
+            query = query.andWhere("showtime.date <= :endDate", { endDate });
         }
 
-        if (startTime && endTime) {
-            query = query.andWhere("showtime.start_time BETWEEN :startTime AND :endTime", { startTime, endTime });
-        }
+
 
         try {
-            const planning = query.orderBy("showtime.date", "ASC").getMany();
-    
+            const planning = await query.orderBy("showtime.date", "ASC").getMany();
+
             res.status(200).send(planning);
         } catch (error) {
             console.error("Error fetching planning:", error);
@@ -118,7 +139,7 @@ export const SalleHandler = (app: express.Express) => {
             const salleId = validationResult.value
 
             const salleRepository = AppDataSource.getRepository(Salle)
-            const salle = await salleRepository.findOneBy({ salle_id: salleId.id })
+            const salle = await salleRepository.findOneBy({ id: salleId.id })
             if (salle === null) {
                 res.status(404).send({ "error": `salle ${salleId.id} not found` })
                 return
@@ -141,13 +162,13 @@ export const SalleHandler = (app: express.Express) => {
             const salleId = validationResult.value
     
             const salleRepository = AppDataSource.getRepository(Salle)
-            const salle = await salleRepository.findOneBy({ salle_id: salleId.id })
+            const salle = await salleRepository.findOneBy({ id: salleId.id })
             if (salle === null) {
                 res.status(404).send({ "error": `salle ${salleId.id} not found` })
                 return
             }
     
-            const salleDeleted = await salleRepository.remove(salle)
+            await salleRepository.remove(salle)
             res.status(200).send(`Successfully deleted`)
         } catch (error) {
             console.log(error)
@@ -206,10 +227,6 @@ export const SalleHandler = (app: express.Express) => {
         try {
             const salleUsecase = new SalleUsecase(AppDataSource);
 
-            if (updateSalleMaintenanceRequest.maintenance_status === undefined) {
-                res.status(404).send("error: Maintenance status required")
-                return
-            }
 
             const updatedMaintenanceSalle = await salleUsecase.updateMaintenanceSalle(updateSalleMaintenanceRequest.id, updateSalleMaintenanceRequest )
             
