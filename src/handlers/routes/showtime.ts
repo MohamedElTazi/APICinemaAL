@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { generateValidationErrorMessage } from "../validators/generate-validation-message";
-import { createShowtimeValidation, listShowtimeValidation, showtimeIdValidation, updateShowtimeValidation,  } from "../validators/showtime-validator";
+import { createShowtimeValidation, listShowtimeValidation, showtimeIdValidation, showtimePlanningValidation, updateShowtimeValidation,  } from "../validators/showtime-validator";
 import { AppDataSource } from "../../database/database";
 import { Showtime } from "../../database/entities/showtime";
 import { ShowtimeUsecase } from "../../domain/showtime-usecase";
@@ -13,9 +13,9 @@ import { toZonedTime } from "date-fns-tz";
 export const ShowtimeHandler = (app: express.Express) => {
 
     
-    app.post("/showtimes",authMiddlewareAdmin, async (req: Request, res: Response) => {
+    app.post("/showtimes", async (req: Request, res: Response) => {
         const reqBodyStartDatetime = req.body.start_datetime
-        req.body.start_datetime = req.body.start_datetime+".000Z"
+        req.body.start_datetime = req.body.start_datetime+"Z"
 
         const validation = createShowtimeValidation.validate(req.body)
 
@@ -39,7 +39,6 @@ export const ShowtimeHandler = (app: express.Express) => {
         }
 
         const utcDate = toZonedTime(end_datetime, 'UTC');
-
 
         const formattedDatetime = format(utcDate, "yyyy-MM-dd'T'HH:mm:ss");
 
@@ -65,7 +64,58 @@ export const ShowtimeHandler = (app: express.Express) => {
         }
     })
 
+    app.get("/showtime/planning/",/*authMiddlewareUser ,*/async (req: Request, res: Response) => {
+        
+        let { startDate, endDate} = req.query;
 
+        const validationResultQuery = showtimePlanningValidation.validate(req.query)
+
+
+        if (validationResultQuery.error) {
+            res.status(400).send(generateValidationErrorMessage(validationResultQuery.error.details))
+            return
+        }
+
+
+        let query = AppDataSource
+        .getRepository(Showtime)
+        .createQueryBuilder("showtime")
+        .leftJoinAndSelect("showtime.salle", "salle")
+        .leftJoinAndSelect("showtime.movie", "movie")
+        .select([
+            "salle.name",
+            "salle.description",
+            "salle.type",
+            "movie.title",
+            "movie.description",
+            "showtime.start_datetime",
+            "showtime.end_datetime",
+            "showtime.special_notes"
+        ])
+        .where("salle.maintenance_status = false")
+
+        if (startDate && endDate) {
+            endDate = endDate + " 23:59:59"
+            query = query.andWhere("showtime.start_datetime >= :startDate AND showtime.end_datetime <= :endDate", { startDate, endDate });
+        }else if(startDate && !endDate){
+            query = query.andWhere("showtime.start_datetime >= :startDate", { startDate });
+        }else if(!startDate && endDate){
+            endDate = endDate + " 23:59:59"
+            query = query.andWhere("showtime.end_datetime <= :endDate", { endDate });
+        }
+
+        try {
+            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
+            planning.forEach((showtime) => {
+                showtime.start_datetime = toZonedTime(showtime.start_datetime, '+04:00')
+                showtime.end_datetime = toZonedTime(showtime.end_datetime, '+04:00')
+            })
+            res.status(200).send(planning);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
 
     app.get("/showtimes", async (req: Request, res: Response) => {
         const validation = listShowtimeValidation.validate(req.query)

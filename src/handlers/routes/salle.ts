@@ -7,6 +7,9 @@ import { SalleUsecase } from "../../domain/salle-usecase";
 import { UserHandler } from "./user";
 import { authMiddlewareAdmin, authMiddlewareUser } from "../middleware/auth-middleware";
 import { Showtime } from "../../database/entities/showtime";
+import { toZonedTime } from "date-fns-tz";
+import mysql from 'mysql2/promise'; // Utilisez mysql2 pour les promesses
+
 export const SalleHandler = (app: express.Express) => {
    
 
@@ -58,7 +61,7 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.get("/salles/planning/:id",authMiddlewareUser ,async (req: Request, res: Response) => {
+    app.get("/salles/planning/:id",/*authMiddlewareUser ,*/async (req: Request, res: Response) => {
 
         const validationResultParams = salleIdValidation.validate(req.params)
 
@@ -76,8 +79,6 @@ export const SalleHandler = (app: express.Express) => {
         }
         
         let { startDate, endDate} = req.query;
-
-
 
         const validationResultQuery = sallePlanningValidation.validate(req.query)
 
@@ -116,10 +117,16 @@ export const SalleHandler = (app: express.Express) => {
             query = query.andWhere("showtime.end_datetime <= :endDate", { endDate });
         }
 
+        
+
 
 
         try {
             const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
+            planning.forEach((showtime) => {
+                showtime.start_datetime = toZonedTime(showtime.start_datetime, '+04:00')
+                showtime.end_datetime = toZonedTime(showtime.end_datetime, '+04:00')
+            })
             res.status(200).send(planning);
         } catch (error) {
             console.error("Error fetching planning:", error);

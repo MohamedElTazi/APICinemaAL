@@ -1,6 +1,7 @@
 import Joi from "joi";
 import { Salle } from "../../database/entities/salle";
 import { Movie } from "../../database/entities/movie";
+import { Timestamp } from "typeorm";
 
 export const createShowtimeValidation = Joi.object<CreateShowtimeValidationRequest>({
     salle: Joi.number().required(),
@@ -85,3 +86,13 @@ export interface SalleIdRequest {
     id: number
 }
 
+
+export const showtimePlanningValidation = Joi.object<ShowtimePlanningRequest>({
+    startDate : Joi.date().optional(),
+    endDate: Joi.date().optional(),
+})
+
+export interface ShowtimePlanningRequest {
+    startDate?: Date,
+    endDate?: Date,
+}

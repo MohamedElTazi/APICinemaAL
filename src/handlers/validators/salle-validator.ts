@@ -61,7 +61,6 @@ export interface UpdateSalleMaintenanceRequest {
 export const sallePlanningValidation = Joi.object<SallePlanningRequest>({
     startDate : Joi.date().optional(),
     endDate: Joi.date().optional(),
-
 })
 
 export interface SallePlanningRequest {

@@ -25,8 +25,8 @@ CREATE TABLE showtime (
     id INT PRIMARY KEY AUTO_INCREMENT,
     salleId INT NOT NULL REFERENCES salle(id),
     movieId INT NOT NULL REFERENCES movie(id),
-    start_datetime DATETIME NOT NULL,  
-    end_datetime DATETIME NOT NULL,  
+    start_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
+    end_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
     special_notes TEXT
 );
 
