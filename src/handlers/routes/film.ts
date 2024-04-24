@@ -1,10 +1,14 @@
-import express from "express"
-
+import express, { Request, Response } from "express";
+import { generateValidationErrorMessage } from "../validators/generate-validation-message";
+import { createSalleValidation, listSalleValidation, salleIdValidation, sallePlanningValidation, updateSalleMaintenanceValidation, updateSalleValidation } from "../validators/salle-validator";
+import { AppDataSource } from "../../database/database";
+import { Salle } from "../../database/entities/salle";
+import { UserHandler } from "./user";
+import { authMiddlewareAdmin, authMiddlewareUser } from "../middleware/auth-middleware";
 export const SalleHandler = (app: express.Express) => {
    
 
-    app.post("/salles",authMiddlewareAdmin ,async (req: Request, res: Response) => {
-        console.log(UserHandler.name)
+    app.post("/salles",authMiddlewareAdmin,async (req: Request, res: Response) => {
         const validation = createSalleValidation.validate(req.body)
 
         if (validation.error) {

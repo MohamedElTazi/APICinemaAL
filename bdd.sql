@@ -17,7 +17,7 @@ CREATE TABLE movie (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    duration INT NOT NULL,
+    duration TIME NOT NULL,
     genre VARCHAR(100)
 );
 
@@ -25,9 +25,8 @@ CREATE TABLE showtime (
     id INT PRIMARY KEY AUTO_INCREMENT,
     salleId INT NOT NULL REFERENCES salle(id),
     movieId INT NOT NULL REFERENCES movie(id),
-    date DATETIME NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
+    start_datetime DATETIME NOT NULL,  
+    end_datetime DATETIME NOT NULL,  
     special_notes TEXT
 );
 

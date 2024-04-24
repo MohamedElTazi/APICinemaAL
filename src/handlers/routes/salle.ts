@@ -11,7 +11,6 @@ export const SalleHandler = (app: express.Express) => {
    
 
     app.post("/salles",authMiddlewareAdmin ,async (req: Request, res: Response) => {
-        console.log(UserHandler.name)
         const validation = createSalleValidation.validate(req.body)
 
         if (validation.error) {
@@ -76,7 +75,7 @@ export const SalleHandler = (app: express.Express) => {
             return
         }
         
-        const { startDate, endDate} = req.query;
+        let { startDate, endDate} = req.query;
 
 
 
@@ -100,26 +99,27 @@ export const SalleHandler = (app: express.Express) => {
             "salle.type",
             "movie.title",
             "movie.description",
-            "showtime.start_time",
-            "showtime.end_time",
+            "showtime.start_datetime",
+            "showtime.end_datetime",
             "showtime.special_notes"
         ])
         .where("salle.maintenance_status = false")
         .andWhere("salle.id = :id", { id: salleId.id });
 
         if (startDate && endDate) {
-            query = query.andWhere("showtime.date BETWEEN :startDate AND :endDate", { startDate, endDate });
+            endDate = endDate + " 23:59:59"
+            query = query.andWhere("showtime.start_datetime >= :startDate AND showtime.end_datetime <= :endDate", { startDate, endDate });
         }else if(startDate && !endDate){
-            query = query.andWhere("showtime.date >= :startDate", { startDate });
+            query = query.andWhere("showtime.start_datetime >= :startDate", { startDate });
         }else if(!startDate && endDate){
-            query = query.andWhere("showtime.date <= :endDate", { endDate });
+            endDate = endDate + " 23:59:59"
+            query = query.andWhere("showtime.end_datetime <= :endDate", { endDate });
         }
 
 
 
         try {
-            const planning = await query.orderBy("showtime.date", "ASC").getMany();
-
+            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
             res.status(200).send(planning);
         } catch (error) {
             console.error("Error fetching planning:", error);
