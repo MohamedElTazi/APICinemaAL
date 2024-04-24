@@ -1,9 +1,11 @@
 import express, { Request, Response } from "express";
 import { generateValidationErrorMessage } from "../validators/generate-validation-message";
-import {  createMovieValidation, listMovieValidation, movieIdValidation, updateMovieValidation } from "../validators/movie-validator";
+import {  createMovieValidation, listMovieValidation, moviePlanningValidation, movieIdValidation, updateMovieValidation } from "../validators/movie-validator";
 import { AppDataSource } from "../../database/database";
 import { Movie } from "../../database/entities/movie";
+import { authMiddlewareUser } from "../middleware/auth-middleware";
 import { MovieUsecase } from "../../domain/movie-usecase";
+import { Showtime } from "../../database/entities/showtime";
 
 
 export const MovieHandler = (app: express.Express) => {
@@ -31,6 +33,75 @@ export const MovieHandler = (app: express.Express) => {
         console.log(error)
     }
     })
+
+    app.get("/movies/planning/:id",authMiddlewareUser ,async (req: Request, res: Response) => {
+
+        const validationResultParams = movieIdValidation.validate(req.params)
+
+        if (validationResultParams.error) {
+            res.status(400).send(generateValidationErrorMessage(validationResultParams.error.details))
+            return
+        }
+        const movieId = validationResultParams.value
+
+        const movieRepository = AppDataSource.getRepository(Movie)
+        const movie = await movieRepository.findOneBy({ id: movieId.id })
+        if (movie === null) {
+            res.status(404).send({ "error": `salle ${movieId.id} not found` })
+            return
+        }
+        
+        const { startDate, endDate} = req.query;
+
+
+
+        const validationResultQuery = moviePlanningValidation.validate(req.query)
+
+
+        if (validationResultQuery.error) {
+            res.status(400).send(generateValidationErrorMessage(validationResultQuery.error.details))
+            return
+        }
+
+
+        let query = AppDataSource
+        .getRepository(Showtime)
+        .createQueryBuilder("showtime")
+        .leftJoinAndSelect("showtime.salle", "salle")
+        .leftJoinAndSelect("showtime.movie", "movie")
+        .select([
+            "salle.name",
+            "salle.description",
+            "salle.type",
+            "movie.title",
+            "movie.description",
+            "showtime.start_time",
+            "showtime.end_time",
+            "showtime.special_notes"
+        ])
+        .where("salle.maintenance_status = false")
+        .andWhere("salle.id = :id", { id: movieId.id });
+
+        if (startDate && endDate) {
+            query = query.andWhere("showtime.date BETWEEN :startDate AND :endDate", { startDate, endDate });
+        }else if(startDate && !endDate){
+            query = query.andWhere("showtime.date >= :startDate", { startDate });
+        }else if(!startDate && endDate){
+            query = query.andWhere("showtime.date <= :endDate", { endDate });
+        }
+
+
+
+        try {
+            const planning = await query.orderBy("showtime.date", "ASC").getMany();
+
+            res.status(200).send(planning);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
 
     app.post("/movies", async (req: Request, res: Response) => {
         const validation = createMovieValidation.validate(req.body)

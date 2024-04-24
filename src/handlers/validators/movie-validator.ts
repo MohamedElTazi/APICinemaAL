@@ -48,3 +48,14 @@ export interface ListMovieRequest {
     limit?: number
     genre: string
 }
+
+export const moviePlanningValidation = Joi.object<MoviePlanningRequest>({
+    startDate : Joi.date().optional(),
+    endDate: Joi.date().optional(),
+
+})
+
+export interface MoviePlanningRequest {
+    startDate?: Date
+    endDate?: Date
+}
