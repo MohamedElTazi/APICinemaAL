@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { Salle } from "../../database/entities/salle";
 import { Movie } from "../../database/entities/movie";
-import { Timestamp } from "typeorm";
+import { TicketShowtimeAccesses } from "../../database/entities/ticketShowtimeAccesses";
 
 export const createShowtimeValidation = Joi.object<CreateShowtimeValidationRequest>({
     salle: Joi.number().required(),
@@ -23,12 +23,11 @@ export const createShowtimeValidation = Joi.object<CreateShowtimeValidationReque
 }).options({ abortEarly: false });
 
 export interface CreateShowtimeValidationRequest {
-    id: number
     salle: Salle
     movie: Movie
     start_datetime: Date,
     end_datetime: Date,
-    special_notes: string
+    special_notes: string,
 }
 
 export const listShowtimeValidation = Joi.object<ListShowtimeRequest>({

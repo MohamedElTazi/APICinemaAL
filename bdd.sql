@@ -40,18 +40,18 @@ CREATE TABLE user(
 
 CREATE TABLE ticket (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    showtimeId INT REFERENCES showtime(id),
     userId INT REFERENCES user(id),
-    status VARCHAR(50) NOT NULL,
-    is_super BOOLEAN DEFAULT FALSE
+    is_used BOOLEAN DEFAULT FALSE,
+    is_super BOOLEAN DEFAULT FALSE,
+    nb_tickets INT NOT NULL
 );
 
-
-CREATE TABLE super_ticket_accesse (
+CREATE TABLE ticket_showtime_accesses (
     id INT PRIMARY KEY AUTO_INCREMENT,
     ticketId INT REFERENCES ticket(id),
-    showtimeId INT REFERENCES showtime(id)
+    showtimeId INT REFERENCES showtime(id) 
 );
+
 
 CREATE TABLE transaction (
     id INT PRIMARY KEY AUTO_INCREMENT,

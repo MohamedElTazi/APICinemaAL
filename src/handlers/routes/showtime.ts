@@ -64,7 +64,7 @@ export const ShowtimeHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/showtime/planning/",/*authMiddlewareUser ,*/async (req: Request, res: Response) => {
+    app.get("/showtimes/planning/",/*authMiddlewareUser ,*/async (req: Request, res: Response) => {
         
         let { startDate, endDate} = req.query;
 
@@ -77,32 +77,13 @@ export const ShowtimeHandler = (app: express.Express) => {
         }
 
 
-        let query = AppDataSource
-        .getRepository(Showtime)
-        .createQueryBuilder("showtime")
-        .leftJoinAndSelect("showtime.salle", "salle")
-        .leftJoinAndSelect("showtime.movie", "movie")
-        .select([
-            "salle.name",
-            "salle.description",
-            "salle.type",
-            "movie.title",
-            "movie.description",
-            "showtime.start_datetime",
-            "showtime.end_datetime",
-            "showtime.special_notes"
-        ])
-        .where("salle.maintenance_status = false")
+        const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
+        const query = await showtimeUsecase.getShowtimePlanning(startDate as string, endDate as string);
 
-        if (startDate && endDate) {
-            endDate = endDate + " 23:59:59"
-            query = query.andWhere("showtime.start_datetime >= :startDate AND showtime.end_datetime <= :endDate", { startDate, endDate });
-        }else if(startDate && !endDate){
-            query = query.andWhere("showtime.start_datetime >= :startDate", { startDate });
-        }else if(!startDate && endDate){
-            endDate = endDate + " 23:59:59"
-            query = query.andWhere("showtime.end_datetime <= :endDate", { endDate });
-        }
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }   
 
         try {
             const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
@@ -115,6 +96,8 @@ export const ShowtimeHandler = (app: express.Express) => {
             console.error("Error fetching planning:", error);
             res.status(500).json({ error: "Internal Server Error" });
         }
+
+
     });
 
     app.get("/showtimes", async (req: Request, res: Response) => {
@@ -164,6 +147,36 @@ export const ShowtimeHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
+
+
+    app.get("/showtimes/count/:id", async (req: Request, res: Response) => {
+        try {
+            const validationResult = showtimeIdValidation.validate(req.params)
+
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+            const showtimeId = validationResult.value
+
+            const showtimeRepository = AppDataSource.getRepository(Showtime)
+
+
+            const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
+            const count = await showtimeUsecase.getCountByShowtimeId(showtimeId.id)
+
+            if (count === null) {
+                res.status(404).send({ "error": `showtime ${showtimeId.id} not found` })
+                return
+            }
+
+            res.status(200).send("Number of spectators : " + count)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+
 
     app.delete("/showtimes/:id", authMiddlewareAdmin, async (req: Request, res: Response) => {
         try {

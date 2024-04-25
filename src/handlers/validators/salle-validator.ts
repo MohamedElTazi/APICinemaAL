@@ -26,9 +26,6 @@ export interface ListSalleRequest {
     capacityMax?: number
 }
 
-
-
-
 export const salleIdValidation = Joi.object<SalleIdRequest>({
     id: Joi.number().required(),
 })

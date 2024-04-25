@@ -1,10 +1,10 @@
-import { DataSource, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual } from "typeorm";
+import { createQueryBuilder, DataSource, SelectQueryBuilder } from "typeorm";
 import { Showtime } from "../database/entities/showtime";
-import { Salle } from "../database/entities/salle";
-import { addMinutes } from 'date-fns';
 import { Movie } from "../database/entities/movie";
 import { AppDataSource } from "../database/database";
 import { format } from 'date-fns';
+import { CreateShowtimeValidationRequest } from "../handlers/validators/showtime-validator";
+import { TicketShowtimeAccesses } from "../database/entities/ticketShowtimeAccesses";
 
 export interface ListShowtimeFilter {
     limit: number
@@ -75,12 +75,41 @@ export class ShowtimeUsecase {
             return start_datetimeDate;
     }
 
+    async getShowtimePlanning(startDate:string, endDate:string): Promise<SelectQueryBuilder<Showtime> | null>{
+
+        let query = this.db.getRepository(Showtime)
+        .createQueryBuilder("showtime")
+        .leftJoinAndSelect("showtime.salle", "salle")
+        .leftJoinAndSelect("showtime.movie", "movie")
+        .select([
+            "salle.name",
+            "salle.description",
+            "salle.type",
+            "movie.title",
+            "movie.description",
+            "showtime.start_datetime",
+            "showtime.end_datetime",
+            "showtime.special_notes"
+        ])
+        .where("salle.maintenance_status = false")
+
+        if (startDate && endDate) {
+            endDate = endDate + " 23:59:59"
+            query = query.andWhere("showtime.start_datetime >= :startDate AND showtime.end_datetime <= :endDate", { startDate, endDate });
+        }else if(startDate && !endDate){
+            query = query.andWhere("showtime.start_datetime >= :startDate", { startDate });
+        }else if(!startDate && endDate){
+            endDate = endDate + " 23:59:59"
+            query = query.andWhere("showtime.end_datetime <= :endDate", { endDate });
+        }
+
+        return query;
+
+    }
     
 
-    async isOverlap(newShowtime: Showtime): Promise<boolean> {
-        const showtimeRepository = this.db.getRepository(Showtime);
-    
-        const count = await showtimeRepository
+    async isOverlap(newShowtime: CreateShowtimeValidationRequest): Promise<boolean> {
+        const count = await this.db.getRepository(Showtime)
             .createQueryBuilder('showtime')
             .where('start_datetime <= :newEndDatetime', { newEndDatetime: newShowtime.end_datetime })
             .andWhere('DATE_ADD(end_datetime, INTERVAL 30 MINUTE) >= :newStartDatetime', { newStartDatetime: newShowtime.start_datetime })
@@ -92,4 +121,16 @@ export class ShowtimeUsecase {
         }
         return true
     }
+
+
+    async getCountByShowtimeId(showtimeId: number): Promise<number> {
+        const count = await this.db.getRepository(TicketShowtimeAccesses).
+        createQueryBuilder('ticketShowtimeAccess')
+        .where('ticketShowtimeAccess.showtimeId = :showtimeId', { showtimeId })
+        .getCount();
+      
+        return count;
+      }
+
+    
 }

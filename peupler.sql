@@ -22,15 +22,18 @@ INSERT INTO user (email, password, role, balance) VALUES
 ('admin@example.com', '$2b$10$ZoAnhqUHS7sShkq/7fLS9.2iTlQ.z./yIAThCiNPj7vLWlrVsLDv6', 'administrator', 0), /* password: password2 */
 ('user2@example.com', '$2b$10$lf2XD4g1HRdAK2Zy6DZj.uZOsIz4eiAIcG0fo5716A6JayQO6FOLa', 'user', 50); /* password: password3 */
 
--- Insertion dans la table ticket
-INSERT INTO ticket (showtimeId, userId, status, is_super) VALUES
-(1, 1, 'reserved', FALSE),
-(2, 3, 'paid', TRUE),
-(3, 1, 'cancelled', FALSE);
+INSERT INTO ticket (userId, is_used, is_super, nb_tickets) VALUES
+(1, FALSE, FALSE, 1),
+(2, FALSE, FALSE, 1),
+(3, FALSE, FALSE, 1),
+(1, FALSE, TRUE, 9),
+(2, FALSE, TRUE, 8);
 
--- Insertion dans la table super_ticket_accesse
-INSERT INTO super_ticket_accesse (ticketId, showtimeId) VALUES
-(2, 2);
+
+INSERT INTO ticket_showtime_accesses (ticketId, showtimeId) VALUES
+(4, 1),
+(5, 2),
+(5, 3);
 
 -- Insertion dans la table transaction
 INSERT INTO transaction (userId, amount, transaction_type, transaction_date) VALUES
@@ -44,7 +47,7 @@ INSERT INTO employee (name, position, working_hours) VALUES
 ('Jane Smith', 'Manager', 'Lundi-Vendredi: 9h-17h'),
 ('Bob Brown', 'Technicien', 'Lundi-Vendredi: 10h-18h');
 
-select salle.name, salle.description, salle.type, movie.title, movie.description , showtime.start_datetime, showtime.end_datetime, showtime.special_notes  
+/*select salle.name, salle.description, salle.type, movie.title, movie.description , showtime.start_datetime, showtime.end_datetime, showtime.special_notes  
 from salle 
 inner join showtime 
 ON salle.id = showtime.salleId 
@@ -59,4 +62,4 @@ SELECT COUNT(*)
 FROM showtime 
 WHERE start_datetime <= 'nouvelle_fin_plage_horaire' 
 AND DATE_ADD(end_datetime, INTERVAL 30 MINUTE) >= 'nouvelle_debut_plage_horaire';
-AND salleId = 'id_salle';
+AND salleId = 'id_salle';*/

@@ -4,11 +4,8 @@ import { createSalleValidation, listSalleValidation, salleIdValidation, sallePla
 import { AppDataSource } from "../../database/database";
 import { Salle } from "../../database/entities/salle";
 import { SalleUsecase } from "../../domain/salle-usecase";
-import { UserHandler } from "./user";
 import { authMiddlewareAdmin, authMiddlewareUser } from "../middleware/auth-middleware";
-import { Showtime } from "../../database/entities/showtime";
 import { toZonedTime } from "date-fns-tz";
-import mysql from 'mysql2/promise'; // Utilisez mysql2 pour les promesses
 
 export const SalleHandler = (app: express.Express) => {
    
@@ -89,38 +86,14 @@ export const SalleHandler = (app: express.Express) => {
         }
 
 
-        let query = AppDataSource
-        .getRepository(Showtime)
-        .createQueryBuilder("showtime")
-        .leftJoinAndSelect("showtime.salle", "salle")
-        .leftJoinAndSelect("showtime.movie", "movie")
-        .select([
-            "salle.name",
-            "salle.description",
-            "salle.type",
-            "movie.title",
-            "movie.description",
-            "showtime.start_datetime",
-            "showtime.end_datetime",
-            "showtime.special_notes"
-        ])
-        .where("salle.maintenance_status = false")
-        .andWhere("salle.id = :id", { id: salleId.id });
+        const salleUsecase = new SalleUsecase(AppDataSource);
+        const query = await salleUsecase.getMoviePlanning(startDate as string, endDate as string, salleId.id);
 
-        if (startDate && endDate) {
-            endDate = endDate + " 23:59:59"
-            query = query.andWhere("showtime.start_datetime >= :startDate AND showtime.end_datetime <= :endDate", { startDate, endDate });
-        }else if(startDate && !endDate){
-            query = query.andWhere("showtime.start_datetime >= :startDate", { startDate });
-        }else if(!startDate && endDate){
-            endDate = endDate + " 23:59:59"
-            query = query.andWhere("showtime.end_datetime <= :endDate", { endDate });
-        }
-
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }   
         
-
-
-
         try {
             const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
             planning.forEach((showtime) => {
