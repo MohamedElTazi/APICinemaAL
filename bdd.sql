@@ -43,15 +43,16 @@ CREATE TABLE ticket (
     ticket_id INT PRIMARY KEY AUTO_INCREMENT,
     showtime_id INT REFERENCES showtime(showtime_id),
     user_id INT REFERENCES user(user_id),
-    status VARCHAR(50) NOT NULL,
+    isUsed BOOLEAN NOT NULL,
     is_super BOOLEAN DEFAULT FALSE
+
 );
 
 
 CREATE TABLE super_ticket_accesse (
     access_id INT PRIMARY KEY AUTO_INCREMENT,
     ticket_id INT REFERENCES ticket(ticket_id),
-    showtime_id INT REFERENCES showtime(showtime_id)
+    nb_tickets INT DEFAULT 10
 );
 
 CREATE TABLE transaction (
