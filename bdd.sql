@@ -42,9 +42,11 @@ CREATE TABLE ticket (
     id INT PRIMARY KEY AUTO_INCREMENT,
     userId INT REFERENCES user(id),
     is_used BOOLEAN DEFAULT FALSE,
-    is_super BOOLEAN DEFAULT FALSE,
+    is_super BOOLEAN NOT NULL,
+    amount INT NOT NULL, 
     nb_tickets INT NOT NULL
 );
+
 
 CREATE TABLE ticket_showtime_accesses (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -73,5 +75,3 @@ CREATE TABLE token (
     token VARCHAR(255) NOT NULL,
     userId INT REFERENCES user(id)
 );
-
-
