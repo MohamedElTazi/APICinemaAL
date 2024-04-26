@@ -40,10 +40,11 @@ CREATE TABLE user(
 
 CREATE TABLE ticket (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    showtimeId INT REFERENCES showtime(id),
     userId INT REFERENCES user(id),
-    status VARCHAR(50) NOT NULL,
-    is_super BOOLEAN DEFAULT FALSE
+    is_used BOOLEAN DEFAULT FALSE,
+    is_super BOOLEAN NOT NULL,
+    amount INT NOT NULL, 
+    nb_tickets INT NOT NULL
 );
 
 
