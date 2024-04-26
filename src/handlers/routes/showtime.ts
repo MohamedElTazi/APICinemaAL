@@ -232,6 +232,4 @@ export const ShowtimeHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
-
-
 }

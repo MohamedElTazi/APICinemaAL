@@ -97,4 +97,5 @@ export class SalleUsecase {
         return query;
 
     }
+
 }

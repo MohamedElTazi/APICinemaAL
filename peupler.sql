@@ -63,3 +63,4 @@ FROM showtime
 WHERE start_datetime <= 'nouvelle_fin_plage_horaire' 
 AND DATE_ADD(end_datetime, INTERVAL 30 MINUTE) >= 'nouvelle_debut_plage_horaire';
 AND salleId = 'id_salle';*/
+
