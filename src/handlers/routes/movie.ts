@@ -3,7 +3,7 @@ import { generateValidationErrorMessage } from "../validators/generate-validatio
 import {  createMovieValidation, listMovieValidation, moviePlanningValidation, movieIdValidation, updateMovieValidation } from "../validators/movie-validator";
 import { AppDataSource } from "../../database/database";
 import { Movie } from "../../database/entities/movie";
-import { authMiddlewareUser } from "../middleware/auth-middleware";
+import { authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
 import { MovieUsecase } from "../../domain/movie-usecase";
 import { Showtime } from "../../database/entities/showtime";
 
@@ -34,7 +34,7 @@ export const MovieHandler = (app: express.Express) => {
     }
     })
 
-    app.get("/movies/planning/:id",authMiddlewareUser ,async (req: Request, res: Response) => {
+    app.get("/movies/planning/:id",authMiddlewareAll ,async (req: Request, res: Response) => {
 
         const validationResultParams = movieIdValidation.validate(req.params)
 
@@ -51,7 +51,7 @@ export const MovieHandler = (app: express.Express) => {
             return
         }
         
-        const { startDate, endDate} = req.query;
+        let { startDate, endDate} = req.query;
 
 
 
@@ -75,25 +75,26 @@ export const MovieHandler = (app: express.Express) => {
             "salle.type",
             "movie.title",
             "movie.description",
-            "showtime.start_time",
-            "showtime.end_time",
+            "showtime.start_datetime",
+            "showtime.end_datetime",
             "showtime.special_notes"
         ])
         .where("salle.maintenance_status = false")
         .andWhere("salle.id = :id", { id: movieId.id });
 
         if (startDate && endDate) {
-            query = query.andWhere("showtime.date BETWEEN :startDate AND :endDate", { startDate, endDate });
+            endDate = endDate + " 23:59:59"
+            query = query.andWhere("showtime.start_datetime >= :startDate AND showtime.end_datetime <= :endDate", { startDate, endDate });
         }else if(startDate && !endDate){
-            query = query.andWhere("showtime.date >= :startDate", { startDate });
+            query = query.andWhere("showtime.start_datetime >= :startDate", { startDate });
         }else if(!startDate && endDate){
-            query = query.andWhere("showtime.date <= :endDate", { endDate });
+            endDate = endDate + " 23:59:59"
+            query = query.andWhere("showtime.end_datetime <= :endDate", { endDate });
         }
 
 
-
         try {
-            const planning = await query.orderBy("showtime.date", "ASC").getMany();
+            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
 
             res.status(200).send(planning);
         } catch (error) {
@@ -198,7 +199,6 @@ export const MovieHandler = (app: express.Express) => {
                 res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
                 return
             }
-            const movieId = validationResult.value
     
     
             const updatedMovie = await movieUsecase.updateMovie(

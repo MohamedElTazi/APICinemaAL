@@ -12,7 +12,7 @@ export interface ListMovieRequest {
 export interface UpdateMovieParams {
     title: string
     description: string
-    duration: number
+    duration: Date
     genre: string
 }
 export class MovieUsecase {

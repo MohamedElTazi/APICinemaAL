@@ -3,14 +3,14 @@ import Joi from "joi";
 export const createMovieValidation = Joi.object<CreateMovieValidationRequest>({
     title: Joi.string().required(),
     description: Joi.string().required(),
-    duration: Joi.number().required(),
+    duration: Joi.date().required(),
     genre: Joi.string().required(),
 }).options({ abortEarly: false });
 
 export interface CreateMovieValidationRequest {
     title: string
     description: string
-    duration: number
+    duration: Date
     genre: string
 }
 
@@ -26,7 +26,7 @@ export const updateMovieValidation = Joi.object<UpdateMovieRequest>({
     id: Joi.number().required(),
     title: Joi.string().required(),
     description: Joi.string().required(),
-    duration: Joi.number().required(),
+    duration: Joi.date().required(),
     genre: Joi.string().required(),
 })
 
@@ -34,7 +34,7 @@ export interface UpdateMovieRequest {
     id: number
     title: string
     description: string
-    duration: number
+    duration: Date
     genre: string
 }
 export const listMovieValidation = Joi.object<ListMovieRequest>({
