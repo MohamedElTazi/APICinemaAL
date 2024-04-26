@@ -1,51 +1,61 @@
 import express, { Request, Response } from "express";
 import { generateValidationErrorMessage } from "../validators/generate-validation-message";
-import { createShowtimeValidation, listShowtimeValidation, showtimeIdValidation, updateShowtimeValidation } from "../validators/showtime-validator";
+import { createShowtimeValidation, listShowtimeValidation, showtimeIdValidation, showtimePlanningValidation, updateShowtimeValidation,  } from "../validators/showtime-validator";
 import { AppDataSource } from "../../database/database";
 import { Showtime } from "../../database/entities/showtime";
 import { ShowtimeUsecase } from "../../domain/showtime-usecase";
 import { UserHandler } from "./user";
 import { authMiddlewareAdmin, authMiddlewareUser } from "../middleware/auth-middleware";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 
 export const ShowtimeHandler = (app: express.Express) => {
 
-    // async function isOverlapping(newShowtime: Showtime) {
-    //     const showtimes = await AppDataSource.getRepository(Showtime).createQueryBuilder("showtime")
-    //         .where("showtime.movieId = :movieId", { movieId: newShowtime.movie })
-    //         .andWhere("showtime.date = :date", { date: newShowtime.date })
-    //         .getMany();
     
-    //     return showtimes.some(existingShowtime => {
-    //         const [existingStart, existingEnd] = [existingShowtime.start_time, existingShowtime.end_time];
-    //         const [newStart, newEnd] = [newShowtime.start_time, newShowtime.end_time];
-    
-    //         return (newStart < existingEnd && newEnd > existingStart) &&
-    //                existingShowtime.salle !== newShowtime.salle;
-    //     });
-    // }
-    
+    app.post("/showtimes", async (req: Request, res: Response) => {
+        const reqBodyStartDatetime = req.body.start_datetime
+        req.body.start_datetime = req.body.start_datetime+"Z"
 
-    app.post("/showtimes",authMiddlewareAdmin ,async (req: Request, res: Response) => {
-        console.log(UserHandler.name)
         const validation = createShowtimeValidation.validate(req.body)
 
         if (validation.error) {
             res.status(400).send(generateValidationErrorMessage(validation.error.details))
             return
         }
-        console.log(validation.value)
-        const ShowtimeRequest = validation.value
-        const ShowtimeRepo = AppDataSource.getRepository(Showtime)
 
-        // if (await isOverlapping(ShowtimeRequest)) {
-        //     res.status(409).send({ error: "Showtime conflicts with an existing showtime for the same movie in a different hall." });
-        //     return;
-        // }
+
+        const showtimeRequest = validation.value
+
+        const showtimeRepository = AppDataSource.getRepository(Showtime)
+
+        const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
+
+        const end_datetime = await showtimeUsecase.getMovieDuration(req.body.movie, req.body.start_datetime)
+
+        if (end_datetime === null) {
+            res.status(404).send({ "error": `movie ${showtimeRequest.movie.id} not found` })
+            return
+        }
+
+        const utcDate = toZonedTime(end_datetime, 'UTC');
+
+        const formattedDatetime = format(utcDate, "yyyy-MM-dd'T'HH:mm:ss");
+
+        req.body.end_datetime = formattedDatetime
+        
+        showtimeRequest.end_datetime = req.body.end_datetime
+
+        showtimeRequest.start_datetime = reqBodyStartDatetime
+
+        if(await showtimeUsecase.isOverlap(showtimeRequest)){
+            res.status(404).send({ "error": `New showtime is overlap with other showtime` })
+            return  
+        }
+
         try {
-
-            const ShowtimeCreated = await ShowtimeRepo.save(
-                ShowtimeRequest
+            const ShowtimeCreated = await showtimeRepository.save(
+                showtimeRequest
             )
             res.status(201).send(ShowtimeCreated)
         } catch (error) {
@@ -53,6 +63,42 @@ export const ShowtimeHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
+
+    app.get("/showtimes/planning/",/*authMiddlewareUser ,*/async (req: Request, res: Response) => {
+        
+        let { startDate, endDate} = req.query;
+
+        const validationResultQuery = showtimePlanningValidation.validate(req.query)
+
+
+        if (validationResultQuery.error) {
+            res.status(400).send(generateValidationErrorMessage(validationResultQuery.error.details))
+            return
+        }
+
+
+        const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
+        const query = await showtimeUsecase.getShowtimePlanning(startDate as string, endDate as string);
+
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }   
+
+        try {
+            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
+            planning.forEach((showtime) => {
+                showtime.start_datetime = toZonedTime(showtime.start_datetime, '+04:00')
+                showtime.end_datetime = toZonedTime(showtime.end_datetime, '+04:00')
+            })
+            res.status(200).send(planning);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+
+
+    });
 
     app.get("/showtimes", async (req: Request, res: Response) => {
         const validation = listShowtimeValidation.validate(req.query)
@@ -101,6 +147,36 @@ export const ShowtimeHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
+
+
+    app.get("/showtimes/count/:id", async (req: Request, res: Response) => {
+        try {
+            const validationResult = showtimeIdValidation.validate(req.params)
+
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+            const showtimeId = validationResult.value
+
+            const showtimeRepository = AppDataSource.getRepository(Showtime)
+
+
+            const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
+            const count = await showtimeUsecase.getCountByShowtimeId(showtimeId.id)
+
+            if (count === null) {
+                res.status(404).send({ "error": `showtime ${showtimeId.id} not found` })
+                return
+            }
+
+            res.status(200).send("Number of spectators : " + count)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+
 
     app.delete("/showtimes/:id", authMiddlewareAdmin, async (req: Request, res: Response) => {
         try {
@@ -156,6 +232,4 @@ export const ShowtimeHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
-
-
 }

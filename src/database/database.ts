@@ -1,12 +1,13 @@
+
 import { DataSource } from "typeorm";
 
 
 export const AppDataSource = new DataSource({
     type: "mysql",
     host: "localhost",
-    port: 3307,
-    username: "root",
-    password: "",
+    port: 3306,
+    username: "user_cinema",
+    password: "azerty",
     database: "CinemaNode",
     logging: true,
     synchronize: false,
@@ -16,4 +17,5 @@ export const AppDataSource = new DataSource({
     migrations: [
         "src/database/migrations/*.ts"
     ]
+
 })

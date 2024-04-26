@@ -13,7 +13,7 @@ export class Movie {
     description: string;
 
     @Column()
-    duration: number;
+    duration: Date;
 
     @Column()
     genre: string;
@@ -22,7 +22,7 @@ export class Movie {
     showtimes: Showtime[];
 
 
-    constructor(id: number, title: string, description: string, duration: number, genre:string, showtimes: Showtime[]) {
+    constructor(id: number, title: string, description: string, duration: Date, genre:string, showtimes: Showtime[]) {
         this.id = id, 
         this.title = title
         this.description = description
@@ -32,3 +32,4 @@ export class Movie {
 
     }
 }
+
