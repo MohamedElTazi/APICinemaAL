@@ -4,8 +4,7 @@ import { createShowtimeValidation, listShowtimeValidation, showtimeIdValidation,
 import { AppDataSource } from "../../database/database";
 import { Showtime } from "../../database/entities/showtime";
 import { ShowtimeUsecase } from "../../domain/showtime-usecase";
-import { UserHandler } from "./user";
-import { authMiddlewareAdmin, authMiddlewareUser } from "../middleware/auth-middleware";
+import { authMiddlewareAdmin, authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 
@@ -13,7 +12,7 @@ import { toZonedTime } from "date-fns-tz";
 export const ShowtimeHandler = (app: express.Express) => {
 
     
-    app.post("/showtimes", async (req: Request, res: Response) => {
+    app.post("/showtimes", authMiddlewareAdmin ,async (req: Request, res: Response) => {
         const reqBodyStartDatetime = req.body.start_datetime
         req.body.start_datetime = req.body.start_datetime+"Z"
 
@@ -64,7 +63,7 @@ export const ShowtimeHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/showtimes/planning/",/*authMiddlewareUser ,*/async (req: Request, res: Response) => {
+    app.get("/showtimes/planning/",authMiddlewareAll,async (req: Request, res: Response) => {
         
         let { startDate, endDate} = req.query;
 
@@ -232,6 +231,4 @@ export const ShowtimeHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
-
-
 }

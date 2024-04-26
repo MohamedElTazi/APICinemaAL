@@ -76,5 +76,3 @@ export const UserHandler = (app: express.Express) => {
     })
 
 }
-
-

@@ -48,4 +48,5 @@ export class User {
         this.tokens = tokens;
         this.tickets = tickets;
     }
+
 }

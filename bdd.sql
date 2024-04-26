@@ -25,8 +25,8 @@ CREATE TABLE showtime (
     id INT PRIMARY KEY AUTO_INCREMENT,
     salleId INT NOT NULL REFERENCES salle(id),
     movieId INT NOT NULL REFERENCES movie(id),
-    start_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
-    end_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
+    start_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    end_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     special_notes TEXT
 );
 
@@ -66,8 +66,14 @@ CREATE TABLE transaction (
 CREATE TABLE employee (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
-    position VARCHAR(100) NOT NULL,
+    id_poste INT NULL,
     working_hours TEXT NOT NULL
+);
+
+CREATE TABLE poste (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL
 );
 
 CREATE TABLE token (

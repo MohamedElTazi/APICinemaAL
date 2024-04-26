@@ -4,7 +4,7 @@ import { createSalleValidation, listSalleValidation, salleIdValidation, sallePla
 import { AppDataSource } from "../../database/database";
 import { Salle } from "../../database/entities/salle";
 import { SalleUsecase } from "../../domain/salle-usecase";
-import { authMiddlewareAdmin, authMiddlewareUser } from "../middleware/auth-middleware";
+import { authMiddlewareAdmin, authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
 import { toZonedTime } from "date-fns-tz";
 
 export const SalleHandler = (app: express.Express) => {
@@ -32,7 +32,7 @@ export const SalleHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/salles", async (req: Request, res: Response) => {
+    app.get("/salles",authMiddlewareAll,async (req: Request, res: Response) => {
         const validation = listSalleValidation.validate(req.query)
 
         if (validation.error) {
@@ -58,7 +58,7 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.get("/salles/planning/:id",/*authMiddlewareUser ,*/async (req: Request, res: Response) => {
+    app.get("/salles/planning/:id",authMiddlewareAll,async (req: Request, res: Response) => {
 
         const validationResultParams = salleIdValidation.validate(req.params)
 
@@ -108,7 +108,7 @@ export const SalleHandler = (app: express.Express) => {
     });
 
 
-    app.get("/salles/:id", async (req: Request, res: Response) => {
+    app.get("/salles/:id",authMiddlewareAll,async (req: Request, res: Response) => {
         try {
             const validationResult = salleIdValidation.validate(req.params)
 
@@ -131,7 +131,7 @@ export const SalleHandler = (app: express.Express) => {
         }
     })
 
-    app.delete("/salles/:id", async (req: Request, res: Response) => {
+    app.delete("/salles/:id",authMiddlewareAdmin ,async (req: Request, res: Response) => {
         try {
             const validationResult = salleIdValidation.validate(req.params)
     
@@ -157,7 +157,7 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/salles/:id", async (req: Request, res: Response) => {
+    app.patch("/salles/:id",authMiddlewareAdmin ,async (req: Request, res: Response) => {
 
         const validation = updateSalleValidation.validate({ ...req.params, ...req.body })
 
@@ -222,6 +222,5 @@ export const SalleHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
-
 
 }
