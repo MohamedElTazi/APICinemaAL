@@ -22,12 +22,12 @@ INSERT INTO user (email, password, role, balance) VALUES
 ('admin@example.com', '$2b$10$ZoAnhqUHS7sShkq/7fLS9.2iTlQ.z./yIAThCiNPj7vLWlrVsLDv6', 'administrator', 0), /* password: password2 */
 ('user2@example.com', '$2b$10$lf2XD4g1HRdAK2Zy6DZj.uZOsIz4eiAIcG0fo5716A6JayQO6FOLa', 'user', 50); /* password: password3 */
 
-INSERT INTO ticket (userId, is_used, is_super, nb_tickets) VALUES
-(1, FALSE, FALSE, 1),
-(2, FALSE, FALSE, 1),
-(3, FALSE, FALSE, 1),
-(1, FALSE, TRUE, 9),
-(2, FALSE, TRUE, 8);
+INSERT INTO ticket (userId, is_used, is_super,amount ,nb_tickets) VALUES
+(1, FALSE, FALSE, 10,1),
+(2, FALSE, FALSE, 10,1),
+(3, FALSE, FALSE, 10, 1),
+(1, FALSE, TRUE, 80, 9),
+(2, FALSE, TRUE, 80 ,8);
 
 
 INSERT INTO ticket_showtime_accesses (ticketId, showtimeId) VALUES
@@ -63,4 +63,3 @@ FROM showtime
 WHERE start_datetime <= 'nouvelle_fin_plage_horaire' 
 AND DATE_ADD(end_datetime, INTERVAL 30 MINUTE) >= 'nouvelle_debut_plage_horaire';
 AND salleId = 'id_salle';*/
-
