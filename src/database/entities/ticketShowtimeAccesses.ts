@@ -1,10 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
-import { Salle } from "./salle";
-import { Movie } from "./movie";
-import { User } from "./user";
+import {Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 import { Ticket } from "./ticket";
 import { Showtime } from "./showtime";
-
 
 @Entity()
 export class TicketShowtimeAccesses {    
