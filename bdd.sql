@@ -48,11 +48,12 @@ CREATE TABLE ticket (
 );
 
 
-CREATE TABLE super_ticket_accesse (
+CREATE TABLE ticket_showtime_accesses (
     id INT PRIMARY KEY AUTO_INCREMENT,
     ticketId INT REFERENCES ticket(id),
-    showtimeId INT REFERENCES showtime(id)
+    showtimeId INT REFERENCES showtime(id) 
 );
+
 
 CREATE TABLE transaction (
     id INT PRIMARY KEY AUTO_INCREMENT,

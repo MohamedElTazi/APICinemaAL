@@ -42,10 +42,10 @@ INSERT INTO transaction (userId, amount, transaction_type, transaction_date) VAL
 (3, 20.00, 'achat ticket', '2024-04-10 15:00:00');
 
 -- Insertion dans la table employee
-INSERT INTO employee (name, position, working_hours) VALUES
+/*INSERT INTO employee (name, position, working_hours) VALUES
 ('John Doe', 'Caissier', 'Lundi-Vendredi: 8h-16h'),
 ('Jane Smith', 'Manager', 'Lundi-Vendredi: 9h-17h'),
-('Bob Brown', 'Technicien', 'Lundi-Vendredi: 10h-18h');
+('Bob Brown', 'Technicien', 'Lundi-Vendredi: 10h-18h');*/
 
 /*select salle.name, salle.description, salle.type, movie.title, movie.description , showtime.start_datetime, showtime.end_datetime, showtime.special_notes  
 from salle 
