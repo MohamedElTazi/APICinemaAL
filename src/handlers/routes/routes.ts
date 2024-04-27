@@ -5,7 +5,7 @@ import { SalleHandler } from "./salle";
 import  {MovieHandler} from "./movie";
 import { ShowtimeHandler } from "./showtime";
 import { PosteHandler } from "./poste";
-
+import { ticketHandler } from "./ticket";
 export const initRoutes = (app: express.Express) => {
 
     app.get("/health", (req: Request, res: Response) => {
@@ -18,7 +18,7 @@ export const initRoutes = (app: express.Express) => {
     PosteHandler(app)
     MovieHandler(app)
     ShowtimeHandler(app)
-    
+    ticketHandler(app)
 
     app.use(invalidPathHandler);
 }

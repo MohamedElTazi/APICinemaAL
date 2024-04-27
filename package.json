@@ -15,8 +15,9 @@
     "express": "^4.19.2",
     "joi": "^17.12.2",
     "moment-timezone": "^0.5.45",
+    "mssql": "^10.0.2",
     "mysql": "^2.18.1",
-    "mysql2": "^3.9.3",
+    "mysql2": "^3.9.7",
     "reflect-metadata": "^0.2.1"
   },
   "devDependencies": {
@@ -31,4 +32,3 @@
     "typeorm": "^0.3.20"
   }
 }
-
