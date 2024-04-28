@@ -22,7 +22,7 @@ INSERT INTO user (email, password, role, balance) VALUES
 ('admin@example.com', '$2b$10$ZoAnhqUHS7sShkq/7fLS9.2iTlQ.z./yIAThCiNPj7vLWlrVsLDv6', 'administrator', 0), /* password: password2 */
 ('user2@example.com', '$2b$10$lf2XD4g1HRdAK2Zy6DZj.uZOsIz4eiAIcG0fo5716A6JayQO6FOLa', 'user', 50); /* password: password3 */
 
-INSERT INTO ticket (userId, is_used, is_super,price ,nb_tickets) VALUES
+INSERT INTO ticket (userId, is_used, is_super,amount ,nb_tickets) VALUES
 (1, FALSE, FALSE, 10,1),
 (2, FALSE, FALSE, 10,1),
 (3, FALSE, FALSE, 10, 1),
@@ -35,18 +35,11 @@ INSERT INTO ticket_showtime_accesses (ticketId, showtimeId) VALUES
 (5, 2),
 (5, 3);
 
-INSERT INTO transaction (userId, ticketId, transaction_type, amount, transaction_date) VALUES
-(1, 1, 'buy ticket', 10.00, '2024-04-10 13:00:00'),
-(3, 2, 'buy ticket', 10.00, '2024-04-10 15:00:00'),
-(3, 3, 'buy ticket', 10.00, '2024-04-10 15:00:00'),
-(1, 4, 'buy ticket', 80.00, '2024-04-10 15:00:00'),
-(3, 5, 'buy ticket', 80.00, '2024-04-10 15:00:00');
-
-
-INSERT INTO transaction (userId, transaction_type, amount, transaction_date) VALUES
-(1, 'recharge balance', 50.00 ,'2024-04-09 10:30:00'),
-(2, 'withdraw balance', 50.00 ,'2024-04-09 10:30:00');
-
+-- Insertion dans la table transaction
+INSERT INTO transaction (userId, amount, transaction_type, transaction_date) VALUES
+(1, 15.00, 'achat ticket', '2024-04-10 13:00:00'),
+(2, 50.00, 'recharge balance', '2024-04-09 10:30:00'),
+(3, 20.00, 'achat ticket', '2024-04-10 15:00:00');
 
 -- Insertion dans la table employee
 /*INSERT INTO employee (name, position, working_hours) VALUES
@@ -61,7 +54,8 @@ ON salle.id = showtime.salleId
 INNER JOIN movie ON showtime.movieId = movie.id 
 WHERE salle.maintenance_status = false 
 AND showtime.start_datetime >= '2024-04-10'  
-AND showtime.end_datetime <= '2024-04-11 23:59:59'
+AND showtime.end_datetime <= '2024-04-11 23:59:59'; 
+
 order by showtime.start_datetime ASC;
 
 SELECT COUNT(*) 
