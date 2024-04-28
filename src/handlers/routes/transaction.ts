@@ -159,7 +159,7 @@ export const TransactionHandler = (app: express.Express) => {
             return
         }
 
-        console.log("showtime:::::::::::",validation.value.idShowtime)
+
 
         if(validation.value.idShowtime !== undefined && validation.value.is_super ===true){
             res.status(400).send("error: cannot assigned showtime to super ticket")
@@ -193,6 +193,9 @@ export const TransactionHandler = (app: express.Express) => {
                 return
             }else if (response === "creation of ticket failed") {
                 res.status(404).send("Creation of ticket failed")
+                return
+            }else if(response === "showtime is outdated"){
+                res.status(404).send("Showtime is outdated")
                 return
             }
 

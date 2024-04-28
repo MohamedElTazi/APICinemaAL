@@ -6,6 +6,7 @@ import { createTicketValidation } from "../handlers/validators/ticket-validator"
 import { createTransactionValidation } from "../handlers/validators/transaction-validator"
 import { createAccessTicketShowTimeAccessesValidation } from "../handlers/validators/ticketShowtimeAccesses-validator"
 import { TicketShowtimeAccesses } from "../database/entities/ticketShowtimeAccesses"
+import { Showtime } from "../database/entities/showtime"
 
 export interface UpdateTransactionParams {
     amount?: number
@@ -120,6 +121,10 @@ export class TransactionUsecase {
             priceTicket = 80
             nbTickets = 10
         }else{
+            if(await this.verifDateShowtime(idShowtime) === 0){
+                console.error('showtime is outdated');
+                return "showtime is outdated"
+            }
             priceTicket = 10
             nbTickets = 1
         }
@@ -129,6 +134,7 @@ export class TransactionUsecase {
             console.error('insufficient funds');
             return "insufficient funds"
         }
+
 
         const creationTicket = await this.creationTicket(id, priceTicket, is_super, false, nbTickets)
         
@@ -254,5 +260,14 @@ export class TransactionUsecase {
         }
     }
    
+    async verifDateShowtime(showtimeId: number): Promise<number> {
+        const count = await this.db.getRepository(Showtime)
+        .createQueryBuilder('showtime')
+        .where('start_datetime >= :currentDate', { currentDate: new Date() })
+        .andWhere('id = :id', { id: showtimeId }) 
+        .getCount();
+
+        return count;
+      }
 
 }
