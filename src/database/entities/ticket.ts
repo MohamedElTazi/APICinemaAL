@@ -25,21 +25,21 @@ export class Ticket {
         @Column()
         is_super: boolean;
         @Column()
-        prix: number;
+        amount: number;
         @Column()
         nb_tickets: number;
     
         @OneToMany(() => TicketShowtimeAccesses, ticket_showtime_accesses => ticket_showtime_accesses.ticket)
         ticket_showtime_accesses: TicketShowtimeAccesses[];
 
-        constructor(id: number, user: User, is_used: boolean, is_super: boolean,   prix: number,nb_tickets: number, ticket_showtime_accesses: TicketShowtimeAccesses[]) {
+        constructor(id: number, user: User, is_used: boolean, is_super: boolean,   amount: number,nb_tickets: number, ticket_showtime_accesses: TicketShowtimeAccesses[]) {
             this.id = id;
             this.user = user;
             this.is_used = is_used;
             this.is_super = is_super;
             this.nb_tickets = nb_tickets;
             this.ticket_showtime_accesses = ticket_showtime_accesses;
-            this.prix = prix;
+            this.amount = amount;
 
         }
 }

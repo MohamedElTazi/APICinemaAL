@@ -14,8 +14,11 @@ export interface ListTicketRequest {
 }
 
 export interface UpdateTicketParams{
-    amount?: number
-    nb_tickets?: number
+    user: User
+    is_used: boolean
+    is_super: boolean
+    amount: number
+    nb_tickets: number
 }
 
 export class TicketUsecase {
@@ -36,6 +39,20 @@ export class TicketUsecase {
             }
         }
 
-//createTicket
-   
+      
+async updateTicket(id: number, {user,is_used, is_super, amount, nb_tickets}: UpdateTicketParams): Promise<Ticket | undefined> {
+    const repo = this.db.getRepository(Ticket)
+    const ticketToUpdate = await repo.findOneBy({id})
+    if (!ticketToUpdate) return undefined
+
+    if(user){
+        ticketToUpdate.user = user
+        ticketToUpdate.is_used = is_used
+        ticketToUpdate.is_super = is_super
+        ticketToUpdate.amount = amount
+        ticketToUpdate.nb_tickets =  nb_tickets;
+    }
+    const MovieUpdated = await repo.save(ticketToUpdate)
+    return MovieUpdated
+}
 }

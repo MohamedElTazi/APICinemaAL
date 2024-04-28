@@ -43,7 +43,7 @@ CREATE TABLE ticket (
     userId INT REFERENCES user(id),
     is_used BOOLEAN DEFAULT FALSE,
     is_super BOOLEAN NOT NULL,
-    prix INT NOT NULL, 
+    amount INT NOT NULL, 
     nb_tickets INT NOT NULL
 );
 
