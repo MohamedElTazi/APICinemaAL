@@ -4,14 +4,13 @@ import { createSalleValidation, listSalleValidation, salleIdValidation, sallePla
 import { AppDataSource } from "../../database/database";
 import { Salle } from "../../database/entities/salle";
 import { SalleUsecase } from "../../domain/salle-usecase";
-import { UserHandler } from "./user";
-import { authMiddlewareAdmin, authMiddlewareUser } from "../middleware/auth-middleware";
-import { Showtime } from "../../database/entities/showtime";
+import { authMiddlewareAdmin, authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
+import { toZonedTime } from "date-fns-tz";
+
 export const SalleHandler = (app: express.Express) => {
    
 
     app.post("/salles",authMiddlewareAdmin ,async (req: Request, res: Response) => {
-        console.log(UserHandler.name)
         const validation = createSalleValidation.validate(req.body)
 
         if (validation.error) {
@@ -33,7 +32,7 @@ export const SalleHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/salles", async (req: Request, res: Response) => {
+    app.get("/salles",authMiddlewareAll,async (req: Request, res: Response) => {
         const validation = listSalleValidation.validate(req.query)
 
         if (validation.error) {
@@ -59,46 +58,48 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.get("/salles/planning", async (req: Request, res: Response) => {
-        const { startDate, endDate, startTime, endTime } = req.query;
+    app.get("/salles/planning/:id",authMiddlewareAll,async (req: Request, res: Response) => {
+
+        const validationResultParams = salleIdValidation.validate(req.params)
+
+        if (validationResultParams.error) {
+            res.status(400).send(generateValidationErrorMessage(validationResultParams.error.details))
+            return
+        }
+        const salleId = validationResultParams.value
+
+        const salleRepository = AppDataSource.getRepository(Salle)
+        const salle = await salleRepository.findOneBy({ id: salleId.id })
+        if (salle === null) {
+            res.status(404).send({ "error": `salle ${salleId.id} not found` })
+            return
+        }
+        
+        let { startDate, endDate} = req.query;
+
+        const validationResultQuery = sallePlanningValidation.validate(req.query)
 
 
-        const validationResult = sallePlanningValidation.validate(req.params)
-
-
-        if (validationResult.error) {
-            res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+        if (validationResultQuery.error) {
+            res.status(400).send(generateValidationErrorMessage(validationResultQuery.error.details))
             return
         }
 
-        let query = AppDataSource
-        .getRepository(Showtime)
-        .createQueryBuilder("showtime")
-        .leftJoinAndSelect("showtime.salle", "salle")
-        .leftJoinAndSelect("showtime.movie", "movie")
-        .select([
-            "salle.name",
-            "salle.description",
-            "salle.type",
-            "movie.title",
-            "movie.description",
-            "showtime.start_time",
-            "showtime.end_time",
-            "showtime.special_notes"
-        ])
-        .where("salle.maintenance_status = false");
 
-        if (startDate && endDate) {
-            query = query.andWhere("showtime.date BETWEEN :startDate AND :endDate", { startDate, endDate });
-        }
+        const salleUsecase = new SalleUsecase(AppDataSource);
+        const query = await salleUsecase.getMoviePlanning(startDate as string, endDate as string, salleId.id);
 
-        if (startTime && endTime) {
-            query = query.andWhere("showtime.start_time BETWEEN :startTime AND :endTime", { startTime, endTime });
-        }
-
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }   
+        
         try {
-            const planning = query.orderBy("showtime.date", "ASC").getMany();
-    
+            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
+            planning.forEach((showtime) => {
+                showtime.start_datetime = toZonedTime(showtime.start_datetime, '+04:00')
+                showtime.end_datetime = toZonedTime(showtime.end_datetime, '+04:00')
+            })
             res.status(200).send(planning);
         } catch (error) {
             console.error("Error fetching planning:", error);
@@ -107,7 +108,7 @@ export const SalleHandler = (app: express.Express) => {
     });
 
 
-    app.get("/salles/:id", async (req: Request, res: Response) => {
+    app.get("/salles/:id",authMiddlewareAll,async (req: Request, res: Response) => {
         try {
             const validationResult = salleIdValidation.validate(req.params)
 
@@ -118,7 +119,7 @@ export const SalleHandler = (app: express.Express) => {
             const salleId = validationResult.value
 
             const salleRepository = AppDataSource.getRepository(Salle)
-            const salle = await salleRepository.findOneBy({ salle_id: salleId.id })
+            const salle = await salleRepository.findOneBy({ id: salleId.id })
             if (salle === null) {
                 res.status(404).send({ "error": `salle ${salleId.id} not found` })
                 return
@@ -130,7 +131,7 @@ export const SalleHandler = (app: express.Express) => {
         }
     })
 
-    app.delete("/salles/:id", async (req: Request, res: Response) => {
+    app.delete("/salles/:id",authMiddlewareAdmin ,async (req: Request, res: Response) => {
         try {
             const validationResult = salleIdValidation.validate(req.params)
     
@@ -141,13 +142,13 @@ export const SalleHandler = (app: express.Express) => {
             const salleId = validationResult.value
     
             const salleRepository = AppDataSource.getRepository(Salle)
-            const salle = await salleRepository.findOneBy({ salle_id: salleId.id })
+            const salle = await salleRepository.findOneBy({ id: salleId.id })
             if (salle === null) {
                 res.status(404).send({ "error": `salle ${salleId.id} not found` })
                 return
             }
     
-            const salleDeleted = await salleRepository.remove(salle)
+            await salleRepository.remove(salle)
             res.status(200).send(`Successfully deleted`)
         } catch (error) {
             console.log(error)
@@ -156,7 +157,7 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/salles/:id", async (req: Request, res: Response) => {
+    app.patch("/salles/:id",authMiddlewareAdmin ,async (req: Request, res: Response) => {
 
         const validation = updateSalleValidation.validate({ ...req.params, ...req.body })
 
@@ -206,10 +207,6 @@ export const SalleHandler = (app: express.Express) => {
         try {
             const salleUsecase = new SalleUsecase(AppDataSource);
 
-            if (updateSalleMaintenanceRequest.maintenance_status === undefined) {
-                res.status(404).send("error: Maintenance status required")
-                return
-            }
 
             const updatedMaintenanceSalle = await salleUsecase.updateMaintenanceSalle(updateSalleMaintenanceRequest.id, updateSalleMaintenanceRequest )
             
@@ -225,6 +222,5 @@ export const SalleHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
-
 
 }

@@ -1,35 +1,40 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 import { Salle } from "./salle";
 import { Movie } from "./movie";
+import { TicketShowtimeAccesses } from "./ticketShowtimeAccesses";
+
 
 @Entity()
-export class Showtime {
-    @PrimaryGeneratedColumn()
-    showtime_id: number;
+export class Showtime {    
+        @PrimaryGeneratedColumn()
+        id: number;
+    
+        @ManyToOne(() => Salle, salle => salle.showtimes)
+        salle: Salle;
+    
+        @ManyToOne(() => Movie, movie => movie.showtimes)
+        movie: Movie;
+    
+        @Column()
+        start_datetime: Date;  // Date et heure de début
+    
+        @Column()
+        end_datetime: Date;  // Date et heure de fin
+    
+        @Column()
+        special_notes: string;
 
-    @ManyToOne(() => Salle, salle => salle.showtimes)
-    @JoinColumn({ name: "salle_id" })
-    salle: Salle;
+        @OneToMany(() => TicketShowtimeAccesses, ticket_showtime_accesses => ticket_showtime_accesses.ticket)
+        ticket_showtime_accesses: TicketShowtimeAccesses[];
+    
+        constructor(id: number, salle: Salle, movie: Movie, start_datetime: Date, end_datetime: Date, special_notes: string, ticket_showtime_accesses: TicketShowtimeAccesses[]) {
+            this.id = id;
+            this.salle = salle;
+            this.movie = movie;
+            this.start_datetime = start_datetime;
+            this.end_datetime = end_datetime;
+            this.special_notes = special_notes;
+            this.ticket_showtime_accesses = ticket_showtime_accesses;
 
-    @ManyToOne(() => Movie, movie => movie.showtimes)
-    @JoinColumn({ name: "movie_id" })
-    movie: Movie;
-
-    @Column()
-    start_time: Date;
-
-    @Column()
-    end_time: Date;
-
-    @Column()
-    special_notes: string;
-
-    constructor(showtime_id: number, salle: Salle, movie: Movie, start_time: Date, end_time:Date,special_notes: string) {
-        this.showtime_id = showtime_id, 
-        this.salle = salle
-        this.movie = movie
-        this.start_time = start_time
-        this.end_time = end_time
-        this.special_notes = special_notes
-    }
+        }
 }

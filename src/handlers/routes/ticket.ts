@@ -85,7 +85,7 @@ export const ticketHandler = (app: express.Express) => {
                 res.status(404).send({ "error": `ticket ${ticketId.id} not found` })
                 return
             }
-            res.status(200).send(movie)
+            res.status(200).send(ticket)
         } catch (error) {
             console.log(error)
             res.status(500).send({ error: "Internal error" })

@@ -5,18 +5,18 @@ import { User } from "./user";
 export class Token {
 
     @PrimaryGeneratedColumn()
-    token_id: number;
+    id: number;
 
     @Column({type:"varchar", length:255})
     token: string;
 
     @ManyToOne(() => User, user => user.tokens)
-    @JoinColumn({ name: "user_id" })
     user: User;
 
-    constructor(token_id: number, token: string, user: User) {
-        this.token_id = token_id
+    constructor(id: number, token: string, user: User) {
+        this.id = id
         this.token = token
         this.user = user
     }
+
 }

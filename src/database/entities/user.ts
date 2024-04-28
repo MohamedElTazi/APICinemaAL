@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from "typeorm"
 import { Token } from "./token"
 import "reflect-metadata"
+import { Ticket } from "./ticket"
 
 export enum UserRole {
     User = "user",
@@ -11,7 +12,7 @@ export enum UserRole {
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
-    user_id: number
+    id: number
 
     @Column({
         unique: true
@@ -31,16 +32,21 @@ export class User {
     @Column({type: "int", default:0})
     balance: number = 0
 
+    @OneToMany(() => Ticket, ticket => ticket.user)
+    tickets: Ticket[];
+
     @OneToMany(() => Token, token => token.user)
     tokens: Token[];
 
 
-    constructor(user_id: number, password: string, role: UserRole,balance: number, email: string, tokens: Token[]) {
-        this.user_id = user_id;
+    constructor(id: number, password: string, role: UserRole,balance: number, email: string, tokens: Token[],tickets: Ticket[]) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.role = role;
         this.balance = balance;
         this.tokens = tokens;
+        this.tickets = tickets;
     }
+
 }
