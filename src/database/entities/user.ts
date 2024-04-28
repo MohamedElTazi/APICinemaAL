@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } f
 import { Token } from "./token"
 import "reflect-metadata"
 import { Ticket } from "./ticket"
+import { Transaction } from "./transaction"
 
 export enum UserRole {
     User = "user",
@@ -38,8 +39,11 @@ export class User {
     @OneToMany(() => Token, token => token.user)
     tokens: Token[];
 
+    @OneToMany(() => Transaction, transactions => transactions.ticket)
+    transactions: Transaction[];
 
-    constructor(id: number, password: string, role: UserRole,balance: number, email: string, tokens: Token[],tickets: Ticket[]) {
+
+    constructor(id: number, password: string, role: UserRole,balance: number, email: string, tokens: Token[],tickets: Ticket[], transactions: Transaction[]) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -47,5 +51,7 @@ export class User {
         this.balance = balance;
         this.tokens = tokens;
         this.tickets = tickets;
+        this.transactions = transactions;
     }
+
 }

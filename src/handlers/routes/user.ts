@@ -1,16 +1,17 @@
 import express, { Request, Response } from "express"
 import { AppDataSource } from "../../database/database"
 import { compare, hash } from "bcrypt";
-import { createUserValidation, LoginUserValidation } from "../validators/user-validator"
+import { createUserValidation, LoginUserValidation, userIdValidation } from "../validators/user-validator"
 import { generateValidationErrorMessage } from "../validators/generate-validation-message";
 import { User } from "../../database/entities/user";
 import { sign } from "jsonwebtoken";
 import { Token } from "../../database/entities/token";
+import { DataSource, getConnection } from "typeorm";
+import { UserUsecase } from "../../domain/user-usecase";
 
 export const UserHandler = (app: express.Express) => {
     app.post('/auth/signup', async (req: Request, res: Response) => {
         try {
-            console.log(req.body)
             const validationResult = createUserValidation.validate(req.body)
             if (validationResult.error) {
                 res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
@@ -62,7 +63,6 @@ export const UserHandler = (app: express.Express) => {
             }
             
             const secret = process.env.JWT_SECRET ?? "azerty"
-            console.log(secret)
             // generate jwt
             const token = sign({ user_id: user.id, email: user.email }, secret, { expiresIn: '1d' });
             // store un token pour un user
@@ -75,6 +75,35 @@ export const UserHandler = (app: express.Express) => {
         }
     })
 
+    app.delete('/auth/logout/:id', async (req: Request, res: Response) => {
+        try {
+            const validationResult = userIdValidation.validate(req.params)
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+
+            const userId = validationResult.value
+
+            const userRepository = AppDataSource.getRepository(User);
+            const user = await userRepository.findOneBy({ id: userId.id })
+
+            if (user === null) {
+                res.status(404).send({ "error": `user ${userId.id} not found` })
+                return
+            }
+
+            const userUsecase = new UserUsecase(AppDataSource);
+
+            userUsecase.deleteToken(user.id)
+            
+            res.status(201).send({ "message": "logout success" });
+            return
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ "error": "internal error retry later" })
+            return
+        }
+    })
+
 }
-
-

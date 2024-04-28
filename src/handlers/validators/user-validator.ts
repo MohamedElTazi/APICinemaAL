@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { UserRole } from "../../database/entities/user";
 
 export const createUserValidation = Joi.object<CreateUserValidationRequest>({
     email: Joi.string().email().required(),
@@ -9,7 +10,7 @@ export const createUserValidation = Joi.object<CreateUserValidationRequest>({
 export interface CreateUserValidationRequest {
     email: string
     password: string
-    role:string
+    role:UserRole
 }
 
 export const LoginUserValidation = Joi.object<LoginUserValidationRequest>({
@@ -20,4 +21,12 @@ export const LoginUserValidation = Joi.object<LoginUserValidationRequest>({
 export interface LoginUserValidationRequest {
     email: string
     password: string
+}
+
+export const userIdValidation = Joi.object<UserIdRequest>({
+    id: Joi.number().required(),
+})
+
+export interface UserIdRequest {
+    id: number
 }

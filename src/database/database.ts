@@ -1,3 +1,4 @@
+
 import { DataSource } from "typeorm";
 
 
@@ -10,10 +11,12 @@ export const AppDataSource = new DataSource({
     database: "CinemaNode",
     logging: true,
     synchronize: false,
-    entities: [
+    entities:[
         "src/database/entities/*.ts"
     ],
-    migrations: [
-        "src/database/migrations/*.ts"
+    migrations:[
+        process.env.NODE_ENV === "dev" ? "src/database/migrations/*.ts" : "dist/database/migrations/*.js"
     ]
+
+    
 })

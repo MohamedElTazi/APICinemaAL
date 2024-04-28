@@ -27,9 +27,24 @@ export class SalleUsecase {
     async listSalle(listSalleFilter: ListSalleFilter): Promise<{ Salles: Salle[]; totalCount: number; }> {
         console.log(listSalleFilter)
         const query = this.db.createQueryBuilder(Salle, 'Salle')
+
+        if (listSalleFilter.name) {
+            query.andWhere('Salle.name = :name', { name: listSalleFilter.name })
+        }
+        if (listSalleFilter.type) {
+            query.andWhere('Salle.type = :type', { type: listSalleFilter.type })
+        }
+        if (listSalleFilter.access_disabled) {
+            query.andWhere('Salle.access_disabled = :access_disabled', { access_disabled: listSalleFilter.access_disabled })
+        }
+        if (listSalleFilter.maintenance_status) {
+            query.andWhere('Salle.maintenance_status = :maintenance_status', { maintenance_status: listSalleFilter.maintenance_status })
+        }
         if (listSalleFilter.capacityMax) {
             query.andWhere('Salle.capacity <= :capacityMax', { capacityMax: listSalleFilter.capacityMax })
         }
+
+        
         query.skip((listSalleFilter.page - 1) * listSalleFilter.limit)
         query.take(listSalleFilter.limit)
 
@@ -66,7 +81,7 @@ export class SalleUsecase {
         return SalleUpdate
     }
 
-    async getMoviePlanning(startDate:string, endDate:string, id:number): Promise<SelectQueryBuilder<Showtime> | null>{
+    async getSallePlanning(startDate:string, endDate:string, id:number): Promise<SelectQueryBuilder<Showtime> | null>{
 
         let query = this.db.getRepository(Showtime)
         .createQueryBuilder("showtime")
@@ -97,4 +112,5 @@ export class SalleUsecase {
         return query;
 
     }
+
 }

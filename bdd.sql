@@ -25,8 +25,8 @@ CREATE TABLE showtime (
     id INT PRIMARY KEY AUTO_INCREMENT,
     salleId INT NOT NULL REFERENCES salle(id),
     movieId INT NOT NULL REFERENCES movie(id),
-    start_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
-    end_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
+    start_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    end_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     special_notes TEXT
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE user(
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     role ENUM('user', 'administrator') NOT NULL,
-    balance INT DEFAULT 0
+    balance FLOAT DEFAULT 0.0
 );
 
 CREATE TABLE ticket (
@@ -43,7 +43,7 @@ CREATE TABLE ticket (
     userId INT REFERENCES user(id),
     is_used BOOLEAN DEFAULT FALSE,
     is_super BOOLEAN NOT NULL,
-    amount INT NOT NULL, 
+    price INT NOT NULL, 
     nb_tickets INT NOT NULL
 );
 
@@ -58,16 +58,23 @@ CREATE TABLE ticket_showtime_accesses (
 CREATE TABLE transaction (
     id INT PRIMARY KEY AUTO_INCREMENT,
     userId INT REFERENCES user(id),
+    ticketId INT REFERENCES ticket(id),
+    transaction_type ENUM('buy ticket', 'recharge balance', 'withdraw balance') NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
-    transaction_type VARCHAR(50) NOT NULL,
-    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    transaction_date DATE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE employee (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
-    position VARCHAR(100) NOT NULL,
+    id_poste INT NULL,
     working_hours TEXT NOT NULL
+);
+
+CREATE TABLE poste (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL
 );
 
 CREATE TABLE token (
