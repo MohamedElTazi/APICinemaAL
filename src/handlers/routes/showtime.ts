@@ -12,7 +12,7 @@ import { toZonedTime } from "date-fns-tz";
 export const ShowtimeHandler = (app: express.Express) => {
 
     
-    app.post("/showtimes", authMiddlewareAdmin ,async (req: Request, res: Response) => {
+    app.post("/showtimes" ,async (req: Request, res: Response) => {
         const reqBodyStartDatetime = req.body.start_datetime
         req.body.start_datetime = req.body.start_datetime+"Z"
 

@@ -66,6 +66,18 @@ export interface BuyTicketRequest {
     idShowtime?: number
 }
 
+export const useSuperTicketValidation = Joi.object<UseSuperTicketRequest>({
+    id: Joi.number().required(),
+    idTicket: Joi.number().required(),
+    idShowtime: Joi.number().required()
+})
+
+export interface UseSuperTicketRequest {
+    id: number
+    idTicket: number,
+    idShowtime: number
+}
+
 export const transactionIdValidation = Joi.object<TransactionIdRequest>({
     id: Joi.number().required(),
 })

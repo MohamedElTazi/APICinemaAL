@@ -26,10 +26,10 @@ export class Ticket {
         @Column()
         nb_tickets: number;
 
-        @OneToMany(() => TicketShowtimeAccesses, ticket_showtime_accesses => ticket_showtime_accesses.ticket)
+        @OneToMany(() => TicketShowtimeAccesses, ticket_showtime_accesses => ticket_showtime_accesses.ticket, { cascade: true })
         ticket_showtime_accesses: TicketShowtimeAccesses[];
 
-        @OneToMany(() => Transaction, transactions => transactions.ticket)
+        @OneToMany(() => Transaction, transactions => transactions.ticket, { cascade: true })
         transactions: Transaction[];
 
 
@@ -39,8 +39,8 @@ export class Ticket {
             this.is_used = is_used;
             this.is_super = is_super;
             this.nb_tickets = nb_tickets;
+            this.ticket_showtime_accesses = ticket_showtime_accesses
             this.price = price;
-            this.ticket_showtime_accesses = ticket_showtime_accesses;
             this.transactions = transactions;
         }
 }

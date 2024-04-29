@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { generateValidationErrorMessage } from "../validators/generate-validation-message";
 import { AppDataSource } from "../../database/database";
 import {authMiddlewareAdmin, authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
-import { buyTicketValidation, createTransactionValidation, listTransactionValidation, transactionIdValidation, updateMoneyValidation, updateTransactionValidation } from "../validators/transaction-validator";
+import { buyTicketValidation, createTransactionValidation, listTransactionValidation, transactionIdValidation, updateMoneyValidation, updateTransactionValidation, useSuperTicketValidation } from "../validators/transaction-validator";
 import { Transaction } from "../../database/entities/transaction";
 import { TransactionUsecase } from "../../domain/transaction-usecase";
 import { userIdValidation } from "../validators/user-validator";
@@ -151,7 +151,7 @@ export const TransactionHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/transactions/buyTicket/:id" ,async (req: Request, res: Response) => {
+    app.post("/transactions/buyTicket/:id" ,async (req: Request, res: Response) => {
         const validation = buyTicketValidation.validate({...req.params, ...req.body})
 
         if (validation.error) {
@@ -176,16 +176,20 @@ export const TransactionHandler = (app: express.Express) => {
 
 
 
-        const updateMoneyRequest = validation.value
+        const buyTicketRequest = validation.value
 
         try {
             const moneyUsecase = new TransactionUsecase(AppDataSource);
 
-            const response = await moneyUsecase.buyTicket(updateMoneyRequest.id, validation.value.is_super, validation.value.idShowtime)
+            const response = await moneyUsecase.buyTicket(buyTicketRequest.id, validation.value.is_super, validation.value.idShowtime)
         
             if(response === "user not found"){
                 
-                res.status(404).send({ "error": `User ${updateMoneyRequest.id} not found` })
+                res.status(404).send({ "error": `User ${buyTicketRequest.id} not found` })
+                return
+            }
+            else if(response === "showtime not found"){
+                res.status(404).send({ "error": `Showtime ${validation.value.id} not found` })
                 return
             }
             else if(response === "insufficient funds"){
@@ -274,6 +278,7 @@ export const TransactionHandler = (app: express.Express) => {
         }
     })
 
+
     app.delete("/transactions/:id",authMiddlewareAdmin ,async (req: Request, res: Response) => {
         try {
             const validationResult = transactionIdValidation.validate(req.params)
@@ -298,5 +303,58 @@ export const TransactionHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
+
+
+
+
+    app.post("/transactions/useSuperTicket/:id" ,async (req: Request, res: Response) => {
+            const validation = useSuperTicketValidation.validate({...req.params, ...req.body})
+
+        if (validation.error) {
+            res.status(400).send(generateValidationErrorMessage(validation.error.details))
+            return
+        }
+
+        const useSuperTicketRequest = validation.value
+
+        try {
+            const moneyUsecase = new TransactionUsecase(AppDataSource);
+
+            const response = await moneyUsecase.useSuperTicket(useSuperTicketRequest.id, validation.value.idTicket, validation.value.idShowtime)
+        
+            if(response === "user not found"){
+                
+                res.status(400).send({ "error": `User ${useSuperTicketRequest.id} not found` })
+                return
+            }
+            else if(response === "ticket not found"){
+                res.status(400).send({ "error": `Ticket ${validation.value.idTicket} not found` })
+                return
+            }
+            else if(response === "showtime not found"){
+                res.status(400).send({ "error": `Showtime ${validation.value.idShowtime} not found` })
+                return
+            }else if (response === "ticket is already used") {
+                res.status(404).send("Ticket is already used")
+                return
+            }else if(response === "ticket as problem"){
+                res.status(404).send("Ticket as problem")
+                return
+            }else if(response === "ticket is not super"){
+                res.status(404).send("Ticket is not super")
+                return
+            }else if(response === "showtime is outdated"){
+                res.status(404).send("Showtime is outdated")
+                return
+            }
+
+
+            res.status(200).send("Ticket usage completed successfully")
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+
 
 }

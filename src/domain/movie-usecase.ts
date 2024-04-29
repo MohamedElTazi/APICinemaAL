@@ -19,7 +19,6 @@ export interface UpdateMovieParams {
 export class MovieUsecase {
     constructor(private db: DataSource) {}
     async listSalle(listMovieFilter: ListMovieFilter): Promise<{ Movies: Movie[]; totalCount: number; }> {
-        console.log(listMovieFilter)
         const query = this.db.createQueryBuilder(Movie, 'Movie')
         query.skip((listMovieFilter.page - 1) * listMovieFilter.limit)
         query.take(listMovieFilter.limit)

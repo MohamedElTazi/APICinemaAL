@@ -2,11 +2,14 @@ import { DataSource } from "typeorm"
 import { Transaction, TransactionType } from "../database/entities/transaction"
 import { User } from "../database/entities/user"
 import { Ticket } from "../database/entities/ticket"
-import { createTicketValidation } from "../handlers/validators/ticket-validator"
+import { createTicketValidation, ticketIdValidation, updateTicketValidation } from "../handlers/validators/ticket-validator"
 import { createTransactionValidation } from "../handlers/validators/transaction-validator"
 import { createAccessTicketShowTimeAccessesValidation } from "../handlers/validators/ticketShowtimeAccesses-validator"
 import { TicketShowtimeAccesses } from "../database/entities/ticketShowtimeAccesses"
 import { Showtime } from "../database/entities/showtime"
+import e from "express"
+import { number } from "joi"
+import { TicketUsecase } from "./ticket-usecase"
 
 export interface UpdateTransactionParams {
     amount?: number
@@ -107,13 +110,69 @@ export class TransactionUsecase {
 
 
 
+    async useSuperTicket(id: number, idTicket:number, idShowtime:number): Promise<string> {
+
+        const userRepo = this.db.getRepository(User)
+        const Userfound = await userRepo.findOneBy({ id })
+        if (Userfound === null) return "user not found"
+            
+        const ticketRepo = this.db.getRepository(Ticket)
+        const Ticketfound = await ticketRepo.findOneBy({ id: idTicket })
+        if (Ticketfound === null) return "ticket not found"
+
+        const showtimeRepo = this.db.getRepository(Showtime)
+        const Showtimefound = await showtimeRepo.findOneBy({ id: idShowtime })
+        if (Showtimefound === null) return "showtime not found"
+
+
+
+        if(Ticketfound.is_used && Ticketfound.nb_tickets === 0) {
+            console.error('ticket is already used');
+            return "ticket is already used"
+        }else if(Ticketfound.nb_tickets === 0 && !Ticketfound.is_used || Ticketfound.nb_tickets !== 0 && Ticketfound.is_used){
+            console.error('ticket as problem');
+            return "ticket as problem"
+        }
+
+        if(!Ticketfound.is_super){
+            console.error('ticket is not super');
+            return "ticket is not super"
+        }
+
+        if(await this.verifDateShowtime(idShowtime) === 0){
+            console.error('showtime is outdated');
+            return "showtime is outdated"
+        }
+
+        this.creationTicketShowtimeAccesses(idTicket, idShowtime)
+
+        let is_used = false
+        let nb_tickets = Ticketfound.nb_tickets - 1
+        if(Ticketfound.nb_tickets - 1 ===0){
+            is_used = true
+        }
+
+
+
+        this.patchTicket(idTicket, is_used, nb_tickets)
+
+        let response = "ok";
+    
+        return response
+
+    }
     
 
 
     async buyTicket(id: number, is_super:boolean, idShowtime:number): Promise<string> {
-        const repo = this.db.getRepository(User)
-        const Userfound = await repo.findOneBy({ id })
+        const repoUser = this.db.getRepository(User)
+        const Userfound = await repoUser.findOneBy({ id })
         if (Userfound === null) return "user not found"
+
+        const repoShowtime = this.db.getRepository(User)
+        const Showtimefound = await repoShowtime.findOneBy({ id: idShowtime})
+
+        if (Showtimefound === null) return "showtime not found"
 
         let priceTicket;
         let nbTickets
@@ -126,17 +185,16 @@ export class TransactionUsecase {
                 return "showtime is outdated"
             }
             priceTicket = 10
-            nbTickets = 1
+            nbTickets = 0
         }
 
-        console.log("BALANCE",Userfound.balance)
         if(Userfound.balance < priceTicket) {
             console.error('insufficient funds');
             return "insufficient funds"
         }
 
 
-        const creationTicket = await this.creationTicket(id, priceTicket, is_super, false, nbTickets)
+        const creationTicket = await this.creationTicket(id, priceTicket, is_super, true, nbTickets)
         
         await this.transaction("buy ticket", id, priceTicket, is_super, creationTicket as number)
 
@@ -224,6 +282,48 @@ export class TransactionUsecase {
             console.log("TICKET CREATED",ticketCreated)
             
             return ticketCreated.id
+        } catch (error) {
+            console.log(error);
+            return "Internal error" 
+        }
+    }
+
+    async patchTicket(id: number, is_used:boolean, nb_tickets:number): Promise<string | number> {
+        
+        const body =  {
+            is_used: is_used,
+            nb_tickets: nb_tickets
+        }
+
+
+        const validation = updateTicketValidation.validate({ id, ...body })
+
+    
+        if (validation.error) {
+            console.log('Validation error:', validation.error.details)
+            return "Validation error"
+        }
+
+        const UpdateTicketRequest = validation.value
+
+    
+        try {
+            const ticketUsecase = new TicketUsecase(this.db);
+    
+            const updatedTicket = await ticketUsecase.updateTicket(UpdateTicketRequest.id,{ ...UpdateTicketRequest})
+    
+            //console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!UpdateTicketRequest",UpdateTicketRequest)
+
+            //console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!updatedTicket",updatedTicket)
+
+            if (updatedTicket === null) {
+                console.log({ "error": `ticket ${UpdateTicketRequest.id} not found `})
+                return "ticket not found"
+            }
+
+            console.log("TICKET UPDATE",updatedTicket)
+
+            return updatedTicket as string
         } catch (error) {
             console.log(error);
             return "Internal error" 

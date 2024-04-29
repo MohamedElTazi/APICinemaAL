@@ -12,11 +12,14 @@ export interface ListTicketRequest {
     page?: number
     limit?: number
 }
-
 export interface UpdateTicketParams{
-    amount?: number
+    user?: User
+    is_used?: boolean
+    is_super?: boolean
+    price?: number
     nb_tickets?: number
 }
+
 
 export class TicketUsecase {
   
@@ -24,18 +27,48 @@ export class TicketUsecase {
 
 
     async listTickets(listTicketFilter: ListTicketFilter): Promise<{ Tickets: Ticket[], totalCount: number }> {
-            console.log(listTicketFilter)
-            const query = this.db.createQueryBuilder(Ticket, 'Ticket')
-            query.skip((listTicketFilter.page - 1) * listTicketFilter.limit)
-            query.take(listTicketFilter.limit)
+            const query = this.db.createQueryBuilder(Ticket, 'ticket')
+            .leftJoinAndSelect('ticket.user', 'user')
+            .skip((listTicketFilter.page - 1) * listTicketFilter.limit)
+            .take(listTicketFilter.limit);
     
             const [Tickets, totalCount] = await query.getManyAndCount()
             return {
                 Tickets,
                 totalCount
             }
-        }
+    }
 
-//createTicket
-   
+        async updateTicket(id: number, {user,is_used, is_super, price, nb_tickets}: UpdateTicketParams): Promise<Ticket | string |null> {
+
+
+            if(user === undefined && is_used === undefined && is_super === undefined && price === undefined && nb_tickets === undefined) return "No data to update"
+
+
+            const repo = this.db.getRepository(Ticket)
+            const ticketToUpdate = await repo.findOneBy({id})
+            if (ticketToUpdate === null) return null
+        
+            if(user !== null && user !== undefined){
+                ticketToUpdate.user = user;
+            }
+            if(is_used !== null && is_used !== undefined){
+                ticketToUpdate.is_used = is_used;
+            }
+            if(is_super !== null && is_super !== undefined){
+                ticketToUpdate.is_super = is_super;
+            }
+            if(price !== null && price !== undefined){
+                ticketToUpdate.price = price;
+            }
+            if(nb_tickets !== null && nb_tickets !== undefined){
+                ticketToUpdate.nb_tickets = nb_tickets;
+            }
+            console.log("////////////////////",ticketToUpdate.nb_tickets)
+
+            console.log(ticketToUpdate)
+            const TicketUpdated = await repo.save(ticketToUpdate)
+            return TicketUpdated
+        }
+    
 }

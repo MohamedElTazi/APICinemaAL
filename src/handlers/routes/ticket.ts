@@ -1,6 +1,6 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { listTicketValidation,createTicketValidation } from "../validators/ticket-validator";
+import { listTicketValidation,createTicketValidation, ticketIdValidation, updateTicketValidation } from "../validators/ticket-validator";
 import { generateValidationErrorMessage } from '../validators/generate-validation-message';
 import { AppDataSource } from '../../database/database';
 import { Ticket } from "../../database/entities/ticket";
@@ -75,4 +75,99 @@ export const TicketHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
+
+
+    app.get("/tickets/:id", async (req: Request, res: Response) => {
+        try {
+            const validationResult = ticketIdValidation.validate(req.params)
+    
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+            const ticketId = validationResult.value
+    
+            const ticketRepository = AppDataSource.getRepository(Ticket)
+            const ticket = await ticketRepository.findOneBy({ id: ticketId.id })
+            if (ticket === null) {
+                res.status(404).send({ "error": `ticket ${ticketId.id} not found` })
+                return
+            }
+            res.status(200).send(ticket)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+    
+    app.patch("/tickets/:id", async (req: Request, res: Response) => {
+    
+        const validation = updateTicketValidation.validate({ ...req.params, ...req.body })
+    
+        if (validation.error) {
+            res.status(400).send(generateValidationErrorMessage(validation.error.details))
+            return
+        }
+    
+        const UpdateticketRequest = validation.value
+    
+        try {
+            const ticketUsecase = new TicketUsecase(AppDataSource);
+    
+            const validationResult = ticketIdValidation.validate(req.params)
+    
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+    
+    
+            const updatedTicket = await ticketUsecase.updateTicket(UpdateticketRequest.id,{ ...UpdateticketRequest})
+    
+            if (updatedTicket === null) {
+                res.status(404).send({ "error": `ticket ${UpdateticketRequest.id} not found `})
+                return
+            }
+
+            
+            if(updatedTicket === "No data to update"){
+                res.status(400).send({ "error": `No data to update`})
+                return
+            }
+    
+    
+            res.status(200).send(updatedTicket)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+    
+
+    
+    app.delete("/tickets/:id", async (req: Request, res: Response) => {
+        try {
+            const validationResult = ticketIdValidation.validate(req.params)
+    
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+            const ticketId = validationResult.value
+    
+            const MovieRepository = AppDataSource.getRepository(Ticket)
+            const ticket = await MovieRepository.findOneBy({ id: ticketId.id })
+            if (ticket === null) {
+                res.status(404).send({ "error": `ticket  ${ticketId.id} not found` })
+                return
+            }
+    
+            await MovieRepository.remove(ticket)
+            res.status(200).send("Successfully deleted")
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+
 };

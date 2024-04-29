@@ -23,19 +23,38 @@ export interface CreateTicketValidationRequest {
 }
 
 
-// Validation pour récupérer les billets d'un utilisateur
-export const userTicketValidation = Joi.object({
-    userId: Joi.number().integer().required(),
-}).required();
-
 export const listTicketValidation = Joi.object<ListTicketRequest>({
     page: Joi.number().min(1).optional(),
     limit: Joi.number().min(1).optional(),
-  
 })
 
 export interface ListTicketRequest {
     page?: number
     limit?: number
- 
+}
+
+export const updateTicketValidation = Joi.object<UpdateTicketRequest>({
+    id: Joi.number().integer().required(),
+    user: Joi.number().integer().optional(),
+    is_used: Joi.boolean().optional(),
+    is_super: Joi.boolean().optional(),
+    price: Joi.number().optional(),
+    nb_tickets: Joi.number().optional()
+})
+
+export interface UpdateTicketRequest {
+    id: number
+    user?: User
+    is_used?: boolean
+    is_super?: boolean
+    price?: number
+    nb_tickets?: number
+}
+
+export const ticketIdValidation = Joi.object<TicketIdRequest>({
+    id: Joi.number().required(),
+})
+
+export interface TicketIdRequest {
+    id: number
 }
