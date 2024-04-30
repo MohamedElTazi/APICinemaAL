@@ -15,14 +15,16 @@ export interface AccessTicketShowTimeAccessesRequest {
 export const listAccessTicketShowTimeAccessesValidation = Joi.object<ListAccessTicketShowTimeAccessesRequest>({
     page: Joi.number().min(1).optional(),
     limit: Joi.number().min(1).optional(),
-  
+    ticket: Joi.number().optional(),
+    showtime: Joi.number().optional(),
 })
 
 
 export interface ListAccessTicketShowTimeAccessesRequest {
     page?: number
     limit?: number
- 
+    ticket?:number
+    showtime?:number
 }
 
 export const updateTicketAccesValidation = Joi.object<UpdateTicketAccesRequest>({

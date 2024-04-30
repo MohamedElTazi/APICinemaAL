@@ -134,8 +134,8 @@ export const ShowtimeHandler = (app: express.Express) => {
             }
             const showtimeId = validationResult.value
 
-            const showtimeRepository = AppDataSource.getRepository(Showtime)
-            const showtime = await showtimeRepository.findOneBy({ id: showtimeId.id })
+            const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
+            const showtime = await showtimeUsecase.getOneShowtime(showtimeId.id)
             if (showtime === null) {
                 res.status(404).send({ "error": `showtime ${showtimeId.id} not found` })
                 return

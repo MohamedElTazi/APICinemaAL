@@ -26,11 +26,21 @@ export interface CreateTicketValidationRequest {
 export const listTicketValidation = Joi.object<ListTicketRequest>({
     page: Joi.number().min(1).optional(),
     limit: Joi.number().min(1).optional(),
+    user: Joi.number().optional(),
+    is_used: Joi.boolean().optional(),
+    is_super: Joi.boolean().optional(),
+    price: Joi.number().optional(),
+    nb_tickets: Joi.number().optional()
 })
 
 export interface ListTicketRequest {
     page?: number
     limit?: number
+    user?: number;
+    is_used?: boolean;
+    is_super?: boolean;
+    price?: number;
+    nb_tickets?: number;
 }
 
 export const updateTicketValidation = Joi.object<UpdateTicketRequest>({

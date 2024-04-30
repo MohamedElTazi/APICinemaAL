@@ -9,7 +9,6 @@ export const TicketHandler = (app: express.Express) => {
 
     app.get("/tickets", async (req: Request, res: Response) => {
         try {
-            // Validation de la requête
             const validation = listTicketValidation.validate(req.query);
 
             if (validation.error) {
@@ -17,32 +16,21 @@ export const TicketHandler = (app: express.Express) => {
                 res.status(400).send(generateValidationErrorMessage(validation.error.details));
                 return;
             }
-
-            // Diagnostic : affiche les valeurs des variables
-            console.log('Requête valide:', req.query);
             
             const listMovieRequest = validation.value;
             let limit = 20;
             if (listMovieRequest.limit) {
                 limit = listMovieRequest.limit;
-                console.log('Limite:', limit);
             }
             const page = listMovieRequest.page ?? 1;
-            console.log('Page:', page);
 
-            // Création de l'instance de TicketUsecase
             const ticketUsecase = new TicketUsecase(AppDataSource);
-            console.log('TicketUsecase créé.');
 
-            // Appel de la méthode listTickets
             const listTickets = await ticketUsecase.listTickets({ ...listMovieRequest, page, limit });
-            console.log('ListTickets récupéré:', listTickets);
             
-            // Envoi de la réponse
             res.status(200).send(listTickets);
 
         } catch (error) {
-            // Gestion des erreurs
             console.log('Erreur lors de la récupération des tickets:', error);
             res.status(500).send({ error: 'Internal server error' });
         }
@@ -87,12 +75,14 @@ export const TicketHandler = (app: express.Express) => {
             }
             const ticketId = validationResult.value
     
-            const ticketRepository = AppDataSource.getRepository(Ticket)
-            const ticket = await ticketRepository.findOneBy({ id: ticketId.id })
+            const ticketUsecase = new TicketUsecase(AppDataSource);
+            const ticket = await ticketUsecase.getOneTicket(ticketId.id)
+
             if (ticket === null) {
                 res.status(404).send({ "error": `ticket ${ticketId.id} not found` })
                 return
             }
+
             res.status(200).send(ticket)
         } catch (error) {
             console.log(error)

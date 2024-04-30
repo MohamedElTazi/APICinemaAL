@@ -49,24 +49,26 @@ export class TransactionUsecase {
 
 
    async listTransaction(listTransactionFilter: ListTransactionFilter): Promise<{ Transactions: Transaction[]; totalCount: number; }> {
-    const query = this.db.createQueryBuilder(Transaction, 'Transaction')
+    const query = this.db.createQueryBuilder(Transaction, 'transaction')
     if(listTransactionFilter.user){
-        query.andWhere('Transaction.userId = :user', { user: listTransactionFilter.user })
+        query.andWhere('transaction.userId = :user', { user: listTransactionFilter.user })
     }
     if(listTransactionFilter.ticket){
-        query.andWhere('Transaction.ticketId = :ticket', { ticket: listTransactionFilter.ticket })
+        query.andWhere('transaction.ticketId = :ticket', { ticket: listTransactionFilter.ticket })
     }
     if(listTransactionFilter.transaction_type){
-        query.andWhere('Transaction.transaction_type = :transaction_type', { transaction_type: listTransactionFilter.transaction_type })
+        query.andWhere('transaction.transaction_type = :transaction_type', { transaction_type: listTransactionFilter.transaction_type })
     }
     if (listTransactionFilter.amount) {
-        query.andWhere('Transaction.amount <= :amount', { capacityMax: listTransactionFilter.amount })
+        query.andWhere('transaction.amount <= :amount', { capacityMax: listTransactionFilter.amount })
     }
     if(listTransactionFilter.transaction_date){
-        query.andWhere('Transaction.transaction_date = :transaction_date', { transaction_date: listTransactionFilter.transaction_date })
+        query.andWhere('transaction.transaction_date = :transaction_date', { transaction_date: listTransactionFilter.transaction_date })
     }
-    query.skip((listTransactionFilter.page - 1) * listTransactionFilter.limit)
-    query.take(listTransactionFilter.limit)
+    query.leftJoinAndSelect('transaction.user', 'user')
+    .leftJoinAndSelect('transaction.ticket', 'ticket')
+    .skip((listTransactionFilter.page - 1) * listTransactionFilter.limit)
+    .take(listTransactionFilter.limit)
 
     const [Transactions, totalCount] = await query.getManyAndCount()
     return {
@@ -75,6 +77,21 @@ export class TransactionUsecase {
     }
 }
 
+async getOneTransaction(id: number): Promise<Transaction | null> {
+    const repo = this.db.getRepository(Transaction)
+    const query = repo.createQueryBuilder("transaction")
+    .leftJoinAndSelect('transaction.user', 'user')
+    .leftJoinAndSelect('transaction.ticket', 'ticket')
+    .where("transaction.id = :id", { id: id });
+
+    const transaction = await query.getOne();
+
+    if (!transaction) {
+        console.log({ error: `Transaction ${id} not found` });
+        return null;
+    }
+    return transaction
+}
 
     async transaction(typeUpdate:string, id: number, amount : number, is_super:boolean, ticketId:number): Promise<User | null> {
         const repo = this.db.getRepository(User)

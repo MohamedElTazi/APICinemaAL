@@ -10,7 +10,6 @@ export const ticketShowtimeAccessessHandler = (app: express.Express) => {
 
     app.get("/ticketShowtimeAccesses", async (req: Request, res: Response) => {
         try {
-            // Validation de la requête
             const validation = listAccessTicketShowTimeAccessesValidation.validate(req.query);
 
             if (validation.error) {
@@ -20,13 +19,11 @@ export const ticketShowtimeAccessessHandler = (app: express.Express) => {
             }
 
             
-            console.log('Requête valide:', req.query);
             
             const listAcessTicketTicketShowTimeRequest = validation.value;
             let limit = 20;
             if (listAcessTicketTicketShowTimeRequest.limit) {
                 limit = listAcessTicketTicketShowTimeRequest.limit;
-                console.log('Limite:', limit);
             }
             const page = listAcessTicketTicketShowTimeRequest.page ?? 1;
           
@@ -56,13 +53,13 @@ export const ticketShowtimeAccessessHandler = (app: express.Express) => {
             }
             const ticketAccessId = validationResult.value
     
-            const ticketRepository = AppDataSource.getRepository(TicketShowtimeAccesses)
-            const ticket = await ticketRepository.findOneBy({ id: ticketAccessId.id })
-            if (ticket === null) {
-                res.status(404).send({ "error": `ticket ${ticketAccessId.id} not found` })
+            const ticketAccesUsecase = new TicketAccesUsecase(AppDataSource);
+            const ticketAcces = await ticketAccesUsecase.getOneTicketAcces(ticketAccessId.id )
+            if (ticketAcces === null) {
+                res.status(404).send({ "error": `ticketAcces ${ticketAccessId.id} not found` })
                 return
             }
-            res.status(200).send(ticket)
+            res.status(200).send(ticketAcces)
         } catch (error) {
             console.log(error)
             res.status(500).send({ error: "Internal error" })

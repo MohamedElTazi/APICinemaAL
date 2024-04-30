@@ -10,7 +10,7 @@ import { User } from "../../database/entities/user";
 
 export const TransactionHandler = (app: express.Express) => {
 
-    app.post("/transactions", authMiddlewareAll ,async (req: Request, res: Response) => {
+    app.post("/transactions" ,async (req: Request, res: Response) => {
         const validation = createTransactionValidation.validate(req.body)
 
         if (validation.error) {
@@ -74,8 +74,8 @@ export const TransactionHandler = (app: express.Express) => {
             }
             const transactionId = validationResult.value
 
-            const transactionRepository = AppDataSource.getRepository(Transaction)
-            const transaction = await transactionRepository.findOneBy({ id: transactionId.id })
+            const transactionUsecase = new TransactionUsecase(AppDataSource);
+            const transaction = await transactionUsecase.getOneTransaction(transactionId.id)
             if (transaction === null) {
                 res.status(404).send({ "error": `transaction ${transactionId.id} not found` })
                 return

@@ -33,13 +33,21 @@ export interface CreateShowtimeValidationRequest {
 export const listShowtimeValidation = Joi.object<ListShowtimeRequest>({
     page: Joi.number().min(1).optional(),
     limit: Joi.number().min(1).optional(),
-    capacityMax: Joi.number().min(1).optional()
+    salle: Joi.number().optional(),
+    movie: Joi.number().optional(),
+    start_datetime: Joi.date().optional(),
+    end_datetime: Joi.date().optional(),
+    special_notes: Joi.string().optional()
 })
 
 export interface ListShowtimeRequest {
-    page?: number
     limit?: number
-    capacityMax?: number
+    page?: number
+    salle?: number;
+    movie?: number;
+    start_datetime?: Date;  // Date et heure de début
+    end_datetime?: Date;  // Date et heure de fin
+    special_notes?: string;
 }
 
 

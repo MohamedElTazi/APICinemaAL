@@ -7,11 +7,13 @@ import { TicketShowtimeAccesses } from '../database/entities/ticketShowtimeAcces
 export interface ListTicketFilter {
     page: number
     limit: number
+    user?: number;
+    is_used?: boolean;
+    is_super?: boolean;
+    price?: number;
+    nb_tickets?: number;
 }
-export interface ListTicketRequest {
-    page?: number
-    limit?: number
-}
+
 export interface UpdateTicketParams{
     user?: User
     is_used?: boolean
@@ -26,18 +28,56 @@ export class TicketUsecase {
     constructor(private readonly db: DataSource) {}
 
 
-    async listTickets(listTicketFilter: ListTicketFilter): Promise<{ Tickets: Ticket[], totalCount: number }> {
-            const query = this.db.createQueryBuilder(Ticket, 'ticket')
-            .leftJoinAndSelect('ticket.user', 'user')
-            .skip((listTicketFilter.page - 1) * listTicketFilter.limit)
-            .take(listTicketFilter.limit);
-    
-            const [Tickets, totalCount] = await query.getManyAndCount()
-            return {
-                Tickets,
-                totalCount
+        async listTickets(listTicketFilter: ListTicketFilter): Promise<{ Tickets: Ticket[], totalCount: number }> {
+                const query = this.db.createQueryBuilder(Ticket, 'ticket')
+
+                if(listTicketFilter.user){
+                    query.andWhere('ticket.user = :user', { user: listTicketFilter.user })
+                }
+
+                if(listTicketFilter.is_used !== undefined){
+                    query.andWhere('ticket.is_used = :is_used', { is_used: listTicketFilter.is_used })
+                }
+
+                if(listTicketFilter.is_super !== undefined){
+                    query.andWhere('ticket.is_super = :is_super', { is_super: listTicketFilter.is_super })
+                }
+
+                if(listTicketFilter.price !== undefined){
+                    query.andWhere('ticket.price = :price', { price: listTicketFilter.price })
+                }
+
+                if(listTicketFilter.nb_tickets !== undefined){
+                    query.andWhere('ticket.nb_tickets = :nb_tickets', { nb_tickets: listTicketFilter.nb_tickets })
+                }
+                
+                query.leftJoinAndSelect('ticket.user', 'user')
+                .skip((listTicketFilter.page - 1) * listTicketFilter.limit)
+                .take(listTicketFilter.limit);
+        
+                const [Tickets, totalCount] = await query.getManyAndCount()
+                return {
+                    Tickets,
+                    totalCount
+                }
+        }
+
+        async getOneTicket(id: number): Promise<Ticket | null> {
+            const repo = this.db.getRepository(Ticket)
+            const query = repo.createQueryBuilder("ticket")
+            .leftJoinAndSelect("ticket.user", "user") // Effectuer une jointure avec la table des utilisateurs
+            .where("ticket.id = :id", { id: id });
+
+            // Exécuter la requête et récupérer le ticket avec les détails de l'utilisateur
+            const ticket = await query.getOne();
+
+            // Vérifier si le ticket existe
+            if (!ticket) {
+                console.log({ error: `Ticket ${id} not found` });
+                return null;
             }
-    }
+            return ticket
+        }
 
         async updateTicket(id: number, {user,is_used, is_super, price, nb_tickets}: UpdateTicketParams): Promise<Ticket | string |null> {
 
@@ -64,9 +104,7 @@ export class TicketUsecase {
             if(nb_tickets !== null && nb_tickets !== undefined){
                 ticketToUpdate.nb_tickets = nb_tickets;
             }
-            console.log("////////////////////",ticketToUpdate.nb_tickets)
 
-            console.log(ticketToUpdate)
             const TicketUpdated = await repo.save(ticketToUpdate)
             return TicketUpdated
         }
