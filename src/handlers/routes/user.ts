@@ -6,7 +6,6 @@ import { generateValidationErrorMessage } from "../validators/generate-validatio
 import { User } from "../../database/entities/user";
 import { sign } from "jsonwebtoken";
 import { Token } from "../../database/entities/token";
-import { DataSource, getConnection } from "typeorm";
 import { UserUsecase } from "../../domain/user-usecase";
 
 export const UserHandler = (app: express.Express) => {
@@ -23,12 +22,14 @@ export const UserHandler = (app: express.Express) => {
 
             const userRepository = AppDataSource.getRepository(User);
             const user = await userRepository.save({
+                firstname: createUserRequest.firstname,
+                lastname: createUserRequest.lastname,
                 email: createUserRequest.email,
                 password: hashedPassword,
                 role: req.body.role
             });
 
-            res.status(201).send({ id: user.id, email: user.email, role: user.role });
+            res.status(201).send({ id: user.id, firstname:user.firstname, lastname:user.lastname, email: user.email, role: user.role });
             return
         } catch (error) {
             console.log(error)
@@ -105,5 +106,51 @@ export const UserHandler = (app: express.Express) => {
             return
         }
     })
+
+
+    app.get("/users/infos" ,async (req: Request, res: Response) => {
+
+        const userUsecase = new UserUsecase(AppDataSource);
+
+        const query = await userUsecase.getUsersInfos();
+
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }
+
+        try {
+            res.status(200).send(query);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
+    app.get("/users/infos/:id", async (req: Request, res: Response) => {
+        try {
+            const validationResult = userIdValidation.validate(req.params)
+    
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+            const userId = validationResult.value
+    
+            const userUsecase = new UserUsecase(AppDataSource);
+
+            const user = await userUsecase.getUserInfos(userId.id);
+            if (user === null) {
+                res.status(404).send({ "error": `movie ${userId.id} not found` })
+                return
+            }
+            res.status(200).send(user)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+
+    
 
 }

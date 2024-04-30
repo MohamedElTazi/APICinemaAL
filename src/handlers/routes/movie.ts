@@ -83,6 +83,31 @@ export const MovieHandler = (app: express.Express) => {
     });
 
 
+
+    app.get("/movies/available/" ,async (req: Request, res: Response) => {
+
+
+        const movieUsecase = new MovieUsecase(AppDataSource);
+
+        const query = await movieUsecase.getMovieAvailable();
+
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }
+
+        try {
+            const movieAvailable = await query.orderBy("showtime.start_datetime", "ASC").getMany();
+
+            res.status(200).send(movieAvailable);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
+
+
     app.post("/movies", async (req: Request, res: Response) => {
         const validation = createMovieValidation.validate(req.body)
     

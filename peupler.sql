@@ -13,14 +13,14 @@ INSERT INTO movie (title, description, duration, genre) VALUES
 
 -- Insertion dans la table showtime
 INSERT INTO showtime (salleId, movieId, start_datetime, end_datetime, special_notes) VALUES
-(1, 1, '2024-04-10 14:00:00', '2024-04-10 16:00:00', ''),
-(2, 2, '2024-04-10 17:00:00', '2024-04-10 19:00:00', 'Séance avec sous-titres pour sourds et malentendants'),
-(3, 3, '2024-04-11 20:00:00', '20240411225000', '');
+(1, 1, '2024-03-10 14:00:00', '2024-03-10 16:00:00', ''),
+(2, 2, '2024-05-10 17:00:00', '2024-05-10 19:00:00', 'Séance avec sous-titres pour sourds et malentendants'),
+(3, 3, '2024-05-11 20:00:00', '2024-05-11-20:00:00', '');
 
-INSERT INTO user (email, password, role, balance) VALUES
-('user1@example.com', '$2b$10$LKHQLFbLHw7md6jS9UIbxOGRVUV.c/4skjqzhPuEOdgHxqhvgaC2W', 'user', 100), /* password: password1 */
-('admin@example.com', '$2b$10$ZoAnhqUHS7sShkq/7fLS9.2iTlQ.z./yIAThCiNPj7vLWlrVsLDv6', 'administrator', 0), /* password: password2 */
-('user2@example.com', '$2b$10$lf2XD4g1HRdAK2Zy6DZj.uZOsIz4eiAIcG0fo5716A6JayQO6FOLa', 'user', 50); /* password: password3 */
+INSERT INTO user (firstname, lastname,email, password, role, balance) VALUES
+('Antoine', 'Dufour','user1@example.com', '$2b$10$LKHQLFbLHw7md6jS9UIbxOGRVUV.c/4skjqzhPuEOdgHxqhvgaC2W', 'user', 100), /* password: password1 */
+('Mehdi','Bellil','admin@example.com', '$2b$10$ZoAnhqUHS7sShkq/7fLS9.2iTlQ.z./yIAThCiNPj7vLWlrVsLDv6', 'administrator', 0), /* password: password2 */
+('Ines','Zemouche','user2@example.com', '$2b$10$lf2XD4g1HRdAK2Zy6DZj.uZOsIz4eiAIcG0fo5716A6JayQO6FOLa', 'user', 50); /* password: password3 */
 
 INSERT INTO ticket (userId, is_used, is_super,price ,nb_tickets) VALUES
 (1, FALSE, FALSE, 10,1),
@@ -62,4 +62,38 @@ SELECT COUNT(*)
 FROM showtime 
 WHERE start_datetime <= 'nouvelle_fin_plage_horaire' 
 AND DATE_ADD(end_datetime, INTERVAL 30 MINUTE) >= 'nouvelle_debut_plage_horaire';
-AND salleId = 'id_salle';*/
+AND salleId = 'id_salle';
+
+
+SELECT
+    u.id AS user_id,
+    u.firstname,
+    u.lastname,
+    u.email,
+    u.role,
+    u.balance,
+    COUNT(DISTINCT t.id) AS total_tickets,
+    SUM(CASE WHEN t.is_used = TRUE THEN 1 ELSE 0 END) AS tickets_used,
+    SUM(t.nb_tickets) AS total_tickets_purchased,
+    COUNT(DISTINCT ts.id) AS total_ticket_showtime_accesses,
+    COUNT(DISTINCT tr.id) AS total_transactions,
+    GROUP_CONCAT(DISTINCT m.title ORDER BY m.title ASC SEPARATOR ', ') AS movies_watched,
+    GROUP_CONCAT(DISTINCT CONCAT(s.id, ':', s.start_datetime, '-', s.end_datetime) ORDER BY s.id ASC SEPARATOR ', ') AS showtimes_info
+FROM
+    user u
+LEFT JOIN
+    ticket t ON u.id = t.userId
+LEFT JOIN
+    ticket_showtime_accesses ts ON t.id = ts.ticketId
+LEFT JOIN
+    transaction tr ON u.id = tr.userId
+LEFT JOIN
+    showtime s ON ts.showtimeId = s.id
+LEFT JOIN
+    movie m ON s.movieId = m.id
+GROUP BY
+    u.id;
+
+
+*/
+

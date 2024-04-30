@@ -76,5 +76,29 @@ export class MovieUsecase {
         return query;
 
     }
+
+    async getMovieAvailable(): Promise<SelectQueryBuilder<Showtime> | null>{
+
+        let query = this.db.getRepository(Showtime)
+        .createQueryBuilder("showtime")
+        .leftJoinAndSelect("showtime.salle", "salle")
+        .leftJoinAndSelect("showtime.movie", "movie")
+        .select([
+            "salle.id",
+            "salle.name",
+            "salle.description",
+            "salle.type",
+            "movie.title",
+            "movie.description",
+            "showtime.start_datetime",
+            "showtime.end_datetime",
+            "showtime.special_notes"
+        ])
+        .where("salle.maintenance_status = false")
+        .andWhere("showtime.start_datetime >= NOW()");
+
+        return query;
+
+    }
     
 }

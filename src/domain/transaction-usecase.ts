@@ -328,10 +328,6 @@ async getOneTransaction(id: number): Promise<Transaction | null> {
             const ticketUsecase = new TicketUsecase(this.db);
     
             const updatedTicket = await ticketUsecase.updateTicket(UpdateTicketRequest.id,{ ...UpdateTicketRequest})
-    
-            //console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!UpdateTicketRequest",UpdateTicketRequest)
-
-            //console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!updatedTicket",updatedTicket)
 
             if (updatedTicket === null) {
                 console.log({ "error": `ticket ${UpdateTicketRequest.id} not found `})

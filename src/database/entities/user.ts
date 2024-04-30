@@ -15,6 +15,12 @@ export class User {
     @PrimaryGeneratedColumn()
     id: number
 
+    @Column()
+    firstname: string
+    
+    @Column()
+    lastname: string
+
     @Column({
         unique: true
     })
@@ -43,8 +49,10 @@ export class User {
     transactions: Transaction[];
 
 
-    constructor(id: number, password: string, role: UserRole,balance: number, email: string, tokens: Token[],tickets: Ticket[], transactions: Transaction[]) {
+    constructor(id: number, firstname:string, lastname:string ,password: string, role: UserRole,balance: number, email: string, tokens: Token[],tickets: Ticket[], transactions: Transaction[]) {
         this.id = id;
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.role = role;

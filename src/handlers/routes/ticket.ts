@@ -36,6 +36,53 @@ export const TicketHandler = (app: express.Express) => {
         }
     });
 
+    app.get("/tickets/infos" ,async (req: Request, res: Response) => {
+
+        const ticketUsecase = new TicketUsecase(AppDataSource);
+
+        const query = await ticketUsecase.getTicketsInfos();
+
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }
+
+        try {
+            res.status(200).send(query);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
+    app.get("/tickets/infos/:id", async (req: Request, res: Response) => {
+        try {
+            const validationResult = ticketIdValidation.validate(req.params)
+    
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+            const ticketId = validationResult.value;
+
+            const ticketUsecase = new TicketUsecase(AppDataSource);
+
+            let ticket = await ticketUsecase.getTicketInfos(ticketId.id);
+            if (ticket === null) {
+                res.status(404).send({ "error": `movie ${ticketId.id} not found` });
+                return;
+            }
+
+            if (ticket.length === 0) {
+                const ticketUsecase = new TicketUsecase(AppDataSource);
+                ticket = await ticketUsecase.getOneTicket(ticketId.id)
+            }
+            res.status(200).send(ticket);
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
 
     app.post("/tickets", async (req: Request, res: Response) => {
         const validation = createTicketValidation.validate(req.body)

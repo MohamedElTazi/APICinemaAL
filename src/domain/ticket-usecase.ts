@@ -108,5 +108,83 @@ export class TicketUsecase {
             const TicketUpdated = await repo.save(ticketToUpdate)
             return TicketUpdated
         }
+
+            
+    async getTicketsInfos(): Promise<any | null>{
+
+        const entityManager = this.db.getRepository(User);
+
+        const sqlQuery = `
+        SELECT 
+            ticket.id, 
+            ticket.is_used, 
+            ticket.is_super, 
+            ticket.price, 
+            ticket.nb_tickets, 
+            movie.title, 
+            showtime.start_datetime, 
+            showtime.end_datetime, 
+            showtime.special_notes 
+        FROM 
+            ticket 
+        INNER JOIN 
+            ticket_showtime_accesses 
+        ON 
+            ticket.id = ticket_showtime_accesses.ticketId 
+        INNER JOIN 
+            showtime 
+        ON 
+            showtime.id = ticket_showtime_accesses.showtimeId 
+        INNER JOIN 
+            movie 
+        ON 
+            movie.id = showtime.movieId;
+        `;
+        
+        const tickets = await entityManager.query(sqlQuery);
+        
+        return tickets;
+
+    }
+
+
+    async getTicketInfos(id: number): Promise<any | null> {
+        const entityManager = this.db.getRepository(User);
+    
+        const sqlQuery = `
+        SELECT 
+            ticket.id, 
+            ticket.is_used, 
+            ticket.is_super, 
+            ticket.price, 
+            ticket.nb_tickets, 
+            movie.title, 
+            showtime.start_datetime, 
+            showtime.end_datetime, 
+            showtime.special_notes 
+        FROM 
+            ticket 
+        INNER JOIN 
+            ticket_showtime_accesses 
+        ON 
+            ticket.id = ticket_showtime_accesses.ticketId 
+        INNER JOIN 
+            showtime 
+        ON 
+            showtime.id = ticket_showtime_accesses.showtimeId 
+        INNER JOIN 
+            movie 
+        ON 
+            movie.id = showtime.movieId
+        WHERE ticket.id = ?;
+        `;
+    
+        const ticket = await entityManager.query(sqlQuery, [id]);
+    
+        return ticket;
+    }
+    
+
+
     
 }
