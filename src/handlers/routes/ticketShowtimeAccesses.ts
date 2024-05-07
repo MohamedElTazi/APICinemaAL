@@ -6,7 +6,7 @@ import { accessTicketValidation, createAccessTicketShowTimeAccessesValidation, l
 import { TicketAccesUsecase } from "../../domain/ticketShowtimeAccesses-usecase";
 
 
-export const ticketShowtimeAccessessHandler = (app: express.Express) => {
+export const TicketShowtimeAccessessHandler = (app: express.Express) => {
 
     app.get("/ticketShowtimeAccesses", async (req: Request, res: Response) => {
         try {

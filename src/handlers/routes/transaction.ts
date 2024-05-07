@@ -159,6 +159,17 @@ export const TransactionHandler = (app: express.Express) => {
             return
         }
 
+        const userId = validation.value.id
+    
+        const UserRepository = AppDataSource.getRepository(User)
+        const user = await UserRepository.findOneBy({ id: userId })
+        if (user === null) {
+            res.status(404).send({ "error": `user ${userId} not found` })
+            return
+        }else if(user.role !== "user"){
+            res.status(400).send("error: user only can buy ticket")
+            return
+        }
 
 
         if(validation.value.idShowtime !== undefined && validation.value.is_super ===true){

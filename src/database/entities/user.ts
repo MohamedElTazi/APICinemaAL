@@ -45,7 +45,7 @@ export class User {
     @OneToMany(() => Token, token => token.user)
     tokens: Token[];
 
-    @OneToMany(() => Transaction, transactions => transactions.ticket)
+    @OneToMany(() => Transaction, transactions => transactions.user)
     transactions: Transaction[];
 
 

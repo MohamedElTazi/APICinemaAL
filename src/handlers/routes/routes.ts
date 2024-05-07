@@ -7,7 +7,8 @@ import { ShowtimeHandler } from "./showtime";
 import { PosteHandler } from "./poste";
 import { TransactionHandler } from "./transaction";
 import { TicketHandler } from "./ticket";
-import { ticketShowtimeAccessessHandler } from "./ticketShowtimeAccesses";
+import { TicketShowtimeAccessessHandler } from "./ticketShowtimeAccesses";
+import { StatisticHandler } from "./statistic";
 
 export const initRoutes = (app: express.Express) => {
 
@@ -23,7 +24,8 @@ export const initRoutes = (app: express.Express) => {
     ShowtimeHandler(app)
     TransactionHandler(app)
     TicketHandler(app)
-    ticketShowtimeAccessessHandler(app)
+    TicketShowtimeAccessessHandler(app)
+    StatisticHandler(app)
     
 
     app.use(invalidPathHandler);
