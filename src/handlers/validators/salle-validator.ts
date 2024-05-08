@@ -26,6 +26,9 @@ export interface ListSalleRequest {
     capacityMax?: number
 }
 
+
+
+
 export const salleIdValidation = Joi.object<SalleIdRequest>({
     id: Joi.number().required(),
 })
@@ -58,6 +61,7 @@ export interface UpdateSalleMaintenanceRequest {
 export const sallePlanningValidation = Joi.object<SallePlanningRequest>({
     startDate : Joi.date().optional(),
     endDate: Joi.date().optional(),
+
 })
 
 export interface SallePlanningRequest {

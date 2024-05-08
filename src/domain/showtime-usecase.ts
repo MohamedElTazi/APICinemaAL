@@ -1,4 +1,4 @@
-import { createQueryBuilder, DataSource, SelectQueryBuilder } from "typeorm";
+import {DataSource, SelectQueryBuilder } from "typeorm";
 import { Showtime } from "../database/entities/showtime";
 import { Movie } from "../database/entities/movie";
 import { AppDataSource } from "../database/database";
@@ -9,11 +9,11 @@ import { TicketShowtimeAccesses } from "../database/entities/ticketShowtimeAcces
 export interface ListShowtimeFilter {
     limit: number
     page: number
-    name?:string
-    type?:string
-    access_disabled?:boolean
-    maintenance_status?:boolean
-    capacityMax?: number
+    salle?: number;
+    movie?: number;
+    start_datetime?: Date;  // Date et heure de début
+    end_datetime?: Date;  // Date et heure de fin
+    special_notes?: string;
 }
 
 export interface UpdateShowtimeParams {
@@ -26,18 +26,50 @@ export class ShowtimeUsecase {
 
     async listShowtime(listShowtimeFilter: ListShowtimeFilter): Promise<{ Showtimes: Showtime[]; totalCount: number; }> {
         console.log(listShowtimeFilter)
-        const query = this.db.createQueryBuilder(Showtime, 'Showtime')
-        if (listShowtimeFilter.capacityMax) {
-            query.andWhere('Showtime.capacity <= :capacityMax', { capacityMax: listShowtimeFilter.capacityMax })
+        const query = this.db.createQueryBuilder(Showtime, 'showtime')
+        if (listShowtimeFilter.salle) {
+            query.andWhere('showtime.salle <= :salle', { salle: listShowtimeFilter.salle })
         }
-        query.skip((listShowtimeFilter.page - 1) * listShowtimeFilter.limit)
-        query.take(listShowtimeFilter.limit)
+        if(listShowtimeFilter.movie){
+            query.andWhere('showtime.movie <= :movie', { movie: listShowtimeFilter.movie })
+        }
+        if(listShowtimeFilter.start_datetime){
+            query.andWhere('showtime.start_datetime <= :start_datetime', { start_datetime: listShowtimeFilter.start_datetime })
+        }
+        if(listShowtimeFilter.end_datetime){
+            query.andWhere('showtime.end_datetime <= :end_datetime', { end_datetime: listShowtimeFilter.end_datetime })
+        }
+        if(listShowtimeFilter.special_notes){
+            query.andWhere('showtime.special_notes <= :special_notes', { special_notes: listShowtimeFilter.special_notes })
+        }
+
+        query.leftJoinAndSelect('showtime.salle', 'salle')
+        .leftJoinAndSelect('showtime.movie', 'movie')
+        .skip((listShowtimeFilter.page - 1) * listShowtimeFilter.limit)
+        .take(listShowtimeFilter.limit)
 
         const [Showtimes, totalCount] = await query.getManyAndCount()
         return {
             Showtimes,
             totalCount
         }
+    }
+
+    async getOneShowtime(id: number): Promise<Showtime | null> {
+        const query = this.db.createQueryBuilder(Showtime, 'showtime')
+        .leftJoinAndSelect('showtime.salle', 'salle')
+        .leftJoinAndSelect('showtime.movie', 'movie')
+        .where("showtime.id = :id", { id: id });
+
+        // Exécuter la requête et récupérer le ticket avec les détails de l'utilisateur
+        const showtime = await query.getOne();
+
+        // Vérifier si le ticket existe
+        if (!showtime) {
+            console.log({ error: `Ticket ${id} not found` });
+            return null;
+        }
+        return showtime
     }
 
     async updateShowtime(id: number, { special_notes }: UpdateShowtimeParams): Promise<Showtime | null> {

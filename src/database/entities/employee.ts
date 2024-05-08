@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Poste } from "./poste";
+import { Planning } from "./planning";
 
 @Entity()
 export class Employee {
@@ -9,17 +9,18 @@ export class Employee {
     @Column()
     name: string;
 
-    @OneToMany(() => Poste, poste => poste.name)
-    post: Poste[];
+    @OneToMany(() => Planning, planning => planning.employee)
+    plannings: Planning[];
+
 
     @Column()
-    workin_hours: string;
+    working_hours: string;
 
-    constructor(id: number, name: string, post: Poste[], workin_hours: string) {
+    constructor(id: number, name: string, plannings: Planning[], working_hours: string) {
         this.id = id;
         this.name = name;
-        this.post = post;
-        this.workin_hours = workin_hours;
+        this.plannings = plannings;
+        this.working_hours = working_hours;
     }
 }
 

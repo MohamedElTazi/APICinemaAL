@@ -3,7 +3,7 @@ import Joi from "joi";
 export const createUserValidation = Joi.object<CreateUserValidationRequest>({
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
-    role: Joi.string().valid('user', 'administrator').required()
+    role: Joi.string().valid('user', 'administrator', 'Super-administrator').required()
 }).options({ abortEarly: false });
 
 export interface CreateUserValidationRequest {

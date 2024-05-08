@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { Salle } from "../../database/entities/salle";
 import { Movie } from "../../database/entities/movie";
-import { TicketShowtimeAccesses } from "../../database/entities/ticketShowtimeAccesses";
+
 
 export const createShowtimeValidation = Joi.object<CreateShowtimeValidationRequest>({
     salle: Joi.number().required(),
@@ -33,13 +33,21 @@ export interface CreateShowtimeValidationRequest {
 export const listShowtimeValidation = Joi.object<ListShowtimeRequest>({
     page: Joi.number().min(1).optional(),
     limit: Joi.number().min(1).optional(),
-    capacityMax: Joi.number().min(1).optional()
+    salle: Joi.number().optional(),
+    movie: Joi.number().optional(),
+    start_datetime: Joi.date().optional(),
+    end_datetime: Joi.date().optional(),
+    special_notes: Joi.string().optional()
 })
 
 export interface ListShowtimeRequest {
-    page?: number
     limit?: number
-    capacityMax?: number
+    page?: number
+    salle?: number;
+    movie?: number;
+    start_datetime?: Date;  // Date et heure de début
+    end_datetime?: Date;  // Date et heure de fin
+    special_notes?: string;
 }
 
 
@@ -54,7 +62,7 @@ export interface ShowtimeIdRequest {
 
 export const updateShowtimeValidation = Joi.object<UpdateShowtimeRequest>({
     id: Joi.number().required(),
-    start_datetime: Joi.date().required().custom((value, helpers) => {
+    start_datetime: Joi.date().optional().custom((value, helpers) => {
         console.log("value",value)
         const date = new Date(value);
         const dayOfWeek = date.getUTCDay(); 
@@ -67,7 +75,7 @@ export const updateShowtimeValidation = Joi.object<UpdateShowtimeRequest>({
         }
         return value;
     }),
-    special_notes: Joi.string().required()
+    special_notes: Joi.string().optional()
 })
 
 export interface UpdateShowtimeRequest {

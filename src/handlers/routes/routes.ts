@@ -5,6 +5,8 @@ import { SalleHandler } from "./salle";
 import  {MovieHandler} from "./movie";
 import { ShowtimeHandler } from "./showtime";
 import { PosteHandler } from "./poste";
+import { PlanningHandler } from "./planning";
+import { EmployeeHandler } from "./employee";
 
 export const initRoutes = (app: express.Express) => {
 
@@ -18,7 +20,8 @@ export const initRoutes = (app: express.Express) => {
     PosteHandler(app)
     MovieHandler(app)
     ShowtimeHandler(app)
-    
+    PlanningHandler(app)
+    EmployeeHandler(app)
 
     app.use(invalidPathHandler);
 }

@@ -16,10 +16,9 @@ export class Showtime {
         movie: Movie;
     
         @Column()
-        start_datetime: Date;  // Date et heure de début
-    
+        start_datetime: Date;
         @Column()
-        end_datetime: Date;  // Date et heure de fin
+        end_datetime: Date;  
     
         @Column()
         special_notes: string;

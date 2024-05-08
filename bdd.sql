@@ -23,11 +23,13 @@ CREATE TABLE movie (
 
 CREATE TABLE showtime (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    salleId INT NOT NULL REFERENCES salle(id),
-    movieId INT NOT NULL REFERENCES movie(id),
+    salleId INT NOT NULL,
+    movieId INT NOT NULL,
     start_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     end_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    special_notes TEXT
+    special_notes TEXT,
+    FOREIGN KEY (salleId) REFERENCES salle(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (movieId) REFERENCES movie(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE user(
@@ -64,14 +66,25 @@ CREATE TABLE transaction (
 CREATE TABLE employee (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
-    id_poste INT NULL,
-    working_hours TEXT NOT NULL
+    address VARCHAR(255),
+    phone_number VARCHAR(20),
+    status VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE poste (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL
+);
+
+CREATE TABLE planning (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    employeeId INT NOT NULL REFERENCES employee(id),
+    posteId INT NOT NULL REFERENCES poste(id),
+    start_datetime DATETIME NOT NULL,
+    end_datetime DATETIME NOT NULL,
+    FOREIGN KEY (employeeId) REFERENCES employee(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (posteId) REFERENCES poste(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE token (

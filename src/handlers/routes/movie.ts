@@ -6,6 +6,7 @@ import { Movie } from "../../database/entities/movie";
 import { authMiddlewareUser } from "../middleware/auth-middleware";
 import { MovieUsecase } from "../../domain/movie-usecase";
 import { Showtime } from "../../database/entities/showtime";
+import { toZonedTime } from "date-fns-tz";
 
 
 export const MovieHandler = (app: express.Express) => {
@@ -34,7 +35,7 @@ export const MovieHandler = (app: express.Express) => {
     }
     })
 
-    app.get("/movies/planning/:id",authMiddlewareUser ,async (req: Request, res: Response) => {
+    app.get("/movies/planning/:id", authMiddlewareUser ,async (req: Request, res: Response) => {
 
         const validationResultParams = movieIdValidation.validate(req.params)
 
@@ -47,11 +48,11 @@ export const MovieHandler = (app: express.Express) => {
         const movieRepository = AppDataSource.getRepository(Movie)
         const movie = await movieRepository.findOneBy({ id: movieId.id })
         if (movie === null) {
-            res.status(404).send({ "error": `salle ${movieId.id} not found` })
+            res.status(404).send({ "error": `Movie ${movieId.id} not found` })
             return
         }
         
-        const { startDate, endDate} = req.query;
+        let { startDate, endDate} = req.params;
 
 
 
@@ -75,25 +76,31 @@ export const MovieHandler = (app: express.Express) => {
             "salle.type",
             "movie.title",
             "movie.description",
-            "showtime.start_time",
-            "showtime.end_time",
+            "showtime.start_datetime",
+            "showtime.end_datetime",
             "showtime.special_notes"
         ])
         .where("salle.maintenance_status = false")
-        .andWhere("salle.id = :id", { id: movieId.id });
+        .andWhere("showtime.movie = :id", { id: movieId.id });
 
         if (startDate && endDate) {
-            query = query.andWhere("showtime.date BETWEEN :startDate AND :endDate", { startDate, endDate });
+            endDate = endDate + " 23:59:59"
+            query = query.andWhere("showtime.start_datetime >= :startDate AND showtime.end_datetime <= :endDate", { startDate, endDate });
         }else if(startDate && !endDate){
-            query = query.andWhere("showtime.date >= :startDate", { startDate });
+            query = query.andWhere("showtime.start_datetime >= :startDate", { startDate });
         }else if(!startDate && endDate){
-            query = query.andWhere("showtime.date <= :endDate", { endDate });
+            endDate = endDate + " 23:59:59"
+            query = query.andWhere("showtime.end_datetime <= :endDate", { endDate });
         }
 
 
 
         try {
-            const planning = await query.orderBy("showtime.date", "ASC").getMany();
+            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
+            planning.forEach((showtime) => {
+                showtime.start_datetime = toZonedTime(showtime.start_datetime, '+04:00')
+                showtime.end_datetime = toZonedTime(showtime.end_datetime, '+04:00')
+            })
 
             res.status(200).send(planning);
         } catch (error) {
