@@ -14,7 +14,7 @@ export const createShowtimeValidation = Joi.object<CreateShowtimeValidationReque
             return helpers.error('Showtime must be scheduled from Monday to Friday.');
         }
         const time = date.getUTCHours();
-        if(time < 9 || time > 20) {
+        if(time < 9 || time > 19) {
             return helpers.error('Showtime must be scheduled from 9AM to 8PM.');
         }
         return value;
