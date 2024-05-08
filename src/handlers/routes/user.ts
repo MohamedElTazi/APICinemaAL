@@ -1,16 +1,16 @@
 import express, { Request, Response } from "express"
 import { AppDataSource } from "../../database/database"
 import { compare, hash } from "bcrypt";
-import { createUserValidation, LoginUserValidation } from "../validators/user-validator"
+import { createUserValidation, LoginUserValidation, userIdValidation } from "../validators/user-validator"
 import { generateValidationErrorMessage } from "../validators/generate-validation-message";
 import { User } from "../../database/entities/user";
 import { sign } from "jsonwebtoken";
 import { Token } from "../../database/entities/token";
+import { UserUsecase } from "../../domain/user-usecase";
 
 export const UserHandler = (app: express.Express) => {
     app.post('/auth/signup', async (req: Request, res: Response) => {
         try {
-            console.log(req.body)
             const validationResult = createUserValidation.validate(req.body)
             if (validationResult.error) {
                 res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
@@ -22,12 +22,14 @@ export const UserHandler = (app: express.Express) => {
 
             const userRepository = AppDataSource.getRepository(User);
             const user = await userRepository.save({
+                firstname: createUserRequest.firstname,
+                lastname: createUserRequest.lastname,
                 email: createUserRequest.email,
                 password: hashedPassword,
                 role: req.body.role
             });
 
-            res.status(201).send({ id: user.id, email: user.email, role: user.role });
+            res.status(201).send({ id: user.id, firstname:user.firstname, lastname:user.lastname, email: user.email, role: user.role });
             return
         } catch (error) {
             console.log(error)
@@ -62,7 +64,6 @@ export const UserHandler = (app: express.Express) => {
             }
             
             const secret = process.env.JWT_SECRET ?? "azerty"
-            console.log(secret)
             // generate jwt
             const token = sign({ user_id: user.id, email: user.email }, secret, { expiresIn: '1d' });
             // store un token pour un user
@@ -75,6 +76,81 @@ export const UserHandler = (app: express.Express) => {
         }
     })
 
+    app.delete('/auth/logout/:id', async (req: Request, res: Response) => {
+        try {
+            const validationResult = userIdValidation.validate(req.params)
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+
+            const userId = validationResult.value
+
+            const userRepository = AppDataSource.getRepository(User);
+            const user = await userRepository.findOneBy({ id: userId.id })
+
+            if (user === null) {
+                res.status(404).send({ "error": `user ${userId.id} not found` })
+                return
+            }
+
+            const userUsecase = new UserUsecase(AppDataSource);
+
+            userUsecase.deleteToken(user.id)
+            
+            res.status(201).send({ "message": "logout success" });
+            return
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ "error": "internal error retry later" })
+            return
+        }
+    })
+
+
+    app.get("/users/infos" ,async (req: Request, res: Response) => {
+
+        const userUsecase = new UserUsecase(AppDataSource);
+
+        const query = await userUsecase.getUsersInfos();
+
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }
+
+        try {
+            res.status(200).send(query);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
+    app.get("/users/infos/:id", async (req: Request, res: Response) => {
+        try {
+            const validationResult = userIdValidation.validate(req.params)
+    
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+            const userId = validationResult.value
+    
+            const userUsecase = new UserUsecase(AppDataSource);
+
+            const user = await userUsecase.getUserInfos(userId.id);
+            if (user === null) {
+                res.status(404).send({ "error": `movie ${userId.id} not found` })
+                return
+            }
+            res.status(200).send(user)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+
+    
+
 }
-
-

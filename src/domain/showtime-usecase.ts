@@ -17,6 +17,8 @@ export interface ListShowtimeFilter {
 }
 
 export interface UpdateShowtimeParams {
+    start_datetime?: Date
+    end_datetime?: Date
     special_notes?: string
 }
 
@@ -72,13 +74,19 @@ export class ShowtimeUsecase {
         return showtime
     }
 
-    async updateShowtime(id: number, { special_notes }: UpdateShowtimeParams): Promise<Showtime | null> {
+    async updateShowtime(id: number, { special_notes, start_datetime, end_datetime }: UpdateShowtimeParams): Promise<Showtime | null> {
         const repo = this.db.getRepository(Showtime)
         const Showtimefound = await repo.findOneBy({ id })
         if (Showtimefound === null) return null
 
         if (special_notes) {
             Showtimefound.special_notes = special_notes
+        }
+        if(start_datetime) {
+            Showtimefound.start_datetime = start_datetime
+        }
+        if(end_datetime) {
+            Showtimefound.end_datetime = end_datetime
         }
 
         const ShowtimeUpdate = await repo.save(Showtimefound)

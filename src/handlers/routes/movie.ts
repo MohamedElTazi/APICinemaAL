@@ -3,10 +3,9 @@ import { generateValidationErrorMessage } from "../validators/generate-validatio
 import {  createMovieValidation, listMovieValidation, moviePlanningValidation, movieIdValidation, updateMovieValidation } from "../validators/movie-validator";
 import { AppDataSource } from "../../database/database";
 import { Movie } from "../../database/entities/movie";
-import { authMiddlewareUser } from "../middleware/auth-middleware";
+import { authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
 import { MovieUsecase } from "../../domain/movie-usecase";
 import { Showtime } from "../../database/entities/showtime";
-import { toZonedTime } from "date-fns-tz";
 
 
 export const MovieHandler = (app: express.Express) => {
@@ -33,9 +32,9 @@ export const MovieHandler = (app: express.Express) => {
     } catch (error) {
         console.log(error)
     }
-    })
+})
 
-    app.get("/movies/planning/:id", authMiddlewareUser ,async (req: Request, res: Response) => {
+    app.get("/movies/planning/:id",authMiddlewareAll ,async (req: Request, res: Response) => {
 
         const validationResultParams = movieIdValidation.validate(req.params)
 
@@ -48,11 +47,11 @@ export const MovieHandler = (app: express.Express) => {
         const movieRepository = AppDataSource.getRepository(Movie)
         const movie = await movieRepository.findOneBy({ id: movieId.id })
         if (movie === null) {
-            res.status(404).send({ "error": `Movie ${movieId.id} not found` })
+            res.status(404).send({ "error": `salle ${movieId.id} not found` })
             return
         }
         
-        let { startDate, endDate} = req.params;
+        let { startDate, endDate} = req.query;
 
 
 
@@ -64,43 +63,17 @@ export const MovieHandler = (app: express.Express) => {
             return
         }
 
+        const movieUsecase = new MovieUsecase(AppDataSource);
 
-        let query = AppDataSource
-        .getRepository(Showtime)
-        .createQueryBuilder("showtime")
-        .leftJoinAndSelect("showtime.salle", "salle")
-        .leftJoinAndSelect("showtime.movie", "movie")
-        .select([
-            "salle.name",
-            "salle.description",
-            "salle.type",
-            "movie.title",
-            "movie.description",
-            "showtime.start_datetime",
-            "showtime.end_datetime",
-            "showtime.special_notes"
-        ])
-        .where("salle.maintenance_status = false")
-        .andWhere("showtime.movie = :id", { id: movieId.id });
+        const query = await movieUsecase.getMoviePlanning(startDate as string, endDate as string, movieId.id);
 
-        if (startDate && endDate) {
-            endDate = endDate + " 23:59:59"
-            query = query.andWhere("showtime.start_datetime >= :startDate AND showtime.end_datetime <= :endDate", { startDate, endDate });
-        }else if(startDate && !endDate){
-            query = query.andWhere("showtime.start_datetime >= :startDate", { startDate });
-        }else if(!startDate && endDate){
-            endDate = endDate + " 23:59:59"
-            query = query.andWhere("showtime.end_datetime <= :endDate", { endDate });
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
         }
-
-
 
         try {
             const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
-            planning.forEach((showtime) => {
-                showtime.start_datetime = toZonedTime(showtime.start_datetime, '+04:00')
-                showtime.end_datetime = toZonedTime(showtime.end_datetime, '+04:00')
-            })
 
             res.status(200).send(planning);
         } catch (error) {
@@ -108,6 +81,31 @@ export const MovieHandler = (app: express.Express) => {
             res.status(500).json({ error: "Internal Server Error" });
         }
     });
+
+
+
+    app.get("/movies/available/" ,async (req: Request, res: Response) => {
+
+
+        const movieUsecase = new MovieUsecase(AppDataSource);
+
+        const query = await movieUsecase.getMovieAvailable();
+
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }
+
+        try {
+            const movieAvailable = await query.orderBy("showtime.start_datetime", "ASC").getMany();
+
+            res.status(200).send(movieAvailable);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
 
 
     app.post("/movies", async (req: Request, res: Response) => {
@@ -205,7 +203,6 @@ export const MovieHandler = (app: express.Express) => {
                 res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
                 return
             }
-            const movieId = validationResult.value
     
     
             const updatedMovie = await movieUsecase.updateMovie(

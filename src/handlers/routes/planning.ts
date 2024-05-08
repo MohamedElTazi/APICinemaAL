@@ -56,6 +56,9 @@ export const PlanningHandler = (app: express.Express) => {
         }
         const page = listPlanningRequest.page ?? 1
 
+        const planningRepository = AppDataSource.getRepository(Planning)
+
+
         try {
             const planningUsecase = new PlanningUsecase(AppDataSource);
             const listPlanning = await planningUsecase.listPlanning({ ...listPlanningRequest, page, limit })

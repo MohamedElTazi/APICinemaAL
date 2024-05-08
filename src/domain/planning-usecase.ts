@@ -48,9 +48,7 @@ export class PlanningUsecase {
 
     async verifyPlanning(start_datetime: Date, end_datetime: Date): Promise<any | null> {
         const entityManager = this.db;
-        const sqlQuery = `SELECT COUNT(*) AS postesCouverts FROM planning WHERE start_datetime <= ?
-        AND end_datetime >= ?
-        AND posteId IN (1, 2, 3);`
+        const sqlQuery = `SELECT COUNT(*) AS postesCouverts FROM planning WHERE start_datetime <= ? AND end_datetime >= ? AND posteId IN (1, 2, 3);`
 
         const planning = await entityManager.query(sqlQuery, [start_datetime, end_datetime])
         return planning

@@ -62,7 +62,7 @@ export interface ShowtimeIdRequest {
 
 export const updateShowtimeValidation = Joi.object<UpdateShowtimeRequest>({
     id: Joi.number().required(),
-    start_datetime: Joi.date().optional().custom((value, helpers) => {
+    start_datetime: Joi.date().required().custom((value, helpers) => {
         console.log("value",value)
         const date = new Date(value);
         const dayOfWeek = date.getUTCDay(); 
@@ -75,12 +75,14 @@ export const updateShowtimeValidation = Joi.object<UpdateShowtimeRequest>({
         }
         return value;
     }),
+    end_datetime: Joi.date().required(),
     special_notes: Joi.string().optional()
 })
 
 export interface UpdateShowtimeRequest {
     id: number
-    start_datetime?:Date
+    start_datetime:Date
+    end_datetime: Date
     special_notes?: string
 }
 

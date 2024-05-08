@@ -7,6 +7,8 @@ import { ShowtimeUsecase } from "../../domain/showtime-usecase";
 import { authMiddlewareAdmin, authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import { Planning } from "../../database/entities/planning";
+import { PlanningUsecase } from "../../domain/planning-usecase";
 
 
 export const ShowtimeHandler = (app: express.Express) => {
@@ -50,6 +52,17 @@ export const ShowtimeHandler = (app: express.Express) => {
         if(await showtimeUsecase.isOverlap(showtimeRequest)){
             res.status(404).send({ "error": `New showtime is overlap with other showtime` })
             return  
+        }
+
+        const planningUseCase = new PlanningUsecase(AppDataSource);
+
+        const verifyPlanning = await planningUseCase.verifyPlanning(showtimeRequest.start_datetime, showtimeRequest.end_datetime)
+
+        console.log("ici**********",verifyPlanning[0].postesCouverts)
+
+        if(verifyPlanning[0].postesCouverts !== "3"){
+            res.status(404).send({ "error": `not all employee are here` })
+            return
         }
 
         try {
@@ -203,7 +216,7 @@ export const ShowtimeHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/showtimes/:id", authMiddlewareAdmin, async (req: Request, res: Response) => {
+    app.patch("/showtimes/:id", async (req: Request, res: Response) => {
 
         const validation = updateShowtimeValidation.validate({ ...req.params, ...req.body })
 
@@ -213,6 +226,19 @@ export const ShowtimeHandler = (app: express.Express) => {
         }
 
         const updateShowtimeRequest = validation.value
+
+        const showtimeRequest = listShowtimeValidation.validate(req.body).value
+
+        const planningUseCase = new PlanningUsecase(AppDataSource);
+
+        const verifyPlanning = await planningUseCase.verifyPlanning(updateShowtimeRequest.start_datetime, updateShowtimeRequest.end_datetime)
+
+        console.log("ici**********",verifyPlanning[0].postesCouverts)
+
+        if(verifyPlanning[0].postesCouverts !== "3"){
+            res.status(404).send({ "error": `not all employee are here` })
+            return
+        }
 
         try {
             const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
