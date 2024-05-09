@@ -11,10 +11,10 @@ export interface ListMovieRequest {
     limit?: number
 }
 export interface UpdateMovieParams {
-    title: string
-    description: string
-    duration: Date
-    genre: string
+    title?: string
+    description?: string
+    duration?: string
+    genre?: string
 }
 export class MovieUsecase {
     constructor(private db: DataSource) {}
@@ -37,10 +37,17 @@ export class MovieUsecase {
 
         if(title){
             movieToUpdate.title = title
+        }
+        if(description){
             movieToUpdate.description = description
+        }
+        if(duration){
             movieToUpdate.duration = duration
+        }
+        if(genre){
             movieToUpdate.genre = genre
         }
+        
         const MovieUpdated = await repo.save(movieToUpdate)
         return MovieUpdated
     }
@@ -101,4 +108,14 @@ export class MovieUsecase {
 
     }
     
+    formatTime(minutes: number): string {
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+    
+        // Convertit les heures et les minutes en chaîne, ajoutant un zéro au début si nécessaire
+        const hoursStr = hours.toString().padStart(2, '0');
+        const minutesStr = remainingMinutes.toString().padStart(2, '0');
+    
+        return `${hoursStr}:${minutesStr}:00`; // Format HH:mm:ss
+    }
 }

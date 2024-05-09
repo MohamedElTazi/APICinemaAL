@@ -118,7 +118,10 @@ export const MovieHandler = (app: express.Express) => {
     
         const movieRequest = validation.value
         const movieRepo = AppDataSource.getRepository(Movie)
-        console.log("ok")
+
+        const movieUsecase = new MovieUsecase(AppDataSource);
+
+        movieRequest.duration = movieUsecase.formatTime(+movieRequest.duration)
         try {
     
             const movieCreated = await movieRepo.save(
@@ -204,6 +207,11 @@ export const MovieHandler = (app: express.Express) => {
                 return
             }
     
+            if(UpdateMovieRequest.duration){
+                const movieUsecase = new MovieUsecase(AppDataSource)
+                UpdateMovieRequest.duration = movieUsecase.formatTime(+UpdateMovieRequest.duration)
+            }
+                
     
             const updatedMovie = await movieUsecase.updateMovie(
                 UpdateMovieRequest.id,
