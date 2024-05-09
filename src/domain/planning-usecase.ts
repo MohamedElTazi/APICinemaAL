@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 import { Planning } from "../database/entities/planning";
+import { Poste } from "../database/entities/poste";
 
 export interface ListPlanningFilter {
     limit: number
@@ -8,6 +9,7 @@ export interface ListPlanningFilter {
 }
 
 export interface UpdatePlanningParams {
+    poste: Poste
     start_datetime?: Date
     end_datetime?: Date
 }
@@ -30,11 +32,14 @@ export class PlanningUsecase {
         }
     }
 
-    async updatePlanning(id: number, {start_datetime, end_datetime}: UpdatePlanningParams): Promise<Planning | Date | undefined> {
+    async updatePlanning(id: number, {poste ,start_datetime, end_datetime}: UpdatePlanningParams): Promise<Planning | null> {
         const repo = this.db.getRepository(Planning)
         const planningToUpdate = await repo.findOneBy({ id })
-        if (planningToUpdate === null) return undefined
+        if (planningToUpdate === null) return null
 
+        if(poste){
+            planningToUpdate.poste = poste
+        }
         if (start_datetime) {
             planningToUpdate.start_datetime = start_datetime
         }
@@ -51,6 +56,13 @@ export class PlanningUsecase {
         const sqlQuery = `SELECT COUNT(*) AS postesCouverts FROM planning WHERE start_datetime <= ? AND end_datetime >= ? AND posteId IN (1, 2, 3);`
 
         const planning = await entityManager.query(sqlQuery, [start_datetime, end_datetime])
+        return planning
+    }
+    async verifyPoste(posteId: Poste, start_datetime: Date, end_datetime: Date): Promise<any | null> {
+        const entityManager = this.db;
+        const sqlQuery = `SELECT COUNT(*) FROM planning WHERE start_datetime <= ? AND end_datetime >= ? AND posteId = ?;`
+
+        const planning = await entityManager.query(sqlQuery, [start_datetime, end_datetime, posteId])
         return planning
     }
 }
