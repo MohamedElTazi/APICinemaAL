@@ -118,4 +118,32 @@ export class MovieUsecase {
     
         return `${hoursStr}:${minutesStr}:00`; // Format HH:mm:ss
     }
+
+    async updateShowtimeEndDatetimesOnFilmDurationChange(movieId: number,  newDurationMinutes: number) {
+        console.log(newDurationMinutes)
+
+        const showtimes = await this.db.getRepository(Showtime)
+        .createQueryBuilder("showtime")
+        .where("showtime.movieId = :movieId", { movieId })
+        .getMany();
+
+        const updatePromises = showtimes.map(showtime => {
+        let newEndDatetime = new Date(showtime.start_datetime.getTime() + newDurationMinutes * 60000);
+
+
+        if (isNaN(newEndDatetime.getTime())) {
+            console.error("Failed to calculate newEndDatetime for showtime:", showtime.id);
+            throw new Error("Invalid newEndDatetime calculated");
+        }
+
+        return this.db.getRepository(Showtime)
+            .createQueryBuilder()
+            .update(Showtime)
+            .set({ end_datetime: newEndDatetime })
+            .where("id = :id", { id: showtime.id })
+            .execute();
+    });
+
+    await Promise.all(updatePromises);
+    }
 }

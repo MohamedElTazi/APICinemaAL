@@ -209,14 +209,12 @@ export const MovieHandler = (app: express.Express) => {
     
             if(UpdateMovieRequest.duration){
                 const movieUsecase = new MovieUsecase(AppDataSource)
+                movieUsecase.updateShowtimeEndDatetimesOnFilmDurationChange(UpdateMovieRequest.id, +UpdateMovieRequest.duration)
                 UpdateMovieRequest.duration = movieUsecase.formatTime(+UpdateMovieRequest.duration)
             }
                 
     
-            const updatedMovie = await movieUsecase.updateMovie(
-                UpdateMovieRequest.id,
-                { ...UpdateMovieRequest }
-                )
+            const updatedMovie = await movieUsecase.updateMovie(UpdateMovieRequest.id,{ ...UpdateMovieRequest })
     
             if (updatedMovie === null) {
                 res.status(404).send({ "error": `Movie ${UpdateMovieRequest.id} not found `})

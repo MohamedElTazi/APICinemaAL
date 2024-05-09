@@ -94,17 +94,17 @@ export class ShowtimeUsecase {
             .where("id = :movieId", { movieId: movieId })
             .getRawOne();
 
-            const start_datetimeDate = new Date(start_datetime);    
+            const end_datetimeDate = new Date(start_datetime);    
 
-            const formattedDate = format(start_datetimeDate, 'yyyy-MM-dd'); 
+            const formattedDate = format(end_datetimeDate, 'yyyy-MM-dd'); 
 
             let resultDate = new Date(formattedDate+"T"+result.duration);
             
-            start_datetimeDate.setHours(start_datetimeDate.getHours() + resultDate.getHours());
-            start_datetimeDate.setMinutes(start_datetimeDate.getMinutes() + resultDate.getMinutes());
-            start_datetimeDate.setSeconds(start_datetimeDate.getSeconds() + resultDate.getSeconds());
+            end_datetimeDate.setHours(end_datetimeDate.getHours() + resultDate.getHours());
+            end_datetimeDate.setMinutes(end_datetimeDate.getMinutes() + resultDate.getMinutes());
+            end_datetimeDate.setSeconds(end_datetimeDate.getSeconds() + resultDate.getSeconds());
 
-            return start_datetimeDate;
+            return end_datetimeDate;
     }
 
     async getShowtimePlanning(startDate:string, endDate:string): Promise<SelectQueryBuilder<Showtime> | null>{
