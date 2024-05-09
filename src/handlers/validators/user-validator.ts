@@ -6,7 +6,7 @@ export const createUserValidation = Joi.object<CreateUserValidationRequest>({
     lastname: Joi.string().required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
-    role: Joi.string().valid('user', 'administrator').required()
+    role: Joi.string().valid('user', 'administrator', 'super_administrator').required()
 }).options({ abortEarly: false });
 
 export interface CreateUserValidationRequest {

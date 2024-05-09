@@ -7,6 +7,7 @@ import { Transaction } from "./transaction"
 export enum UserRole {
     User = "user",
     Administrator = "administrator",
+    SuperAdministrator = "super_administrator"
 }
 
 
