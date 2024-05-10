@@ -203,7 +203,7 @@ export const ShowtimeHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/showtimes/:id", authMiddlewareAdmin, async (req: Request, res: Response) => {
+    app.patch("/showtimes/:id", async (req: Request, res: Response) => {
 
         const validation = updateShowtimeValidation.validate({ ...req.params, ...req.body })
 
