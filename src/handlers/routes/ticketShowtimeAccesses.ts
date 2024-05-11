@@ -166,3 +166,266 @@ export const TicketShowtimeAccessessHandler = (app: express.Express) => {
 
 
 }
+
+/**
+ * @openapi
+ * 
+ * components:
+ *  schemas:
+ *    TicketShowtimeAccesses:
+ *      type: object 
+ *      properties:
+ *        id:
+ *          type: integer
+ *          description: The id of the ticket showtime access
+ *        ticketId:
+ *          type: integer
+ *          description: The id of the ticket
+ *        showtimeId:
+ *          type: integer
+ *          description: The id of the showtime
+ * 
+ */
+
+/**
+ * @openapi
+ * /ticketShowtimeAccesses:
+ *   get:
+ *     tags:
+ *       - Ticket_Showtime_Accesses
+ *     summary: List ticket showtime accesses
+ *     description: Retrieve a list of ticket showtime accesses.
+ *     responses:
+ *       200:
+ *         description: List of ticket showtime accesses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/TicketShowtimeAccess'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+
+/**
+ * @openapi
+ * /ticketShowtimeAccesses/{id}:
+ *   get:
+ *     tags:
+ *       - Ticket_Showtime_Accesses
+ *     summary: Get ticket showtime access by ID
+ *     description: Retrieve a ticket showtime access by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Ticket showtime access details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TicketShowtimeAccess'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Ticket showtime access not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+
+/**
+ * @openapi
+ * /ticketShowtimeAccesses:
+ *   post:
+ *     tags:
+ *       - Ticket_Showtime_Accesses
+ *     summary: Create ticket showtime access
+ *     description: Create a new ticket showtime access.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TicketShowtimeAccesses'
+ *     responses:
+ *       201:
+ *         description: Ticket showtime access created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TicketShowtimeAccess'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+
+/**
+ * @openapi
+ * /ticketShowtimeAccesses/{id}:
+ *   patch:
+ *     tags:
+ *       - Ticket_Showtime_Accesses
+ *     summary: Update ticket showtime access
+ *     description: Update a ticket showtime access by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TicketShowtimeAccesses'
+ *     responses:
+ *       200:
+ *         description: Updated ticket showtime access
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TicketShowtimeAccess'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Ticket showtime access not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+
+/**
+ * @openapi
+ * /ticketShowtimeAccesses/{id}:
+ *   delete:
+ *     tags:
+ *       - Ticket_Showtime_Accesses
+ *     summary: Delete ticket showtime access by ID
+ *     description: Delete a ticket showtime access by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Ticket showtime access deleted successfully
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Ticket showtime access not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */

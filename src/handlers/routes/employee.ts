@@ -149,7 +149,7 @@ app.delete("/employees/:id", async (req: Request, res: Response) => {
  *       type: object
  *       properties:
  *         id:
- *           type: string
+ *           type: Integer
  *           description: The ID of the employee.
  *         name:
  *           type: string

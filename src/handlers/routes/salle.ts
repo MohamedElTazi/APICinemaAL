@@ -4,7 +4,7 @@ import { createSalleValidation, listSalleValidation, salleIdValidation, sallePla
 import { AppDataSource } from "../../database/database";
 import { Salle } from "../../database/entities/salle";
 import { SalleUsecase } from "../../domain/salle-usecase";
-import { authMiddlewareAdmin, authMiddlewareAll} from "../middleware/auth-middleware";
+import { authMiddlewareAdmin, authMiddlewareAll, authMiddlewareSuperAdmin, authMiddlewareUser} from "../middleware/auth-middleware";
 import { toZonedTime } from "date-fns-tz";
 import { UserHandler } from "./user";
 

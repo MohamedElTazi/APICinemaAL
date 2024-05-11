@@ -178,9 +178,7 @@ export const UserHandler = (app: express.Express) => {
  *       role:
  *         type: string
  *         description: The role of the user.
- */
-/**
- * components:
+ * 
  * schemas:
  *   UserLogin:
  *     type: object
@@ -192,9 +190,8 @@ export const UserHandler = (app: express.Express) => {
  *       password:
  *         type: string
  *         description: The password of the user.
- */
-/**
- * components:
+ *
+ *
  * schemas:
  *   User:
  *     type: object

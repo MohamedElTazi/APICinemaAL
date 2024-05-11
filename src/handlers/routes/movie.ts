@@ -269,9 +269,7 @@ export const MovieHandler = (app: express.Express) => {
  *           type: string
  *           description: The genre of the movie
  *         showtimes:
- *           type: array
- *           items:
- *             type: showtimes
+ *           type: showtimes
  *           description: Showtimes of the movie
  * tags:
  *  name: Movies
