@@ -20,7 +20,7 @@ const swagger_1 = require("./swagger/swagger");
 require("reflect-metadata");
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = (0, express_1.default)();
-    const port = 3000;
+    const port = process.env.PORT || '3000';
     try {
         yield database_1.AppDataSource.initialize();
         console.error("well connected to database");

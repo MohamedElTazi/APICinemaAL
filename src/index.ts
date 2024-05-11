@@ -7,7 +7,7 @@ import "reflect-metadata"
 
 const main = async () => {
     const app = express()
-    const port = 3000
+    const port = process.env.PORT || '3000';
 
     try {
 
@@ -21,7 +21,7 @@ const main = async () => {
 
     app.use(express.json())
     
-    swaggerDocs(app, port)
+    swaggerDocs(app, port as unknown as number)
 
     initRoutes(app)
     app.listen(port, () => {

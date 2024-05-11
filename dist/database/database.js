@@ -12,7 +12,7 @@ exports.AppDataSource = new typeorm_1.DataSource({
     logging: true,
     synchronize: false,
     entities: [
-        "dist/database/entities/*.ts"
+        process.env.NODE_ENV === "dev" ? "src/database/entities/*.ts" : "dist/database/entities/*.js"
     ],
     migrations: [
         process.env.NODE_ENV === "dev" ? "src/database/migrations/*.ts" : "dist/database/migrations/*.js"
