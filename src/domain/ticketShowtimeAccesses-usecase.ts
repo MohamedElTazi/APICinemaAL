@@ -65,10 +65,11 @@ export class TicketAccesUsecase {
         const ticketAccessToUpdate = await repo.findOneBy({id})
         if (!ticketAccessToUpdate) return undefined
     
-        if(id){
-            ticketAccessToUpdate.showtime = showtime
+        if(ticket){
             ticketAccessToUpdate.ticket = ticket
-        
+        }
+        if(showtime){
+            ticketAccessToUpdate.showtime = showtime
         }
         const ticketAccessUpdated = await repo.save(ticketAccessToUpdate)
         return ticketAccessUpdated

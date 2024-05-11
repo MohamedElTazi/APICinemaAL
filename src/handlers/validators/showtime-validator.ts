@@ -7,7 +7,6 @@ export const createShowtimeValidation = Joi.object<CreateShowtimeValidationReque
     salle: Joi.number().required(),
     movie: Joi.number().required(),
     start_datetime: Joi.date().required().custom((value, helpers) => {
-        console.log("value",value)
         const date = new Date(value);
         const dayOfWeek = date.getUTCDay(); 
         if (dayOfWeek < 1 || dayOfWeek > 5) {
@@ -45,8 +44,8 @@ export interface ListShowtimeRequest {
     page?: number
     salle?: number;
     movie?: number;
-    start_datetime?: Date;  // Date et heure de début
-    end_datetime?: Date;  // Date et heure de fin
+    start_datetime?: Date;  
+    end_datetime?: Date; 
     special_notes?: string;
 }
 
@@ -73,15 +72,22 @@ export const updateShowtimeValidation = Joi.object<UpdateShowtimeRequest>({
         if(time < 9 || time > 20) {
             return helpers.error('Showtime must be scheduled from 9AM to 8PM.');
         }
+        
         return value;
     }),
-    special_notes: Joi.string().optional()
+    end_datetime: Joi.date().optional(),   
+    special_notes: Joi.string().optional(),
+    salle: Joi.number().optional(),
+    movie: Joi.number().optional(),
 })
 
 export interface UpdateShowtimeRequest {
     id: number
     start_datetime?:Date
+    end_datetime?: Date
     special_notes?: string
+    salle: Salle
+    movie: Movie
 }
 
 
