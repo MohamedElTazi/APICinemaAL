@@ -1,15 +1,17 @@
-FROM node:20-alpine
+FROM node:14
 
 WORKDIR /app
 
-COPY package.json ./
-COPY package-lock.json ./
-RUN npm install 
+COPY package*.json ./
 
-COPY . .
+RUN npm install
 
+ RUN npm install -g nodemon ts-node
 
-RUN npm run build 
-RUN npx prisma generate
+ COPY . .
+
+ RUN npm rebuild bcrypt --build-from-source
+
 EXPOSE 3000
-CMD ["node","dist/main.js"]
+
+CMD ["nodemon", "-e", "ts", "--exec", "ts-node", "src/index.ts"]
