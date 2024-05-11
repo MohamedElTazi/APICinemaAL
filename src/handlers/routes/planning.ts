@@ -247,3 +247,169 @@ export const PlanningHandler = (app: express.Express) => {
     })
 
 }
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Planning:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         employee:
+ *           type: integer
+ *         poste:
+ *           type: integer
+ *         start_datetime:
+ *           type: string
+ *           format: date-time
+ *         end_datetime:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @openapi
+ * tags:
+ *   name: Planning
+ *   description: Endpoints related to employee planning
+ */
+
+/**
+ * @openapi
+ * /plannings:
+ *   post:
+ *     tags: [Planning]
+ *     summary: Create a new planning
+ *     description: Create a new planning.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Planning'
+ *     responses:
+ *       '201':
+ *         description: Created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Planning'
+ *       '400':
+ *         description: Bad Request
+ *       '404':
+ *         description: Not Found
+ *       '500':
+ *         description: Internal Server Error
+ */
+
+/**
+ * @openapi
+ * /plannings:
+ *   get:
+ *     tags: [Planning]
+ *     summary: Get all plannings
+ *     description: Retrieve a list of all plannings.
+ *     responses:
+ *       '200':
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Planning'
+ *       '400':
+ *         description: Bad Request
+ *       '500':
+ *         description: Internal Server Error
+ */
+
+/**
+ * @openapi
+ * /plannings/{id}:
+ *   get:
+ *     tags: [Planning]
+ *     summary: Get a planning by ID
+ *     description: Retrieve a planning with the specified ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID of the planning to get
+ *     responses:
+ *       '200':
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Planning'
+ *       '400':
+ *         description: Bad Request
+ *       '404':
+ *         description: Not Found
+ *       '500':
+ *         description: Internal Server Error
+ */
+
+/**
+ * @openapi
+ * /plannings/{id}:
+ *   delete:
+ *     tags: [Planning]
+ *     summary: Delete a planning by ID
+ *     description: Delete a planning with the specified ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID of the planning to delete
+ *     responses:
+ *       '200':
+ *         description: Success
+ *       '400':
+ *         description: Bad Request
+ *       '404':
+ *         description: Not Found
+ *       '500':
+ *         description: Internal Server Error
+ */
+
+/**
+ * @openapi
+ * /plannings/{id}:
+ *   patch:
+ *     tags: [Planning]
+ *     summary: Update a planning by ID
+ *     description: Update a planning with the specified ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID of the planning to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Planning'
+ *     responses:
+ *       '200':
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Planning'
+ *       '400':
+ *         description: Bad Request
+ *       '404':
+ *         description: Not Found
+ *       '500':
+ *         description: Internal Server Error
+ */

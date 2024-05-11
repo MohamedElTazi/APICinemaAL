@@ -144,3 +144,274 @@ export const PosteHandler = (app: express.Express) => {
     })
 
 }
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Poste:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: The ID of the poste.
+ *         name:
+ *           type: string
+ *           description: The name of the poste.
+ *         description:
+ *           type: string
+ *           description: The description of the poste.
+ * tags:
+ *  name: Postes
+ *  description: Endpoints related to postes
+ */
+/**
+ * @openapi
+ * /postes/{id}:
+ *   get:
+ *     tags:
+ *      [Postes]
+ *     summary: Get a post by ID
+ *     description: Retrieve details of a specific post.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the post to retrieve.
+ *     responses:
+ *       200:
+ *         description: Success retrieving the post.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Poste'
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ * 
+ */
+
+/**
+ * @openapi
+ * /postes:
+ *   get:
+ *     tags:
+ *      [Postes]
+ *     summary: Get all posts
+ *     description: Retrieve a list of posts.
+ *     responses:
+ *       200:
+ *         description: List of posts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Poste'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/** 
+ * @openapi
+ * /postes:
+ *   post:
+ *     tags:
+ *      [Postes]
+ *     summary: Create a new post
+ *     description: Create a new post with the provided data.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Poste'
+ *     responses:
+ *       201:
+ *         description: Post created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Poste'
+ *       400:
+ *         description: Invalid request data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ * 
+ */
+/**
+ * @openapi
+ * /postes/{id}:
+ *   patch:
+ *     tags:
+ *      [Postes]
+ *     summary: Update a post by ID
+ *     description: Update the details of a specific post.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the post to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Poste'
+ *     responses:
+ *       200:
+ *         description: Success updating the post.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Poste'
+ *       400:
+ *         description: Invalid parameter or request data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /postes/{id}:
+ *   delete:
+ *     tags:
+ *      [Postes]
+ *     summary: Delete a post by ID
+ *     description: Delete a specific post.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the post to delete.
+ *     responses:
+ *       200:
+ *         description: Success deleting the post.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Poste'
+ *       400:
+ *         description: Invalid parameter.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Post not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+
+

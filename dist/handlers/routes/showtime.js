@@ -18,8 +18,9 @@ const showtime_usecase_1 = require("../../domain/showtime-usecase");
 const auth_middleware_1 = require("../middleware/auth-middleware");
 const date_fns_1 = require("date-fns");
 const date_fns_tz_1 = require("date-fns-tz");
+const planning_usecase_1 = require("../../domain/planning-usecase");
 const ShowtimeHandler = (app) => {
-    app.post("/showtimes", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/showtimes", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const reqBodyStartDatetime = req.body.start_datetime;
         req.body.start_datetime = req.body.start_datetime + "Z";
         const validation = showtime_validator_1.createShowtimeValidation.validate(req.body);
@@ -42,6 +43,13 @@ const ShowtimeHandler = (app) => {
         showtimeRequest.start_datetime = reqBodyStartDatetime;
         if (yield showtimeUsecase.isOverlap(showtimeRequest)) {
             res.status(404).send({ "error": `New showtime is overlap with other showtime` });
+            return;
+        }
+        const planningUseCase = new planning_usecase_1.PlanningUsecase(database_1.AppDataSource);
+        const verifyPlanning = yield planningUseCase.verifyPlanning(showtimeRequest.start_datetime, showtimeRequest.end_datetime);
+        console.log("ici**********", verifyPlanning[0].postesCouverts);
+        if (verifyPlanning[0].postesCouverts !== "3") {
+            res.status(404).send({ "error": `not all employee are here` });
             return;
         }
         try {
@@ -110,35 +118,13 @@ const ShowtimeHandler = (app) => {
                 return;
             }
             const showtimeId = validationResult.value;
-            const showtimeRepository = database_1.AppDataSource.getRepository(showtime_1.Showtime);
-            const showtime = yield showtimeRepository.findOneBy({ id: showtimeId.id });
+            const showtimeUsecase = new showtime_usecase_1.ShowtimeUsecase(database_1.AppDataSource);
+            const showtime = yield showtimeUsecase.getOneShowtime(showtimeId.id);
             if (showtime === null) {
                 res.status(404).send({ "error": `showtime ${showtimeId.id} not found` });
                 return;
             }
             res.status(200).send(showtime);
-        }
-        catch (error) {
-            console.log(error);
-            res.status(500).send({ error: "Internal error" });
-        }
-    }));
-    app.get("/showtimes/count/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        try {
-            const validationResult = showtime_validator_1.showtimeIdValidation.validate(req.params);
-            if (validationResult.error) {
-                res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validationResult.error.details));
-                return;
-            }
-            const showtimeId = validationResult.value;
-            const showtimeRepository = database_1.AppDataSource.getRepository(showtime_1.Showtime);
-            const showtimeUsecase = new showtime_usecase_1.ShowtimeUsecase(database_1.AppDataSource);
-            const count = yield showtimeUsecase.getCountByShowtimeId(showtimeId.id);
-            if (count === null) {
-                res.status(404).send({ "error": `showtime ${showtimeId.id} not found` });
-                return;
-            }
-            res.status(200).send("Number of spectators : " + count);
         }
         catch (error) {
             console.log(error);
@@ -167,7 +153,7 @@ const ShowtimeHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/showtimes/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/showtimes/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = showtime_validator_1.updateShowtimeValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -176,11 +162,37 @@ const ShowtimeHandler = (app) => {
         const updateShowtimeRequest = validation.value;
         try {
             const showtimeUsecase = new showtime_usecase_1.ShowtimeUsecase(database_1.AppDataSource);
-            const updatedShowtime = yield showtimeUsecase.updateShowtime(updateShowtimeRequest.id, Object.assign({}, updateShowtimeRequest));
-            if (updatedShowtime === null) {
+            const showtime = yield showtimeUsecase.foundShowtime(updateShowtimeRequest.id);
+            if (showtime === null) {
                 res.status(404).send({ "error": `Salle ${updateShowtimeRequest.id} not found` });
                 return;
             }
+            const planningUseCase = new planning_usecase_1.PlanningUsecase(database_1.AppDataSource);
+            if (updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime !== undefined) {
+                const verifyPlanning = yield planningUseCase.verifyPlanning(updateShowtimeRequest.start_datetime, updateShowtimeRequest.end_datetime);
+                console.log("ici**********", verifyPlanning[0].postesCouverts);
+                if (verifyPlanning[0].postesCouverts !== "3") {
+                    res.status(404).send({ "error": `not all employee are here` });
+                    return;
+                }
+            }
+            else if (updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime === undefined) {
+                const verifyPlanning = yield planningUseCase.verifyPlanning(updateShowtimeRequest.start_datetime, showtime.end_datetime);
+                console.log("ici**********", updateShowtimeRequest.start_datetime);
+                if (verifyPlanning[0].postesCouverts !== "3") {
+                    res.status(404).send({ "error": `not all employee are here` });
+                    return;
+                }
+            }
+            else if (updateShowtimeRequest.start_datetime === undefined && updateShowtimeRequest.end_datetime !== undefined) {
+                const verifyPlanning = yield planningUseCase.verifyPlanning(showtime.start_datetime, updateShowtimeRequest.end_datetime);
+                console.log("ici**********", verifyPlanning[0].postesCouverts);
+                if (verifyPlanning[0].postesCouverts !== "3") {
+                    res.status(404).send({ "error": `not all employee are here` });
+                    return;
+                }
+            }
+            const updatedShowtime = yield showtimeUsecase.updateShowtime(updateShowtimeRequest.id, Object.assign({}, updateShowtimeRequest));
             res.status(200).send(updatedShowtime);
         }
         catch (error) {
@@ -190,3 +202,290 @@ const ShowtimeHandler = (app) => {
     }));
 };
 exports.ShowtimeHandler = ShowtimeHandler;
+/**
+ * @openapi
+ * components:
+ *  schemas:
+ *   Showtime:
+ *    type: object
+ *    required:
+ *     - salle
+ *     - movie
+ *     - start_datetime
+ *     - end_datetime
+ *     - special_notes
+ *    properties:
+ *     id:
+ *       type: integer
+ *       description: The auto-generated id of the showtime
+ *     salle:
+ *       type: salle
+ *       description: The salle of the showtime
+ *     movie:
+ *       type: movie
+ *       description: The movie of the showtime
+ *     start_datetime:
+ *       type: string
+ *       format: date-time
+ *       description: The start datetime of the showtime
+ *     end_datetime:
+ *       type: string
+ *       format: date-time
+ *       description: The end datetime of the showtime
+ *     special_notes:
+ *       type: string
+ *       description: The special notes of the showtime
+ *
+ * tags:
+ *  name: [Séances]
+ */
+/**
+ * @openapi
+ * /showtimes:
+ *   post:
+ *     tags:
+ *       - Séances
+ *     summary: Create a new showtime
+ *     description: Create a new showtime with provided data.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Showtime'
+ *     responses:
+ *       201:
+ *         description: Showtime created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Showtime'
+ *       400:
+ *         description: Invalid request data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /showtimes/{id}:
+ *   patch:
+ *     tags:
+ *       - Séances
+ *     summary: Update a showtime by ID
+ *     description: Update a specific showtime by specifying its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the showtime to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Showtime'
+ *     responses:
+ *       200:
+ *         description: Showtime updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Showtime'
+ *       400:
+ *         description: Invalid request data or showtime not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /showtimes:
+ *   get:
+ *     tags:
+ *       - Séances
+ *     summary: Get a list of showtimes
+ *     description: Retrieve a list of showtimes.
+ *     responses:
+ *       200:
+ *         description: List of showtimes.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Showtime'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /showtimes/{id}:
+ *   get:
+ *     tags:
+ *       - Séances
+ *     summary: Get a showtime by ID
+ *     description: Retrieve a specific showtime by specifying its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the showtime to retrieve.
+ *     responses:
+ *       200:
+ *         description: Showtime retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Showtime'
+ *       404:
+ *         description: Showtime not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /showtimes/count/{id}:
+ *   get:
+ *     tags:
+ *       - Séances
+ *     summary: Get the number of spectators for a showtime
+ *     description: Retrieve the number of spectators for a specific showtime by specifying its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the showtime to count spectators for.
+ *     responses:
+ *       200:
+ *         description: Number of spectators retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               description: Number of spectators for the specified showtime.
+ *       404:
+ *         description: Showtime not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /showtimes/{id}:
+ *   delete:
+ *     tags:
+ *       - Séances
+ *     summary: Delete a showtime by ID
+ *     description: Delete a specific showtime by specifying its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the showtime to delete.
+ *     responses:
+ *       200:
+ *         description: Showtime deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               description: Success message
+ *       404:
+ *         description: Showtime not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */

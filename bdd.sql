@@ -83,10 +83,7 @@ CREATE TABLE token (
 
 CREATE TABLE employee (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    address VARCHAR(255),
-    phone_number VARCHAR(20),
-    status VARCHAR(50) NOT NULL
+    name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE poste (

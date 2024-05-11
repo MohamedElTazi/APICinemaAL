@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  mysql-db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: CinemaNode
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql-db
+    environment:
+      - PMA_HOST=mysql-db
+volumes:
+  mysql-data:
+    driver: local

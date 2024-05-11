@@ -11,10 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Poste = void 0;
 const typeorm_1 = require("typeorm");
+const planning_1 = require("./planning");
 let Poste = class Poste {
-    constructor(id, name, description) {
+    constructor(id, name, plannings, description) {
         this.id = id;
         this.name = name;
+        this.plannings = plannings;
         this.description = description;
     }
 };
@@ -28,10 +30,14 @@ __decorate([
     __metadata("design:type", String)
 ], Poste.prototype, "name", void 0);
 __decorate([
+    (0, typeorm_1.OneToMany)(() => planning_1.Planning, planning => planning.poste),
+    __metadata("design:type", Array)
+], Poste.prototype, "plannings", void 0);
+__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Poste.prototype, "description", void 0);
 exports.Poste = Poste = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, String, String])
+    __metadata("design:paramtypes", [Number, String, Array, String])
 ], Poste);

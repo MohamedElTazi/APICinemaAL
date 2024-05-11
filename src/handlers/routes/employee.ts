@@ -54,6 +54,7 @@ export const EmployeeHandler = (app: express.Express) => {
         }
     })
 
+
     app.post("/employees", async (req: Request, res: Response) => {
         const validation = createEmployeeValidation.validate(req.body)
         if(validation.error) {
@@ -112,7 +113,8 @@ export const EmployeeHandler = (app: express.Express) => {
     }
 })
 
-app.delete("/postes/:id", async (req: Request, res: Response) => {
+
+app.delete("/employees/:id", async (req: Request, res: Response) => {
     try {
         const validationResult = employeeIdValidation.validate(req.params)
 
@@ -125,7 +127,7 @@ app.delete("/postes/:id", async (req: Request, res: Response) => {
         const EmployeeRepository = AppDataSource.getRepository(Employee)
         const employee = await EmployeeRepository.findOneBy({ id: employeeId.id })
         if (employee === null) {
-            res.status(404).send({ "error": `salle ${employeeId.id} not found` })
+            res.status(404).send({ "error": `employees ${employeeId.id} not found` })
             return
         }
 
@@ -138,3 +140,273 @@ app.delete("/postes/:id", async (req: Request, res: Response) => {
 })
 
 }
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Employee:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: Integer
+ *           description: The ID of the employee.
+ *         name:
+ *           type: string
+ *           description: The name of the employee.
+ * tags:
+ *  name: Employees
+ *  description: Endpoints related to employees
+ */
+
+
+/**
+ * @openapi
+ * /employees:
+ *   get:
+ *     tags:
+ *      [Employees]
+ *     summary: Get all employees
+ *     description: Retrieve a list of employees.
+ *     responses:
+ *       200:
+ *         description: List of employees
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Employee'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+
+/**
+ * @openapi
+
+ * /employees/{id}:
+ *   get:
+ *     tags:
+ *      [Employees]
+ *     summary: Get an employee by ID
+ *     description: Retrieve an employee with the specified ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the employee to retrieve
+ *     responses:
+ *       200:
+ *         description: Employee found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Employee'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Employee not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+
+
+
+/**
+ * @openapi
+ * /employees:
+ *   post:
+ *     tags:
+ *      [Employees]
+ *     summary: Create a new employee
+ *     description: Create a new employee.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Employee'
+ *     responses:
+ *       201:
+ *         description: Employee successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Employee'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /employees/{id}:
+ *   delete:
+ *     tags:
+ *      [Employees]
+ *     summary: Delete an employee by ID
+ *     description: Delete an employee with the specified ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the employee to delete
+ *     responses:
+ *       200:
+ *         description: Employee successfully deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Employee'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Employee not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /employees/{id}:
+ *   patch:
+ *     tags:
+ *      [Employees]
+ *     summary: Update an employee by ID
+ *     description: Update an employee with the specified ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the employee to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Employee'
+ *     responses:
+ *       200:
+ *         description: Employee successfully updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Employee'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Employee not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */

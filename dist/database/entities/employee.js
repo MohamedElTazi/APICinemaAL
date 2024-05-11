@@ -11,13 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Employee = void 0;
 const typeorm_1 = require("typeorm");
-const poste_1 = require("./poste");
+const planning_1 = require("./planning");
 let Employee = class Employee {
-    constructor(id, name, post, workin_hours) {
+    constructor(id, name, plannings) {
         this.id = id;
         this.name = name;
-        this.post = post;
-        this.workin_hours = workin_hours;
+        this.plannings = plannings;
     }
 };
 exports.Employee = Employee;
@@ -30,14 +29,10 @@ __decorate([
     __metadata("design:type", String)
 ], Employee.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => poste_1.Poste, poste => poste.name),
+    (0, typeorm_1.OneToMany)(() => planning_1.Planning, planning => planning.employee),
     __metadata("design:type", Array)
-], Employee.prototype, "post", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Employee.prototype, "workin_hours", void 0);
+], Employee.prototype, "plannings", void 0);
 exports.Employee = Employee = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, String, Array, String])
+    __metadata("design:paramtypes", [Number, String, Array])
 ], Employee);
