@@ -68,25 +68,15 @@ CREATE TABLE transaction (
     ticketId INT,
     transaction_type ENUM('buy ticket', 'recharge balance', 'withdraw balance') NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
-    transaction_date DATE DEFAULT CURRENT_TIMESTAMP,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ticketId) REFERENCES ticket(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
-CREATE TABLE token (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    token VARCHAR(255) NOT NULL,
-    userId INT NOT NULL,
-    FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
 CREATE TABLE employee (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    address VARCHAR(255),
-    phone_number VARCHAR(20),
-    status VARCHAR(50) NOT NULL
+    name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE poste (
@@ -110,4 +100,4 @@ CREATE TABLE token (
     token VARCHAR(255) NOT NULL,
     userId INT REFERENCES user(id)
 
-);
+)

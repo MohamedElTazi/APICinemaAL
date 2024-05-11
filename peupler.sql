@@ -105,14 +105,6 @@ INSERT INTO planning (employeeId, posteId, start_datetime, end_datetime) VALUES
 (2, 2, '2024-04-23 10:00:00', '2024-04-23 18:00:00'),
 (3, 3, '2024-04-23 11:00:00', '2024-04-23 19:00:00');
 
-select salle.name, salle.description, salle.type, movie.title, movie.description , showtime.start_time, showtime.end_time, showtime.special_notes  
-from salle 
-inner join showtime 
-ON salle.id = showtime.id 
-INNER JOIN movie ON showtime.movieId = movie.id 
-WHERE salle.maintenance_status = false 
-AND showtime.date BETWEEN '2024-04-10' AND '2024-04-11' 
-order by showtime.date ASC;
 
 
 

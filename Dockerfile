@@ -5,13 +5,11 @@ WORKDIR /app
 COPY package*.json ./
 
 RUN npm install
+RUN npm install -g ts-node
 
- RUN npm install -g nodemon ts-node
+COPY . .
 
- COPY . .
-
- RUN npm rebuild bcrypt --build-from-source
 
 EXPOSE 3000
 
-CMD ["nodemon", "-e", "ts", "--exec", "ts-node", "src/index.ts"]
+CMD ["ts-node", "dist/index.js"]
