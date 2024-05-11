@@ -26,7 +26,7 @@ const authMiddlewareAll = (req, res, next) => __awaiter(void 0, void 0, void 0, 
     if (!tokenFound) {
         return res.status(403).json({ "error": "Access Forbidden" });
     }
-    const secret = (_a = process.env.JWT_SECRET) !== null && _a !== void 0 ? _a : "";
+    const secret = (_a = process.env.JWT_SECRET) !== null && _a !== void 0 ? _a : "azerty";
     (0, jsonwebtoken_1.verify)(token, secret, (err, user) => {
         if (err)
             return res.status(403).json({ "error": "Access Forbidden" });
@@ -78,7 +78,7 @@ const authMiddlewareAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0
     if (tokenFound.user.role !== "administrator") {
         return res.status(403).json({ "error": "Access Denied: Administrator role required" });
     }
-    const secret = (_c = process.env.JWT_SECRET) !== null && _c !== void 0 ? _c : "";
+    const secret = (_c = process.env.JWT_SECRET) !== null && _c !== void 0 ? _c : "azerty";
     (0, jsonwebtoken_1.verify)(token, secret, (err, user) => {
         if (err)
             return res.status(403).json({ "error": "Access Forbidden" });
@@ -107,7 +107,7 @@ const authMiddlewareUser = (req, res, next) => __awaiter(void 0, void 0, void 0,
     if (tokenFound.user.role !== "user") {
         return res.status(403).json({ "error": "Access Denied: User role required" });
     }
-    const secret = (_d = process.env.JWT_SECRET) !== null && _d !== void 0 ? _d : "";
+    const secret = (_d = process.env.JWT_SECRET) !== null && _d !== void 0 ? _d : "azerty";
     (0, jsonwebtoken_1.verify)(token, secret, (err, user) => {
         if (err)
             return res.status(403).json({ "error": "Access Forbidden" });

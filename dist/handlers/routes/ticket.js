@@ -173,3 +173,385 @@ const TicketHandler = (app) => {
     }));
 };
 exports.TicketHandler = TicketHandler;
+/**
+ * @openapi
+ *
+ * components:
+ *  schemas:
+ *    Ticket:
+ *     type: object
+ *     required:
+ *      - user_id
+ *      - is_used
+ *      - is_super
+ *      - amount
+ *      - nb_tickets
+ *     properties:
+ *      id:
+ *       type: integer
+ *       description: The auto-generated id of the ticket
+ *      user_id:
+ *       type: integer
+ *       description: The id of the user who bought the ticket
+ *      is_used:
+ *       type: boolean
+ *       description: The status of the ticket
+ *      is_super:
+ *       type: boolean
+ *       description: The status of the ticket
+ *      amount:
+ *       type: number
+ *       description: The price of the ticket
+ *      nb_tickets:
+ *       type: integer
+ *       description: The number of tickets bought
+ *
+ * tags:
+ *  name: Tickets
+ */
+/**
+ * @openapi
+ * /tickets:
+ *   get:
+ *     tags:
+ *       - Tickets
+ *     summary: Get list of tickets
+ *     description: Retrieve a list of tickets with optional pagination and filtering.
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *         description: Number of tickets per page
+ *     responses:
+ *       200:
+ *         description: List of tickets
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Ticket'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /tickets/infos:
+ *   get:
+ *     tags:
+ *       - Tickets
+ *     summary: Get ticket information
+ *     description: Retrieve information about tickets.
+ *     responses:
+ *       200:
+ *         description: Ticket information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/TicketInfo'
+ *       404:
+ *         description: Tickets not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /tickets/infos/{id}:
+ *   get:
+ *     tags:
+ *       - Tickets
+ *     summary: Get ticket information by ID
+ *     description: Retrieve information about a ticket by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Ticket ID
+ *     responses:
+ *       200:
+ *         description: Ticket information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Ticket'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Ticket not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /tickets:
+ *   post:
+ *     tags:
+ *       - Tickets
+ *     summary: Create a new ticket
+ *     description: Create a new ticket.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/NewTicket'
+ *     responses:
+ *       201:
+ *         description: Created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Ticket'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /tickets/{id}:
+ *   get:
+ *     tags:
+ *       - Tickets
+ *     summary: Get ticket by ID
+ *     description: Retrieve a ticket by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Ticket ID
+ *     responses:
+ *       200:
+ *         description: Ticket information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Ticket'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Ticket not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /tickets/{id}:
+ *   patch:
+ *     tags:
+ *       - Tickets
+ *     summary: Update ticket by ID
+ *     description: Update a ticket by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Ticket ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateTicket'
+ *     responses:
+ *       200:
+ *         description: Updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Ticket'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Ticket not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /tickets/{id}:
+ *   delete:
+ *     tags:
+ *       - Tickets
+ *     summary: Delete ticket by ID
+ *     description: Delete a ticket by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Ticket ID
+ *     responses:
+ *       200:
+ *         description: Successfully deleted
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Ticket not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
