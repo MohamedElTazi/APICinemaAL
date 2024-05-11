@@ -42,6 +42,7 @@ INSERT INTO user (firstname, lastname,email, password, role, balance) VALUES
 ('Boume','Bennali','user6@example.com', '$2b$10$IOHz6oO7lOEsl9KQH8lZ4ukaPCJ.TEgGyz7gsJWE32AUiTUtLdZa2', 'user', 90), /* password: azertyyy */
 ('Theophile','Bourget','user7@example.com', '$2b$10$IOHz6oO7lOEsl9KQH8lZ4ukaPCJ.TEgGyz7gsJWE32AUiTUtLdZa2', 'user', 65); /* password: azertyyy */
 
+-- Insertion dans la table ticket
 INSERT INTO ticket (userId, is_used, is_super,price ,nb_tickets) VALUES
 (1, FALSE, FALSE, 10,1),
 (3, FALSE, FALSE, 10,1),
@@ -54,7 +55,7 @@ INSERT INTO ticket (userId, is_used, is_super,price ,nb_tickets) VALUES
 (6, FALSE, TRUE, 80, 5),
 (7, FALSE, TRUE, 80, 4);
 
-
+-- Insertion dans la table ticket_showtime_accesses
 INSERT INTO ticket_showtime_accesses (ticketId, showtimeId) VALUES
 (4, 1),
 (4, 7),
@@ -86,23 +87,32 @@ INSERT INTO transaction (userId, ticketId, transaction_type, amount, transaction
 (6, 9, 'buy ticket', 80.00, '2024-04-18'),
 (7, 10, 'buy ticket', 80.00, '2024-04-19');
 
-
+-- Insertion dans la table employee
 INSERT INTO employee (name) VALUES
 ('John Doe'),
 ('Jane Smith'),
 ('Bob Brown');
 
+-- Insertion dans la table poste
 INSERT INTO poste (name, description) VALUES
 ('Confiserie', "Responsable de la vente et de la gestion des confiseries."),
 ('Projectionniste', "Responsable de la projection des films et de la gestion des équipements de projection."),
 ('Accueil', "Responsable de l'accueil des clients et de la gestion des billets.");
 
-
 -- Insertion dans la table planning
-INSERT INTO planning (employeeId, posteId, start_time, end_time) VALUES
+INSERT INTO planning (employeeId, posteId, start_datetime, end_datetime) VALUES
 (1, 1, '2024-04-23 09:00:00', '2024-04-23 17:00:00'),
 (2, 2, '2024-04-23 10:00:00', '2024-04-23 18:00:00'),
 (3, 3, '2024-04-23 11:00:00', '2024-04-23 19:00:00');
+
+select salle.name, salle.description, salle.type, movie.title, movie.description , showtime.start_time, showtime.end_time, showtime.special_notes  
+from salle 
+inner join showtime 
+ON salle.id = showtime.id 
+INNER JOIN movie ON showtime.movieId = movie.id 
+WHERE salle.maintenance_status = false 
+AND showtime.date BETWEEN '2024-04-10' AND '2024-04-11' 
+order by showtime.date ASC;
 
 
 
@@ -325,4 +335,3 @@ ORDER BY
 
 
 */
-

@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { Salle } from "../../database/entities/salle";
 import { Movie } from "../../database/entities/movie";
-import { TicketShowtimeAccesses } from "../../database/entities/ticketShowtimeAccesses";
+
 
 export const createShowtimeValidation = Joi.object<CreateShowtimeValidationRequest>({
     salle: Joi.number().required(),

@@ -3,7 +3,7 @@ import Joi from "joi";
 export const createMovieValidation = Joi.object<CreateMovieValidationRequest>({
     title: Joi.string().required(),
     description: Joi.string().required(),
-    duration: Joi.number().required(),
+    duration: Joi.date().required(),
     genre: Joi.string().required(),
 }).options({ abortEarly: false });
 

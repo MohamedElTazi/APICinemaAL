@@ -1,4 +1,3 @@
-
 import { DataSource } from "typeorm";
 
 
@@ -17,6 +16,4 @@ export const AppDataSource = new DataSource({
     migrations:[
         process.env.NODE_ENV === "dev" ? "src/database/migrations/*.ts" : "dist/database/migrations/*.js"
     ]
-
-    
 })

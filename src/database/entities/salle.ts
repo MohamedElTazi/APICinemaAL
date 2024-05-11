@@ -36,4 +36,3 @@ export class Salle {
         this.showtimes = showtimes;
     }
 }
-

@@ -1,6 +1,5 @@
-import { DataSource, SelectQueryBuilder } from "typeorm";
+import { DataSource } from "typeorm";
 import { Salle } from "../database/entities/salle";
-import { Showtime } from "../database/entities/showtime";
 
 export interface ListSalleFilter {
     limit: number
@@ -81,6 +80,7 @@ export class SalleUsecase {
         return SalleUpdate
     }
 
+
     async getSallePlanning(startDate:string, endDate:string, id:number): Promise<SelectQueryBuilder<Showtime> | null>{
 
         let query = this.db.getRepository(Showtime)
@@ -112,5 +112,4 @@ export class SalleUsecase {
         return query;
 
     }
-
 }

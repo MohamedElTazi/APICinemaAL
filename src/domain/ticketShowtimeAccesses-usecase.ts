@@ -65,6 +65,7 @@ export class TicketAccesUsecase {
         const ticketAccessToUpdate = await repo.findOneBy({id})
         if (!ticketAccessToUpdate) return undefined
     
+
         if(ticket){
             ticketAccessToUpdate.ticket = ticket
         }

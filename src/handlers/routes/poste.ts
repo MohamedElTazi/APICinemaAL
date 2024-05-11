@@ -118,5 +118,29 @@ export const PosteHandler = (app: express.Express) => {
         }
     })
 
+    app.delete("/postes/:id", async (req: Request, res: Response) => {
+        try {
+            const validationResult = posteIdValidation.validate(req.params)
+    
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+            const posteId = validationResult.value
+    
+            const PosteRepository = AppDataSource.getRepository(Poste)
+            const poste = await PosteRepository.findOneBy({ id: posteId.id })
+            if (poste === null) {
+                res.status(404).send({ "error": `salle ${posteId.id} not found` })
+                return
+            }
+    
+            const PosteDeleted = await PosteRepository.remove(poste)
+            res.status(200).send(PosteDeleted)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
 
 }

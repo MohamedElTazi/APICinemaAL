@@ -32,6 +32,29 @@ export const authMiddlewareAll = async (req: Request, res: Response, next: NextF
     });
 }
 
+export const authMiddlewareSuperAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) return res.status(401).json({"error": "Unauthorized"});
+
+    const token = authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({"error": "Unauthorized"});
+
+    const tokenRepo = AppDataSource.getRepository(Token);
+    const tokenFound = await tokenRepo.findOne({ where: { token } });
+
+    if (!tokenFound) {
+        return res.status(403).json({"error": "Access Forbidden"});
+    }
+
+    const secret = process.env.JWT_SECRET ?? "azerty";
+    verify(token, secret, (err, user) => {
+        if (err) return res.status(403).json({"error": "Access Forbidden"});
+        (req as any).user = user;
+        next();
+    });
+};
+
+
 
 export const authMiddlewareAdmin = async (req: Request, res: Response, next: NextFunction) => {
     
@@ -55,6 +78,7 @@ export const authMiddlewareAdmin = async (req: Request, res: Response, next: Nex
     }
 
 
+    console.log(tokenFound.user.role);
     if (tokenFound.user.role !== "administrator") {
         return res.status(403).json({"error": "Access Denied: Administrator role required"});
     }

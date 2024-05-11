@@ -11,6 +11,7 @@ export const SalleHandler = (app: express.Express) => {
    
 
     app.post("/salles",authMiddlewareAdmin ,async (req: Request, res: Response) => {
+        console.log(UserHandler.name)
         const validation = createSalleValidation.validate(req.body)
 
         if (validation.error) {
@@ -58,6 +59,7 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
+
     app.get("/salles/planning/:id",authMiddlewareAll,async (req: Request, res: Response) => {
 
         const validationResultParams = salleIdValidation.validate(req.params)
@@ -75,7 +77,9 @@ export const SalleHandler = (app: express.Express) => {
             return
         }
         
-        let { startDate, endDate} = req.query;
+        const { startDate, endDate} = req.query;
+
+
 
         const validationResultQuery = sallePlanningValidation.validate(req.query)
 
@@ -86,20 +90,13 @@ export const SalleHandler = (app: express.Express) => {
         }
 
 
+
         const salleUsecase = new SalleUsecase(AppDataSource);
         const query = await salleUsecase.getSallePlanning(startDate as string, endDate as string, salleId.id);
 
-        if(query === null){
-            res.status(404).send(Error("Error fetching planning"))
-            return
-        }   
-        
         try {
-            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
-            planning.forEach((showtime) => {
-                showtime.start_datetime = toZonedTime(showtime.start_datetime, '+04:00')
-                showtime.end_datetime = toZonedTime(showtime.end_datetime, '+04:00')
-            })
+            const planning = await query.orderBy("showtime.date", "ASC").getMany();
+
             res.status(200).send(planning);
         } catch (error) {
             console.error("Error fetching planning:", error);
@@ -222,5 +219,6 @@ export const SalleHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
+
 
 }

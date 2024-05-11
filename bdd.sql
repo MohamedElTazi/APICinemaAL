@@ -38,7 +38,7 @@ CREATE TABLE user(
     lastname VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role ENUM('user', 'administrator') NOT NULL,
+    role ENUM('user', 'administrator', 'super_administrator') NOT NULL,
     balance FLOAT DEFAULT 0.0
 );
 
@@ -83,7 +83,10 @@ CREATE TABLE token (
 
 CREATE TABLE employee (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    address VARCHAR(255),
+    phone_number VARCHAR(20),
+    status VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE poste (
@@ -94,10 +97,17 @@ CREATE TABLE poste (
 
 CREATE TABLE planning (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    employeeId INT,
-    posteId INT,
-    start_time DATETIME NOT NULL,
-    end_time DATETIME NOT NULL,
+    employeeId INT NOT NULL REFERENCES employee(id),
+    posteId INT NOT NULL REFERENCES poste(id),
+    start_datetime DATETIME NOT NULL,
+    end_datetime DATETIME NOT NULL,
     FOREIGN KEY (employeeId) REFERENCES employee(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (posteId) REFERENCES poste(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE token (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    userId INT REFERENCES user(id)
+
 );
