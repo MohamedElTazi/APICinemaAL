@@ -7,8 +7,14 @@ const salle_1 = require("./salle");
 const movie_1 = require("./movie");
 const showtime_1 = require("./showtime");
 const poste_1 = require("./poste");
+const planning_1 = require("./planning");
+const employee_1 = require("./employee");
+const transaction_1 = require("./transaction");
+const ticket_1 = require("./ticket");
+const ticketShowtimeAccesses_1 = require("./ticketShowtimeAccesses");
+const statistic_1 = require("./statistic");
 const initRoutes = (app) => {
-    app.get("/health", (req, res) => {
+    app.get("/health", (res) => {
         res.send({ "message": "OP LE S" });
     });
     (0, user_1.UserHandler)(app);
@@ -16,6 +22,12 @@ const initRoutes = (app) => {
     (0, poste_1.PosteHandler)(app);
     (0, movie_1.MovieHandler)(app);
     (0, showtime_1.ShowtimeHandler)(app);
+    (0, planning_1.PlanningHandler)(app);
+    (0, employee_1.EmployeeHandler)(app);
+    (0, transaction_1.TransactionHandler)(app);
+    (0, ticket_1.TicketHandler)(app);
+    (0, ticketShowtimeAccesses_1.TicketShowtimeAccessessHandler)(app);
+    (0, statistic_1.StatisticHandler)(app);
     app.use(invalid_path_handler_1.invalidPathHandler);
 };
 exports.initRoutes = initRoutes;

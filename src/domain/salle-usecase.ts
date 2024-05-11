@@ -1,5 +1,6 @@
-import { DataSource } from "typeorm";
+import { DataSource, SelectQueryBuilder } from "typeorm";
 import { Salle } from "../database/entities/salle";
+import { Showtime } from "../database/entities/showtime";
 
 export interface ListSalleFilter {
     limit: number

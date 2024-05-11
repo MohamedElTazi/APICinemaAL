@@ -16,9 +16,10 @@ const database_1 = require("../../database/database");
 const salle_1 = require("../../database/entities/salle");
 const salle_usecase_1 = require("../../domain/salle-usecase");
 const auth_middleware_1 = require("../middleware/auth-middleware");
-const date_fns_tz_1 = require("date-fns-tz");
+const user_1 = require("./user");
 const SalleHandler = (app) => {
     app.post("/salles", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        console.log(user_1.UserHandler.name);
         const validation = salle_validator_1.createSalleValidation.validate(req.body);
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -71,24 +72,20 @@ const SalleHandler = (app) => {
             res.status(404).send({ "error": `salle ${salleId.id} not found` });
             return;
         }
-        let { startDate, endDate } = req.query;
+        const { startDate, endDate } = req.query;
         const validationResultQuery = salle_validator_1.sallePlanningValidation.validate(req.query);
         if (validationResultQuery.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validationResultQuery.error.details));
             return;
         }
         const salleUsecase = new salle_usecase_1.SalleUsecase(database_1.AppDataSource);
-        const query = yield salleUsecase.getMoviePlanning(startDate, endDate, salleId.id);
+        const query = yield salleUsecase.getSallePlanning(startDate, endDate, salleId.id);
         if (query === null) {
-            res.status(404).send(Error("Error fetching planning"));
+            res.status(404).send({ "error": `salle ${salleId.id} not found` });
             return;
         }
         try {
-            const planning = yield query.orderBy("showtime.start_datetime", "ASC").getMany();
-            planning.forEach((showtime) => {
-                showtime.start_datetime = (0, date_fns_tz_1.toZonedTime)(showtime.start_datetime, '+04:00');
-                showtime.end_datetime = (0, date_fns_tz_1.toZonedTime)(showtime.end_datetime, '+04:00');
-            });
+            const planning = yield query.orderBy("showtime.date", "ASC").getMany();
             res.status(200).send(planning);
         }
         catch (error) {
@@ -139,7 +136,7 @@ const SalleHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/salles/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/salles/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = salle_validator_1.updateSalleValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -187,3 +184,325 @@ const SalleHandler = (app) => {
     }));
 };
 exports.SalleHandler = SalleHandler;
+/**
+ * @openapi
+ * components:
+ *  schemas:
+ *   salle:
+ *    type: object
+ *    properties:
+ *     id:
+ *      type: integer
+ *      description: The auto-generated id of the salle.
+ *     name:
+ *      type: string
+ *      description: The name of the salle.
+ *     capacity:
+ *      type: integer
+ *      description: The capacity of the salle.
+ *
+ * tags:
+ *  name: salles
+ *  description: The salles managing API
+ */
+/**
+ * @openapi
+ * /salles:
+ *   post:
+ *     tags:
+ *      [salles]
+ *     summary: Create a new salle
+ *     description: Create a new salle with the provided data.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/salle'
+ *     responses:
+ *       201:
+ *         description: salle created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/salle'
+ *       400:
+ *         description: Invalid request data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /salles:
+ *   get:
+ *     tags:
+ *      [salles]
+ *     summary: Get all salles
+ *     description: Retrieve a list of salles.
+ *     responses:
+ *       200:
+ *         description: List of salles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/salle'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /salles/planning/{id}:
+ *   get:
+ *     tags:
+ *      [salles]
+ *     summary: Get salle planning by ID
+ *     description: Retrieve the planning of a specific salle.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the salle to retrieve the planning for.
+ *     responses:
+ *       200:
+ *         description: Success retrieving the salle planning.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/sallePlanning'
+ *       400:
+ *         description: Invalid request or parameter
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: salle not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /salles/{id}:
+ *   get:
+ *     tags:
+ *      [salles]
+ *     summary: Get a salle by ID
+ *     description: Retrieve details of a specific salle.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the salle to retrieve.
+ *     responses:
+ *       200:
+ *         description: Success retrieving the salle.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/salle'
+ *       400:
+ *         description: Invalid request or parameter
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: salle not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /salles/{id}:
+ *   delete:
+ *     tags:
+ *      [salles]
+ *     summary: Delete a salle by ID
+ *     description: Delete a specific salle.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the salle to delete.
+ *     responses:
+ *       200:
+ *         description: Success deleting the salle.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/salle'
+
+ *       400:
+ *         description: Invalid parameter or request data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: salle not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /salles/maintenance/{id}:
+ *   patch:
+ *     tags:
+ *      [salles]
+ *     summary: Update maintenance information of a salle by ID
+ *     description: Update the maintenance details of a specific salle.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The unique identifier of the salle to update maintenance information for.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/salleMaintenance'
+ *     responses:
+ *       200:
+ *         description: Success updating the maintenance information of the salle.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/salleMaintenance'
+ *       400:
+ *         description: Invalid parameter or request data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: salle not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */ 

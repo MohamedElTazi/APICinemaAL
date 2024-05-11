@@ -21,13 +21,26 @@ class ShowtimeUsecase {
     }
     listShowtime(listShowtimeFilter) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(listShowtimeFilter);
-            const query = this.db.createQueryBuilder(showtime_1.Showtime, 'Showtime');
-            if (listShowtimeFilter.capacityMax) {
-                query.andWhere('Showtime.capacity <= :capacityMax', { capacityMax: listShowtimeFilter.capacityMax });
+            const query = this.db.createQueryBuilder(showtime_1.Showtime, 'showtime');
+            if (listShowtimeFilter.salle) {
+                query.andWhere('showtime.salle <= :salle', { salle: listShowtimeFilter.salle });
             }
-            query.skip((listShowtimeFilter.page - 1) * listShowtimeFilter.limit);
-            query.take(listShowtimeFilter.limit);
+            if (listShowtimeFilter.movie) {
+                query.andWhere('showtime.movie <= :movie', { movie: listShowtimeFilter.movie });
+            }
+            if (listShowtimeFilter.start_datetime) {
+                query.andWhere('showtime.start_datetime <= :start_datetime', { start_datetime: listShowtimeFilter.start_datetime });
+            }
+            if (listShowtimeFilter.end_datetime) {
+                query.andWhere('showtime.end_datetime <= :end_datetime', { end_datetime: listShowtimeFilter.end_datetime });
+            }
+            if (listShowtimeFilter.special_notes) {
+                query.andWhere('showtime.special_notes <= :special_notes', { special_notes: listShowtimeFilter.special_notes });
+            }
+            query.leftJoinAndSelect('showtime.salle', 'salle')
+                .leftJoinAndSelect('showtime.movie', 'movie')
+                .skip((listShowtimeFilter.page - 1) * listShowtimeFilter.limit)
+                .take(listShowtimeFilter.limit);
             const [Showtimes, totalCount] = yield query.getManyAndCount();
             return {
                 Showtimes,
@@ -35,17 +48,61 @@ class ShowtimeUsecase {
             };
         });
     }
+    getOneShowtime(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const query = this.db.createQueryBuilder(showtime_1.Showtime, 'showtime')
+                .leftJoinAndSelect('showtime.salle', 'salle')
+                .leftJoinAndSelect('showtime.movie', 'movie')
+                .where("showtime.id = :id", { id: id });
+            // Exécuter la requête et récupérer le ticket avec les détails de l'utilisateur
+            const showtime = yield query.getOne();
+            // Vérifier si le ticket existe
+            if (!showtime) {
+                console.log({ error: `Ticket ${id} not found` });
+                return null;
+            }
+            return showtime;
+        });
+    }
     updateShowtime(id_1, _a) {
-        return __awaiter(this, arguments, void 0, function* (id, { special_notes }) {
+        return __awaiter(this, arguments, void 0, function* (id, { special_notes, start_datetime, end_datetime, salle, movie }) {
             const repo = this.db.getRepository(showtime_1.Showtime);
-            const Showtimefound = yield repo.findOneBy({ id });
+            const Showtimefound = yield this.foundShowtime(id);
             if (Showtimefound === null)
                 return null;
             if (special_notes) {
                 Showtimefound.special_notes = special_notes;
             }
+            if (start_datetime) {
+                Showtimefound.start_datetime = start_datetime;
+            }
+            if (end_datetime) {
+                Showtimefound.end_datetime = end_datetime;
+            }
+            if (start_datetime) {
+                Showtimefound.start_datetime = start_datetime;
+                //Showtimefound.end_datetime = await this.getMovieDuration(Showtimefound.movie.id, Showtimefound.start_datetime)
+            }
+            if (end_datetime) {
+                Showtimefound.end_datetime = end_datetime;
+            }
+            if (salle) {
+                Showtimefound.salle = salle;
+            }
+            if (movie) {
+                Showtimefound.movie = movie;
+            }
             const ShowtimeUpdate = yield repo.save(Showtimefound);
             return ShowtimeUpdate;
+        });
+    }
+    foundShowtime(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const repo = this.db.getRepository(showtime_1.Showtime);
+            const Showtimefound = yield repo.findOneBy({ id });
+            if (Showtimefound === null)
+                return null;
+            return Showtimefound;
         });
     }
     getMovieDuration(movieId, start_datetime) {
@@ -56,13 +113,13 @@ class ShowtimeUsecase {
                 .select("duration")
                 .where("id = :movieId", { movieId: movieId })
                 .getRawOne();
-            const start_datetimeDate = new Date(start_datetime);
-            const formattedDate = (0, date_fns_1.format)(start_datetimeDate, 'yyyy-MM-dd');
+            const end_datetimeDate = new Date(start_datetime);
+            const formattedDate = (0, date_fns_1.format)(end_datetimeDate, 'yyyy-MM-dd');
             let resultDate = new Date(formattedDate + "T" + result.duration);
-            start_datetimeDate.setHours(start_datetimeDate.getHours() + resultDate.getHours());
-            start_datetimeDate.setMinutes(start_datetimeDate.getMinutes() + resultDate.getMinutes());
-            start_datetimeDate.setSeconds(start_datetimeDate.getSeconds() + resultDate.getSeconds());
-            return start_datetimeDate;
+            end_datetimeDate.setHours(end_datetimeDate.getHours() + resultDate.getHours());
+            end_datetimeDate.setMinutes(end_datetimeDate.getMinutes() + resultDate.getMinutes());
+            end_datetimeDate.setSeconds(end_datetimeDate.getSeconds() + resultDate.getSeconds());
+            return end_datetimeDate;
         });
     }
     getShowtimePlanning(startDate, endDate) {

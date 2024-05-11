@@ -12,15 +12,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Ticket = void 0;
 const typeorm_1 = require("typeorm");
 const user_1 = require("./user");
+const transaction_1 = require("./transaction");
 const ticketShowtimeAccesses_1 = require("./ticketShowtimeAccesses");
 let Ticket = class Ticket {
-    constructor(id, user, is_used, is_super, nb_tickets, ticket_showtime_accesses) {
+    constructor(id, user, is_used, is_super, nb_tickets, price, ticket_showtime_accesses, transactions) {
         this.id = id;
         this.user = user;
         this.is_used = is_used;
         this.is_super = is_super;
         this.nb_tickets = nb_tickets;
         this.ticket_showtime_accesses = ticket_showtime_accesses;
+        this.price = price;
+        this.transactions = transactions;
     }
 };
 exports.Ticket = Ticket;
@@ -29,7 +32,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Ticket.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_1.User, user => user.tokens),
+    (0, typeorm_1.ManyToOne)(() => user_1.User, user => user.tickets),
     __metadata("design:type", user_1.User)
 ], Ticket.prototype, "user", void 0);
 __decorate([
@@ -43,12 +46,20 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
+], Ticket.prototype, "price", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
 ], Ticket.prototype, "nb_tickets", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => ticketShowtimeAccesses_1.TicketShowtimeAccesses, ticket_showtime_accesses => ticket_showtime_accesses.ticket),
+    (0, typeorm_1.OneToMany)(() => ticketShowtimeAccesses_1.TicketShowtimeAccesses, ticket_showtime_accesses => ticket_showtime_accesses.ticket, { cascade: true }),
     __metadata("design:type", Array)
 ], Ticket.prototype, "ticket_showtime_accesses", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => transaction_1.Transaction, transactions => transactions.ticket, { cascade: true }),
+    __metadata("design:type", Array)
+], Ticket.prototype, "transactions", void 0);
 exports.Ticket = Ticket = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, user_1.User, Boolean, Boolean, Number, Array])
+    __metadata("design:paramtypes", [Number, user_1.User, Boolean, Boolean, Number, Number, Array, Array])
 ], Ticket);

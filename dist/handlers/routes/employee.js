@@ -9,116 +9,116 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PosteHandler = void 0;
+exports.EmployeeHandler = void 0;
 const database_1 = require("../../database/database");
 const generate_validation_message_1 = require("../validators/generate-validation-message");
-const poste_validator_1 = require("../validators/poste-validator");
-const poste_1 = require("../../database/entities/poste");
-const poste_usecase_1 = require("../../domain/poste-usecase");
-const PosteHandler = (app) => {
-    app.get("/postes/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const employee_validator_1 = require("../validators/employee-validator");
+const employee_1 = require("../../database/entities/employee");
+const employee_usecase_1 = require("../../domain/employee-usecase");
+const EmployeeHandler = (app) => {
+    app.get("/employees/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const validationResult = poste_validator_1.posteIdValidation.validate(req.params);
+            const validationResult = employee_validator_1.employeeIdValidation.validate(req.params);
             if (validationResult.error) {
                 res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validationResult.error.details));
                 return;
             }
-            const posteId = validationResult.value;
-            const posteRepository = database_1.AppDataSource.getRepository(poste_1.Poste);
-            const poste = yield posteRepository.findOneBy({ id: posteId.id });
-            if (poste === null) {
-                res.status(404).send({ "error": `poste ${posteId.id} not found` });
+            const employeeId = validationResult.value;
+            const employeeRepository = database_1.AppDataSource.getRepository(employee_1.Employee);
+            const employee = yield employeeRepository.findOneBy({ id: employeeId.id });
+            if (employee === null) {
+                res.status(404).send({ "error": `employee ${employeeId.id} not found` });
                 return;
             }
-            res.status(200).send(poste);
+            res.status(200).send(employee);
         }
         catch (error) {
             console.log(error);
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/postes", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/employees", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
-        const validation = poste_validator_1.listPosteValidation.validate(req.query);
+        const validation = employee_validator_1.listEmployeeValidation.validate(req.query);
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
             return;
         }
-        const listPosteRequest = validation.value;
+        const listEmployeeRequest = validation.value;
         let limit = 20;
-        if (listPosteRequest.limit) {
-            limit = listPosteRequest.limit;
+        if (listEmployeeRequest.limit) {
+            limit = listEmployeeRequest.limit;
         }
-        const page = (_a = listPosteRequest.page) !== null && _a !== void 0 ? _a : 1;
+        const page = (_a = listEmployeeRequest.page) !== null && _a !== void 0 ? _a : 1;
         try {
-            const posteUsecase = new poste_usecase_1.PosteUsecase(database_1.AppDataSource);
-            const listPostes = yield posteUsecase.listPoste(Object.assign(Object.assign({}, listPosteRequest), { page, limit }));
-            res.status(200).send(listPostes);
+            const employeeUsecase = new employee_usecase_1.EmployeeUsecase(database_1.AppDataSource);
+            const listEmployees = yield employeeUsecase.listEmployee(Object.assign(Object.assign({}, listEmployeeRequest), { page, limit }));
+            res.status(200).send(listEmployees);
         }
         catch (error) {
             console.log(error);
         }
     }));
-    app.post("/postes", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const validation = poste_validator_1.createPosteValidation.validate(req.body);
+    app.post("/employees", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const validation = employee_validator_1.createEmployeeValidation.validate(req.body);
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
             return;
         }
-        const PosteRequest = validation.value;
-        const posteRepository = database_1.AppDataSource.getRepository(poste_1.Poste);
+        const EmployeeRequest = validation.value;
+        const employeeRepository = database_1.AppDataSource.getRepository(employee_1.Employee);
         try {
-            const posteCreated = yield posteRepository.save(PosteRequest);
-            res.status(201).send(posteCreated);
+            const employeeCreated = yield employeeRepository.save(EmployeeRequest);
+            res.status(201).send(employeeCreated);
         }
         catch (error) {
             console.log(error);
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/postes/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const validation = poste_validator_1.updatePosteValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
+    app.patch("/employees/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const validation = employee_validator_1.updateEmployeeValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
             return;
         }
-        const UpdatePosteRequest = validation.value;
+        const UpdateEmployeeRequest = validation.value;
         try {
-            const posteUsecase = new poste_usecase_1.PosteUsecase(database_1.AppDataSource);
-            const validationResult = poste_validator_1.posteIdValidation.validate(req.params);
+            const employeeUsecase = new employee_usecase_1.EmployeeUsecase(database_1.AppDataSource);
+            const validationResult = employee_validator_1.employeeIdValidation.validate(req.params);
             if (validationResult.error) {
                 res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validationResult.error.details));
                 return;
             }
-            const posteId = validationResult.value;
-            const updatedPoste = yield posteUsecase.updatePoste(UpdatePosteRequest.id, Object.assign({}, UpdatePosteRequest));
-            if (updatedPoste === null) {
-                res.status(404).send({ "error": `Poste ${UpdatePosteRequest.id} not found` });
+            const employeId = validationResult.value;
+            const updatedEmployee = yield employeeUsecase.updateEmployee(employeId.id, Object.assign({}, UpdateEmployeeRequest));
+            if (updatedEmployee === null) {
+                res.status(404).send({ "error": `Poste ${UpdateEmployeeRequest.id} not found` });
                 return;
             }
-            res.status(200).send(updatedPoste);
+            res.status(200).send(updatedEmployee);
         }
         catch (error) {
             console.log(error);
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.delete("/postes/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.delete("/employees/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const validationResult = poste_validator_1.posteIdValidation.validate(req.params);
+            const validationResult = employee_validator_1.employeeIdValidation.validate(req.params);
             if (validationResult.error) {
                 res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validationResult.error.details));
                 return;
             }
-            const posteId = validationResult.value;
-            const PosteRepository = database_1.AppDataSource.getRepository(poste_1.Poste);
-            const poste = yield PosteRepository.findOneBy({ id: posteId.id });
-            if (poste === null) {
-                res.status(404).send({ "error": `salle ${posteId.id} not found` });
+            const employeeId = validationResult.value;
+            const EmployeeRepository = database_1.AppDataSource.getRepository(employee_1.Employee);
+            const employee = yield EmployeeRepository.findOneBy({ id: employeeId.id });
+            if (employee === null) {
+                res.status(404).send({ "error": `employees ${employeeId.id} not found` });
                 return;
             }
-            const PosteDeleted = yield PosteRepository.remove(poste);
-            res.status(200).send(PosteDeleted);
+            const EmployeeDeleted = yield EmployeeRepository.remove(employee);
+            res.status(200).send(EmployeeDeleted);
         }
         catch (error) {
             console.log(error);
@@ -126,98 +126,41 @@ const PosteHandler = (app) => {
         }
     }));
 };
-exports.PosteHandler = PosteHandler;
+exports.EmployeeHandler = EmployeeHandler;
 /**
  * @openapi
  * components:
  *   schemas:
- *     Poste:
+ *     Employee:
  *       type: object
  *       properties:
  *         id:
- *           type: integer
- *           description: The ID of the poste.
+ *           type: string
+ *           description: The ID of the employee.
  *         name:
  *           type: string
- *           description: The name of the poste.
- *         description:
- *           type: string
- *           description: The description of the poste.
+ *           description: The name of the employee.
  * tags:
- *  name: Postes
- *  description: Endpoints related to postes
+ *  name: Employees
+ *  description: Endpoints related to employees
  */
 /**
  * @openapi
- * /postes/{id}:
+ * /employees:
  *   get:
  *     tags:
- *      [Postes]
- *     summary: Get a post by ID
- *     description: Retrieve details of a specific post.
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The unique identifier of the post to retrieve.
+ *      [Employees]
+ *     summary: Get all employees
+ *     description: Retrieve a list of employees.
  *     responses:
  *       200:
- *         description: Success retrieving the post.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Poste'
- *       400:
- *         description: Invalid request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message
- *       404:
- *         description: Post not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message
- *
- */
-/**
- * @openapi
- * /postes:
- *   get:
- *     tags:
- *      [Postes]
- *     summary: Get all posts
- *     description: Retrieve a list of posts.
- *     responses:
- *       200:
- *         description: List of posts
+ *         description: List of employees
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Poste'
+ *                 $ref: '#/components/schemas/Employee'
  *       400:
  *         description: Bad request
  *         content:
@@ -241,27 +184,81 @@ exports.PosteHandler = PosteHandler;
  */
 /**
  * @openapi
- * /postes:
+
+ * /employees/{id}:
+ *   get:
+ *     tags:
+ *      [Employees]
+ *     summary: Get an employee by ID
+ *     description: Retrieve an employee with the specified ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the employee to retrieve
+ *     responses:
+ *       200:
+ *         description: Employee found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Employee'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Employee not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /employees:
  *   post:
  *     tags:
- *      [Postes]
- *     summary: Create a new post
- *     description: Create a new post with the provided data.
+ *      [Employees]
+ *     summary: Create a new employee
+ *     description: Create a new employee.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Poste'
+ *             $ref: '#/components/schemas/Employee'
  *     responses:
  *       201:
- *         description: Post created successfully.
+ *         description: Employee successfully created
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Poste'
+ *               $ref: '#/components/schemas/Employee'
  *       400:
- *         description: Invalid request data.
+ *         description: Bad request
  *         content:
  *           application/json:
  *             schema:
@@ -280,38 +277,90 @@ exports.PosteHandler = PosteHandler;
  *                 error:
  *                   type: string
  *                   description: Error message
- *
  */
 /**
  * @openapi
- * /postes/{id}:
- *   patch:
+ * /employees/{id}:
+ *   delete:
  *     tags:
- *      [Postes]
- *     summary: Update a post by ID
- *     description: Update the details of a specific post.
+ *      [Employees]
+ *     summary: Delete an employee by ID
+ *     description: Delete an employee with the specified ID.
  *     parameters:
  *       - in: path
  *         name: id
- *         schema:
- *           type: integer
  *         required: true
- *         description: The unique identifier of the post to update.
+ *         schema:
+ *           type: string
+ *         description: ID of the employee to delete
+ *     responses:
+ *       200:
+ *         description: Employee successfully deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Employee'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Employee not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+/**
+ * @openapi
+ * /employees/{id}:
+ *   patch:
+ *     tags:
+ *      [Employees]
+ *     summary: Update an employee by ID
+ *     description: Update an employee with the specified ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the employee to update
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Poste'
+ *             $ref: '#/components/schemas/Employee'
  *     responses:
  *       200:
- *         description: Success updating the post.
+ *         description: Employee successfully updated
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Poste'
+ *               $ref: '#/components/schemas/Employee'
  *       400:
- *         description: Invalid parameter or request data.
+ *         description: Bad request
  *         content:
  *           application/json:
  *             schema:
@@ -321,7 +370,7 @@ exports.PosteHandler = PosteHandler;
  *                   type: string
  *                   description: Error message
  *       404:
- *         description: Post not found
+ *         description: Employee not found
  *         content:
  *           application/json:
  *             schema:
@@ -340,57 +389,4 @@ exports.PosteHandler = PosteHandler;
  *                 error:
  *                   type: string
  *                   description: Error message
- */
-/**
- * @openapi
- * /postes/{id}:
- *   delete:
- *     tags:
- *      [Postes]
- *     summary: Delete a post by ID
- *     description: Delete a specific post.
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The unique identifier of the post to delete.
- *     responses:
- *       200:
- *         description: Success deleting the post.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Poste'
- *       400:
- *         description: Invalid parameter.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message
- *       404:
- *         description: Post not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: Error message
- */
+ */ 

@@ -9,45 +9,41 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Movie = void 0;
+exports.Planning = void 0;
 const typeorm_1 = require("typeorm");
-const showtime_1 = require("./showtime");
-let Movie = class Movie {
-    constructor(id, title, description, duration, genre, showtimes) {
-        this.id = id,
-            this.title = title;
-        this.description = description;
-        this.duration = duration;
-        this.genre = genre;
-        this.showtimes = showtimes;
+const employee_1 = require("./employee");
+const poste_1 = require("./poste");
+let Planning = class Planning {
+    constructor(id, employees, postes, start_datetime, end_datetime) {
+        this.id = id;
+        this.employee = employees;
+        this.poste = postes;
+        this.start_datetime = start_datetime;
+        this.end_datetime = end_datetime;
     }
 };
-exports.Movie = Movie;
+exports.Planning = Planning;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Movie.prototype, "id", void 0);
+], Planning.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => employee_1.Employee, employee => employee.id),
+    __metadata("design:type", employee_1.Employee)
+], Planning.prototype, "employee", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => poste_1.Poste, poste => poste.id),
+    __metadata("design:type", poste_1.Poste)
+], Planning.prototype, "poste", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Movie.prototype, "title", void 0);
+    __metadata("design:type", Date)
+], Planning.prototype, "start_datetime", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Movie.prototype, "description", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Movie.prototype, "duration", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Movie.prototype, "genre", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => showtime_1.Showtime, showtime => showtime.salle),
-    __metadata("design:type", Array)
-], Movie.prototype, "showtimes", void 0);
-exports.Movie = Movie = __decorate([
+    __metadata("design:type", Date)
+], Planning.prototype, "end_datetime", void 0);
+exports.Planning = Planning = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, String, String, String, String, Array])
-], Movie);
+    __metadata("design:paramtypes", [Number, employee_1.Employee, poste_1.Poste, Date, Date])
+], Planning);

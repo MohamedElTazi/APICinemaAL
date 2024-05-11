@@ -19,7 +19,7 @@ const auth_middleware_1 = require("../middleware/auth-middleware");
 const date_fns_1 = require("date-fns");
 const date_fns_tz_1 = require("date-fns-tz");
 const ShowtimeHandler = (app) => {
-    app.post("/showtimes", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/showtimes", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const reqBodyStartDatetime = req.body.start_datetime;
         req.body.start_datetime = req.body.start_datetime + "Z";
         const validation = showtime_validator_1.createShowtimeValidation.validate(req.body);
@@ -40,6 +40,7 @@ const ShowtimeHandler = (app) => {
         req.body.end_datetime = formattedDatetime;
         showtimeRequest.end_datetime = req.body.end_datetime;
         showtimeRequest.start_datetime = reqBodyStartDatetime;
+        console.log(yield showtimeUsecase.isOverlap(showtimeRequest));
         if (yield showtimeUsecase.isOverlap(showtimeRequest)) {
             res.status(404).send({ "error": `New showtime is overlap with other showtime` });
             return;
@@ -47,6 +48,70 @@ const ShowtimeHandler = (app) => {
         try {
             const ShowtimeCreated = yield showtimeRepository.save(showtimeRequest);
             res.status(201).send(ShowtimeCreated);
+        }
+        catch (error) {
+            console.log(error);
+            res.status(500).send({ error: "Internal error" });
+        }
+    }));
+    app.patch("/showtimes/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        const validation = showtime_validator_1.updateShowtimeValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
+        if (validation.error) {
+            res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
+            return;
+        }
+        let reqBodyStartDatetime;
+        let reqBodyEndDatetime;
+        const showtimeRepository = database_1.AppDataSource.getRepository(showtime_1.Showtime);
+        const Showtimefound = yield showtimeRepository.findOneBy({ id: +req.params.id });
+        if (Showtimefound === null) {
+            res.status(404).send({ "error": `showtime ${req.params.id} not found` });
+            return;
+        }
+        if ((req.body.start_datetime || req.body.end_datetime) && !req.body.salle) {
+            res.status(404).send({ "error": `Salle is required to update the datetime` });
+            return;
+        }
+        if (req.body.start_datetime || req.body.end_datetime) {
+            if (req.body.start_datetime) {
+                reqBodyStartDatetime = req.body.start_datetime;
+                req.body.start_datetime = req.body.start_datetime + "Z";
+            }
+            else {
+                if (Showtimefound === null) {
+                    res.status(404).send({ "error": `showtime ${req.params.id} not found` });
+                    return;
+                }
+                req.body.start_datetime = Showtimefound.start_datetime;
+            }
+            if (req.body.end_datetime) {
+                reqBodyEndDatetime = req.body.end_datetime;
+                req.body.end_datetime = req.body.end_datetime + "Z";
+            }
+            else {
+                req.body.end_datetime = Showtimefound.end_datetime;
+            }
+        }
+        else if (req.body.salle && !req.body.start_datetime && !req.body.end_datetime) {
+            req.body.start_datetime = Showtimefound.start_datetime;
+            req.body.end_datetime = Showtimefound.end_datetime;
+        }
+        const updateShowtimeRequest = validation.value;
+        try {
+            const showtimeUsecase = new showtime_usecase_1.ShowtimeUsecase(database_1.AppDataSource);
+            const updatedShowtime = yield showtimeUsecase.updateShowtime(updateShowtimeRequest.id, Object.assign({}, updateShowtimeRequest));
+            if (updatedShowtime === null) {
+                res.status(404).send({ "error": `Salle ${updateShowtimeRequest.id} not found` });
+                return;
+            }
+            updatedShowtime.start_datetime = reqBodyStartDatetime;
+            updatedShowtime.end_datetime = reqBodyEndDatetime;
+            console.log(yield showtimeUsecase.isOverlap(updatedShowtime));
+            if (yield showtimeUsecase.isOverlap(updatedShowtime)) {
+                res.status(404).send({ "error": `New showtime is overlap with other showtime` });
+                return;
+            }
+            res.status(200).send(updatedShowtime);
         }
         catch (error) {
             console.log(error);
@@ -110,8 +175,8 @@ const ShowtimeHandler = (app) => {
                 return;
             }
             const showtimeId = validationResult.value;
-            const showtimeRepository = database_1.AppDataSource.getRepository(showtime_1.Showtime);
-            const showtime = yield showtimeRepository.findOneBy({ id: showtimeId.id });
+            const showtimeUsecase = new showtime_usecase_1.ShowtimeUsecase(database_1.AppDataSource);
+            const showtime = yield showtimeUsecase.getOneShowtime(showtimeId.id);
             if (showtime === null) {
                 res.status(404).send({ "error": `showtime ${showtimeId.id} not found` });
                 return;
@@ -161,27 +226,6 @@ const ShowtimeHandler = (app) => {
             }
             yield showtimeRepository.remove(showtime);
             res.status(200).send(`Successfully deleted`);
-        }
-        catch (error) {
-            console.log(error);
-            res.status(500).send({ error: "Internal error" });
-        }
-    }));
-    app.patch("/showtimes/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const validation = showtime_validator_1.updateShowtimeValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
-        if (validation.error) {
-            res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
-            return;
-        }
-        const updateShowtimeRequest = validation.value;
-        try {
-            const showtimeUsecase = new showtime_usecase_1.ShowtimeUsecase(database_1.AppDataSource);
-            const updatedShowtime = yield showtimeUsecase.updateShowtime(updateShowtimeRequest.id, Object.assign({}, updateShowtimeRequest));
-            if (updatedShowtime === null) {
-                res.status(404).send({ "error": `Salle ${updateShowtimeRequest.id} not found` });
-                return;
-            }
-            res.status(200).send(updatedShowtime);
         }
         catch (error) {
             console.log(error);

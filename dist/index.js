@@ -16,7 +16,7 @@ const express_1 = __importDefault(require("express"));
 const routes_1 = require("./handlers/routes/routes");
 const database_1 = require("./database/database");
 require("dotenv/config");
-//import { swaggerDocs } from "./swagger/swagger";
+const swagger_1 = require("./swagger/swagger");
 require("reflect-metadata");
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = (0, express_1.default)();
@@ -31,7 +31,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         process.exit(1);
     }
     app.use(express_1.default.json());
-    //swaggerDocs(app, port)
+    (0, swagger_1.swaggerDocs)(app, port);
     (0, routes_1.initRoutes)(app);
     app.listen(port, () => {
         console.log(`Server running on port ${port}`);

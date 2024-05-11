@@ -16,10 +16,10 @@ exports.movieIdValidation = joi_1.default.object({
 });
 exports.updateMovieValidation = joi_1.default.object({
     id: joi_1.default.number().required(),
-    title: joi_1.default.string().required(),
-    description: joi_1.default.string().required(),
-    duration: joi_1.default.date().required(),
-    genre: joi_1.default.string().required(),
+    title: joi_1.default.string().optional(),
+    description: joi_1.default.string().optional(),
+    duration: joi_1.default.number().optional(),
+    genre: joi_1.default.string().optional(),
 });
 exports.listMovieValidation = joi_1.default.object({
     page: joi_1.default.number().min(1).optional(),

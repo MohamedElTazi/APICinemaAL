@@ -15,6 +15,6 @@ exports.AppDataSource = new typeorm_1.DataSource({
         "src/database/entities/*.ts"
     ],
     migrations: [
-        "src/database/migrations/*.ts"
+        process.env.NODE_ENV === "dev" ? "src/database/migrations/*.ts" : "dist/database/migrations/*.js"
     ]
 });

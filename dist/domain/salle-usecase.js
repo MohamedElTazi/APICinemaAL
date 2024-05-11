@@ -20,6 +20,18 @@ class SalleUsecase {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(listSalleFilter);
             const query = this.db.createQueryBuilder(salle_1.Salle, 'Salle');
+            if (listSalleFilter.name) {
+                query.andWhere('Salle.name = :name', { name: listSalleFilter.name });
+            }
+            if (listSalleFilter.type) {
+                query.andWhere('Salle.type = :type', { type: listSalleFilter.type });
+            }
+            if (listSalleFilter.access_disabled) {
+                query.andWhere('Salle.access_disabled = :access_disabled', { access_disabled: listSalleFilter.access_disabled });
+            }
+            if (listSalleFilter.maintenance_status) {
+                query.andWhere('Salle.maintenance_status = :maintenance_status', { maintenance_status: listSalleFilter.maintenance_status });
+            }
             if (listSalleFilter.capacityMax) {
                 query.andWhere('Salle.capacity <= :capacityMax', { capacityMax: listSalleFilter.capacityMax });
             }
@@ -58,7 +70,7 @@ class SalleUsecase {
             return SalleUpdate;
         });
     }
-    getMoviePlanning(startDate, endDate, id) {
+    getSallePlanning(startDate, endDate, id) {
         return __awaiter(this, void 0, void 0, function* () {
             let query = this.db.getRepository(showtime_1.Showtime)
                 .createQueryBuilder("showtime")

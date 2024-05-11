@@ -14,21 +14,26 @@ const typeorm_1 = require("typeorm");
 const token_1 = require("./token");
 require("reflect-metadata");
 const ticket_1 = require("./ticket");
+const transaction_1 = require("./transaction");
 var UserRole;
 (function (UserRole) {
     UserRole["User"] = "user";
     UserRole["Administrator"] = "administrator";
+    UserRole["SuperAdministrator"] = "super_administrator";
 })(UserRole || (exports.UserRole = UserRole = {}));
 let User = class User {
-    constructor(id, password, role, balance, email, tokens, tickets) {
+    constructor(id, firstname, lastname, password, role, balance, email, tokens, tickets, transactions) {
         this.balance = 0;
         this.id = id;
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.role = role;
         this.balance = balance;
         this.tokens = tokens;
         this.tickets = tickets;
+        this.transactions = transactions;
     }
 };
 exports.User = User;
@@ -36,6 +41,14 @@ __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], User.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], User.prototype, "firstname", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], User.prototype, "lastname", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         unique: true
@@ -66,7 +79,11 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => token_1.Token, token => token.user),
     __metadata("design:type", Array)
 ], User.prototype, "tokens", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => transaction_1.Transaction, transactions => transactions.user),
+    __metadata("design:type", Array)
+], User.prototype, "transactions", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, String, String, Number, String, Array, Array])
+    __metadata("design:paramtypes", [Number, String, String, String, String, Number, String, Array, Array, Array])
 ], User);
