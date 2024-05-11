@@ -5,6 +5,7 @@ import { AppDataSource } from "../database/database";
 import { format } from 'date-fns';
 import { CreateShowtimeValidationRequest } from "../handlers/validators/showtime-validator";
 import { TicketShowtimeAccesses } from "../database/entities/ticketShowtimeAccesses";
+import { Salle } from "../database/entities/salle";
 
 export interface ListShowtimeFilter {
     limit: number
@@ -17,9 +18,11 @@ export interface ListShowtimeFilter {
 }
 
 export interface UpdateShowtimeParams {
-    start_datetime?: Date
+    start_datetime?:Date
     end_datetime?: Date
-    special_notes?: string
+    special_notes?: string   
+    salle?: Salle;
+    movie?: Movie; 
 }
 
 
@@ -27,7 +30,6 @@ export class ShowtimeUsecase {
     constructor(private readonly db: DataSource) { }
 
     async listShowtime(listShowtimeFilter: ListShowtimeFilter): Promise<{ Showtimes: Showtime[]; totalCount: number; }> {
-        console.log(listShowtimeFilter)
         const query = this.db.createQueryBuilder(Showtime, 'showtime')
         if (listShowtimeFilter.salle) {
             query.andWhere('showtime.salle <= :salle', { salle: listShowtimeFilter.salle })
@@ -51,6 +53,7 @@ export class ShowtimeUsecase {
         .take(listShowtimeFilter.limit)
 
         const [Showtimes, totalCount] = await query.getManyAndCount()
+        
         return {
             Showtimes,
             totalCount
@@ -74,7 +77,8 @@ export class ShowtimeUsecase {
         return showtime
     }
 
-    async updateShowtime(id: number, { special_notes, start_datetime, end_datetime }: UpdateShowtimeParams): Promise<Showtime | null> {
+
+    async updateShowtime(id: number, { special_notes, start_datetime, end_datetime,salle,movie }: UpdateShowtimeParams): Promise<Showtime | null> {
         const repo = this.db.getRepository(Showtime)
         const Showtimefound = await this.foundShowtime(id)
         if (Showtimefound === null) return null
@@ -88,6 +92,24 @@ export class ShowtimeUsecase {
         if(end_datetime) {
             Showtimefound.end_datetime = end_datetime
         }
+
+        if(start_datetime){
+            Showtimefound.start_datetime = start_datetime
+            //Showtimefound.end_datetime = await this.getMovieDuration(Showtimefound.movie.id, Showtimefound.start_datetime)
+        }
+
+        if(end_datetime){
+            Showtimefound.end_datetime = end_datetime
+        }
+
+        if(salle){
+            Showtimefound.salle = salle
+        }
+
+        if(movie){
+            Showtimefound.movie = movie
+        }
+
 
         const ShowtimeUpdate = await repo.save(Showtimefound)
         return ShowtimeUpdate
@@ -109,17 +131,17 @@ export class ShowtimeUsecase {
             .where("id = :movieId", { movieId: movieId })
             .getRawOne();
 
-            const start_datetimeDate = new Date(start_datetime);    
+            const end_datetimeDate = new Date(start_datetime);    
 
-            const formattedDate = format(start_datetimeDate, 'yyyy-MM-dd'); 
+            const formattedDate = format(end_datetimeDate, 'yyyy-MM-dd'); 
 
             let resultDate = new Date(formattedDate+"T"+result.duration);
             
-            start_datetimeDate.setHours(start_datetimeDate.getHours() + resultDate.getHours());
-            start_datetimeDate.setMinutes(start_datetimeDate.getMinutes() + resultDate.getMinutes());
-            start_datetimeDate.setSeconds(start_datetimeDate.getSeconds() + resultDate.getSeconds());
+            end_datetimeDate.setHours(end_datetimeDate.getHours() + resultDate.getHours());
+            end_datetimeDate.setMinutes(end_datetimeDate.getMinutes() + resultDate.getMinutes());
+            end_datetimeDate.setSeconds(end_datetimeDate.getSeconds() + resultDate.getSeconds());
 
-            return start_datetimeDate;
+            return end_datetimeDate;
     }
 
     async getShowtimePlanning(startDate:string, endDate:string): Promise<SelectQueryBuilder<Showtime> | null>{

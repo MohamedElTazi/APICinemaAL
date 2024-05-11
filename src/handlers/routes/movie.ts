@@ -5,20 +5,19 @@ import { AppDataSource } from "../../database/database";
 import { Movie } from "../../database/entities/movie";
 import { authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
 import { MovieUsecase } from "../../domain/movie-usecase";
-import { Showtime } from "../../database/entities/showtime";
 
 
 export const MovieHandler = (app: express.Express) => {
- 
-/**
- * @openapi
- * /movies:
- *   get:
- *     description: Get all movies
- *     responses:
- *       200:
- *         description: Success
- */
+    
+    /**
+     * @openapi
+     * /movies:
+     *   get:
+     *     description: Get all movies
+     *     responses:
+     *       200:
+     *         description: Success
+     */
     app.get("/movies", async (req: Request, res: Response) => {
         const validation = listMovieValidation.validate(req.query)
 
@@ -76,6 +75,7 @@ export const MovieHandler = (app: express.Express) => {
 
         const query = await movieUsecase.getMoviePlanning(startDate as string, endDate as string, movieId.id);
 
+
         if(query === null){
             res.status(404).send(Error("Error fetching planning"))
             return
@@ -91,6 +91,28 @@ export const MovieHandler = (app: express.Express) => {
         }
     });
 
+
+        try {
+            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
+
+            res.status(200).send(planning);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
+    app.get("/movies/available/" ,async (req: Request, res: Response) => {
+
+
+        const movieUsecase = new MovieUsecase(AppDataSource);
+
+        const query = await movieUsecase.getMovieAvailable();
+
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }
 
 
     app.get("/movies/available/" ,async (req: Request, res: Response) => {
@@ -127,7 +149,10 @@ export const MovieHandler = (app: express.Express) => {
     
         const movieRequest = validation.value
         const movieRepo = AppDataSource.getRepository(Movie)
-        console.log("ok")
+
+        const movieUsecase = new MovieUsecase(AppDataSource);
+
+        movieRequest.duration = movieUsecase.formatTime(+movieRequest.duration)
         try {
     
             const movieCreated = await movieRepo.save(
@@ -213,11 +238,14 @@ export const MovieHandler = (app: express.Express) => {
                 return
             }
     
+            if(UpdateMovieRequest.duration){
+                const movieUsecase = new MovieUsecase(AppDataSource)
+                movieUsecase.updateShowtimeEndDatetimesOnFilmDurationChange(UpdateMovieRequest.id, +UpdateMovieRequest.duration)
+                UpdateMovieRequest.duration = movieUsecase.formatTime(+UpdateMovieRequest.duration)
+            }
+                
     
-            const updatedMovie = await movieUsecase.updateMovie(
-                UpdateMovieRequest.id,
-                { ...UpdateMovieRequest }
-                )
+            const updatedMovie = await movieUsecase.updateMovie(UpdateMovieRequest.id,{ ...UpdateMovieRequest })
     
             if (updatedMovie === null) {
                 res.status(404).send({ "error": `Movie ${UpdateMovieRequest.id} not found `})

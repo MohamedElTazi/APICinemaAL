@@ -10,7 +10,7 @@ export const createMovieValidation = Joi.object<CreateMovieValidationRequest>({
 export interface CreateMovieValidationRequest {
     title: string
     description: string
-    duration: Date
+    duration: string
     genre: string
 }
 
@@ -24,17 +24,17 @@ export interface MovieIdRequest {
 
 export const updateMovieValidation = Joi.object<UpdateMovieRequest>({
     id: Joi.number().required(),
-    title: Joi.string().required(),
-    description: Joi.string().required(),
-    duration: Joi.date().required(),
-    genre: Joi.string().required(),
+    title: Joi.string().optional(),
+    description: Joi.string().optional(),
+    duration: Joi.number().optional(),
+    genre: Joi.string().optional(),
 })
 
 export interface UpdateMovieRequest {
     id: number
-    title: string
-    description: string
-    duration: Date
+    title?: string
+    description?: string
+    duration?: string
     genre: string
 }
 export const listMovieValidation = Joi.object<ListMovieRequest>({

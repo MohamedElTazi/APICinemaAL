@@ -34,6 +34,5 @@ export class Showtime {
             this.end_datetime = end_datetime;
             this.special_notes = special_notes;
             this.ticket_showtime_accesses = ticket_showtime_accesses;
-
         }
 }

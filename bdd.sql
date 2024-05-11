@@ -44,25 +44,41 @@ CREATE TABLE user(
 
 CREATE TABLE ticket (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    showtimeId INT REFERENCES showtime(id),
-    userId INT REFERENCES user(id),
-    status VARCHAR(50) NOT NULL,
-    is_super BOOLEAN DEFAULT FALSE
+    userId INT NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE,
+    is_super BOOLEAN NOT NULL,
+    price INT NOT NULL, 
+    nb_tickets INT NOT NULL,
+    FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
-CREATE TABLE super_ticket_accesse (
+CREATE TABLE ticket_showtime_accesses (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    ticketId INT REFERENCES ticket(id),
-    showtimeId INT REFERENCES showtime(id)
+    ticketId INT NOT NULL,
+    showtimeId INT NOT NULL,
+    FOREIGN KEY (ticketId) REFERENCES ticket(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (showtimeId) REFERENCES showtime(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
 
 CREATE TABLE transaction (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    userId INT REFERENCES user(id),
+    userId INT NOT NULL,
+    ticketId INT,
+    transaction_type ENUM('buy ticket', 'recharge balance', 'withdraw balance') NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
-    transaction_type VARCHAR(50) NOT NULL,
-    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    transaction_date DATE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ticketId) REFERENCES ticket(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE token (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    userId INT NOT NULL,
+    FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE employee (
@@ -93,4 +109,5 @@ CREATE TABLE token (
     id INT AUTO_INCREMENT PRIMARY KEY,
     token VARCHAR(255) NOT NULL,
     userId INT REFERENCES user(id)
+
 );

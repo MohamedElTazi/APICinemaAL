@@ -4,9 +4,9 @@ import { createSalleValidation, listSalleValidation, salleIdValidation, sallePla
 import { AppDataSource } from "../../database/database";
 import { Salle } from "../../database/entities/salle";
 import { SalleUsecase } from "../../domain/salle-usecase";
-import { UserHandler } from "./user";
-import { authMiddlewareAdmin, authMiddlewareUser } from "../middleware/auth-middleware";
-import { Showtime } from "../../database/entities/showtime";
+import { authMiddlewareAdmin, authMiddlewareAll} from "../middleware/auth-middleware";
+import { toZonedTime } from "date-fns-tz";
+
 export const SalleHandler = (app: express.Express) => {
    
 
@@ -33,7 +33,7 @@ export const SalleHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/salles", async (req: Request, res: Response) => {
+    app.get("/salles",authMiddlewareAll,async (req: Request, res: Response) => {
         const validation = listSalleValidation.validate(req.query)
 
         if (validation.error) {
@@ -59,7 +59,8 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.get("/salles/planning/:id",authMiddlewareUser ,async (req: Request, res: Response) => {
+
+    app.get("/salles/planning/:id",authMiddlewareAll,async (req: Request, res: Response) => {
 
         const validationResultParams = salleIdValidation.validate(req.params)
 
@@ -89,33 +90,9 @@ export const SalleHandler = (app: express.Express) => {
         }
 
 
-        let query = AppDataSource
-        .getRepository(Showtime)
-        .createQueryBuilder("showtime")
-        .leftJoinAndSelect("showtime.salle", "salle")
-        .leftJoinAndSelect("showtime.movie", "movie")
-        .select([
-            "salle.name",
-            "salle.description",
-            "salle.type",
-            "movie.title",
-            "movie.description",
-            "showtime.start_time",
-            "showtime.end_time",
-            "showtime.special_notes"
-        ])
-        .where("salle.maintenance_status = false")
-        .andWhere("salle.id = :id", { id: salleId.id });
 
-        if (startDate && endDate) {
-            query = query.andWhere("showtime.date BETWEEN :startDate AND :endDate", { startDate, endDate });
-        }else if(startDate && !endDate){
-            query = query.andWhere("showtime.date >= :startDate", { startDate });
-        }else if(!startDate && endDate){
-            query = query.andWhere("showtime.date <= :endDate", { endDate });
-        }
-
-
+        const salleUsecase = new SalleUsecase(AppDataSource);
+        const query = await salleUsecase.getSallePlanning(startDate as string, endDate as string, salleId.id);
 
         try {
             const planning = await query.orderBy("showtime.date", "ASC").getMany();
@@ -128,7 +105,7 @@ export const SalleHandler = (app: express.Express) => {
     });
 
 
-    app.get("/salles/:id", async (req: Request, res: Response) => {
+    app.get("/salles/:id",authMiddlewareAll,async (req: Request, res: Response) => {
         try {
             const validationResult = salleIdValidation.validate(req.params)
 
@@ -151,7 +128,7 @@ export const SalleHandler = (app: express.Express) => {
         }
     })
 
-    app.delete("/salles/:id", async (req: Request, res: Response) => {
+    app.delete("/salles/:id",authMiddlewareAdmin ,async (req: Request, res: Response) => {
         try {
             const validationResult = salleIdValidation.validate(req.params)
     
@@ -177,7 +154,7 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/salles/:id", async (req: Request, res: Response) => {
+    app.patch("/salles/:id" ,async (req: Request, res: Response) => {
 
         const validation = updateSalleValidation.validate({ ...req.params, ...req.body })
 

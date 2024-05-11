@@ -26,7 +26,7 @@ const options: swaggerJsdoc.Options = {
       },
     ],
   },
-  apis: [handlerPath + "/routes/.ts", handlerPath + "/validators/.ts", handlerPath + "/responses/*.ts"],
+  apis: [handlerPath + "/routes/*.ts", handlerPath + "/validators/*.ts", handlerPath + "/responses/*.ts"],
 }
 
 const swaggerSpec = swaggerJsdoc(options);

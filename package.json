@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "ts-node dist/index.js",
     "start:dev": "nodemon -e ts --exec ts-node src/index.ts",
+    "typeorm": "typeorm-ts-node-commonjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -17,12 +18,17 @@
     "moment-timezone": "^0.5.45",
     "mysql": "^2.18.1",
     "mysql2": "^3.9.3",
-    "reflect-metadata": "^0.2.1"
+    "reflect-metadata": "^0.2.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.6",
+    "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
     "date-fns": "^3.6.0",
     "jsonwebtoken": "^9.0.2",
@@ -31,4 +37,3 @@
     "typeorm": "^0.3.20"
   }
 }
-

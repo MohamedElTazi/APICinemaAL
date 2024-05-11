@@ -1,16 +1,21 @@
-import express, { Request, Response } from "express";
+import express, {Response } from "express";
 import { invalidPathHandler } from "../errors/invalid-path-handler";
 import { UserHandler } from "./user";
 import { SalleHandler } from "./salle";
-import  {MovieHandler} from "./movie";
+import { MovieHandler } from "./movie";
 import { ShowtimeHandler } from "./showtime";
 import { PosteHandler } from "./poste";
 import { PlanningHandler } from "./planning";
 import { EmployeeHandler } from "./employee";
+import { TransactionHandler } from "./transaction";
+import { TicketHandler } from "./ticket";
+import { TicketShowtimeAccessessHandler } from "./ticketShowtimeAccesses";
+import { StatisticHandler } from "./statistic";
 
 export const initRoutes = (app: express.Express) => {
 
-    app.get("/health", (req: Request, res: Response) => {
+
+    app.get("/health", (res: Response) => {
         res.send({ "message": "OP LE S" })
     })
 
@@ -22,6 +27,10 @@ export const initRoutes = (app: express.Express) => {
     ShowtimeHandler(app)
     PlanningHandler(app)
     EmployeeHandler(app)
+    TransactionHandler(app)
+    TicketHandler(app)
+    TicketShowtimeAccessessHandler(app)
+    StatisticHandler(app)
 
     app.use(invalidPathHandler);
 }
