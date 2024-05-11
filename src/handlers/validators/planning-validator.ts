@@ -49,7 +49,7 @@ export const updatePlanningValidation = Joi.object<UpdatePlanningRequest>({
 export interface UpdatePlanningRequest {
     id: number
     poste: Poste
-    employee?: Employee
+    employee: Employee
     start_datetime: Date
     end_datetime: Date
 }

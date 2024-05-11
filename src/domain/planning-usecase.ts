@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { Planning } from "../database/entities/planning";
 import { Poste } from "../database/entities/poste";
+import { Employee } from "../database/entities/employee";
 
 export interface ListPlanningFilter {
     limit: number
@@ -10,6 +11,7 @@ export interface ListPlanningFilter {
 
 export interface UpdatePlanningParams {
     poste: Poste
+    employee: Employee
     start_datetime?: Date
     end_datetime?: Date
 }
@@ -32,13 +34,16 @@ export class PlanningUsecase {
         }
     }
 
-    async updatePlanning(id: number, {poste ,start_datetime, end_datetime}: UpdatePlanningParams): Promise<Planning | null> {
+    async updatePlanning(id: number, {poste , employee,start_datetime, end_datetime}: UpdatePlanningParams): Promise<Planning | null> {
         const repo = this.db.getRepository(Planning)
-        const planningToUpdate = await repo.findOneBy({ id })
+        const planningToUpdate = await this.foundPlanningById(id)
         if (planningToUpdate === null) return null
 
         if(poste){
             planningToUpdate.poste = poste
+        }
+        if(employee){
+            planningToUpdate.employee = employee
         }
         if (start_datetime) {
             planningToUpdate.start_datetime = start_datetime
@@ -61,8 +66,14 @@ export class PlanningUsecase {
     async verifyPoste(posteId: Poste, start_datetime: Date, end_datetime: Date): Promise<any | null> {
         const entityManager = this.db;
         const sqlQuery = `SELECT COUNT(*) FROM planning WHERE start_datetime <= ? AND end_datetime >= ? AND posteId = ?;`
-
+        
         const planning = await entityManager.query(sqlQuery, [start_datetime, end_datetime, posteId])
+        return planning
+    }
+
+    async foundPlanningById(id: number): Promise<Planning | null> {
+        const repo = this.db.getRepository(Planning)
+        const planning = await repo.findOneBy({ id })
         return planning
     }
 }

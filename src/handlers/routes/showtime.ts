@@ -227,29 +227,51 @@ export const ShowtimeHandler = (app: express.Express) => {
 
         const updateShowtimeRequest = validation.value
 
-        const showtimeRequest = listShowtimeValidation.validate(req.body).value
-
-        const planningUseCase = new PlanningUsecase(AppDataSource);
-
-        const verifyPlanning = await planningUseCase.verifyPlanning(updateShowtimeRequest.start_datetime, updateShowtimeRequest.end_datetime)
-
-        console.log("ici**********",verifyPlanning[0].postesCouverts)
-
-        if(verifyPlanning[0].postesCouverts !== "3"){
-            res.status(404).send({ "error": `not all employee are here` })
-            return
-        }
-
         try {
+
             const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
 
 
-            const updatedShowtime = await showtimeUsecase.updateShowtime(updateShowtimeRequest.id, { ...updateShowtimeRequest })
+            const showtime = await showtimeUsecase.foundShowtime(updateShowtimeRequest.id)
             
-            if (updatedShowtime === null) {
+            if (showtime === null) {
                 res.status(404).send({ "error": `Salle ${updateShowtimeRequest.id} not found` })
                 return
             }
+
+            const planningUseCase = new PlanningUsecase(AppDataSource);
+            if(updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime !== undefined){
+                const verifyPlanning = await planningUseCase.verifyPlanning(updateShowtimeRequest.start_datetime, updateShowtimeRequest.end_datetime)
+    
+                console.log("ici**********",verifyPlanning[0].postesCouverts)
+        
+                if(verifyPlanning[0].postesCouverts !== "3"){
+                    res.status(404).send({ "error": `not all employee are here` })
+                    return
+                }
+            }
+            else if(updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime === undefined){
+                const verifyPlanning = await planningUseCase.verifyPlanning(updateShowtimeRequest.start_datetime, showtime.end_datetime)
+    
+                console.log("ici**********",updateShowtimeRequest.start_datetime)
+        
+                if(verifyPlanning[0].postesCouverts !== "3"){
+                    res.status(404).send({ "error": `not all employee are here` })
+                    return
+                }
+            }
+            else if(updateShowtimeRequest.start_datetime === undefined && updateShowtimeRequest.end_datetime !== undefined){
+                const verifyPlanning = await planningUseCase.verifyPlanning(showtime.start_datetime, updateShowtimeRequest.end_datetime)
+    
+                console.log("ici**********",verifyPlanning[0].postesCouverts)
+        
+                if(verifyPlanning[0].postesCouverts !== "3"){
+                    res.status(404).send({ "error": `not all employee are here` })
+                    return
+                }
+            }
+
+            const updatedShowtime = await showtimeUsecase.updateShowtime(updateShowtimeRequest.id, { ...updateShowtimeRequest })
 
             res.status(200).send(updatedShowtime)
         } catch (error) {

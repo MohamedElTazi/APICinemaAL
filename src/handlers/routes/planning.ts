@@ -150,71 +150,94 @@ export const PlanningHandler = (app: express.Express) => {
         try {
             const planningUsecase = new PlanningUsecase(AppDataSource);
 
-            const updatedPlanning = await planningUsecase.updatePlanning(updatePlanningRequest.id, { ...updatePlanningRequest })
+            const planning = await planningUsecase.foundPlanningById(updatePlanningRequest.id)
             
-            if (updatedPlanning === null) {
+            if (planning === null) {
                 res.status(404).send({ "error": `planning ${updatePlanningRequest.id} not found` })
                 return
             }
+
+
             // START_DATETIME + END_DATETIME
             if (updatePlanningRequest.poste === undefined && updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime !== undefined) {
-                const verifyPoste = await planningUsecase.verifyPoste(updatedPlanning.poste, updatePlanningRequest.start_datetime, updatePlanningRequest.end_datetime)
+                const verifyPoste = await planningUsecase.verifyPoste(planning.poste, updatePlanningRequest.start_datetime, updatePlanningRequest.end_datetime)
 
-                console.log("ici**********", verifyPoste[0]['COUNT(*)'], updatedPlanning.poste, updatePlanningRequest.start_datetime, updatePlanningRequest.end_datetime)
-
-                if (verifyPoste[0]['COUNT(*)'] === "1") {
+                if (verifyPoste[0]['COUNT(*)'] >= "1") {
                     res.status(404).send({ "error": `this poste is already take at this time` })
                     return
                 }
             }
+
+
             // POSTE + START_DATETIME + END_DATETIME
-            if(updatePlanningRequest.poste !== undefined &&  updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime !== undefined){
-                const verifyPoste = await planningUsecase.verifyPoste( updatePlanningRequest.poste, updatedPlanning.start_datetime, updatedPlanning.end_datetime)
-
-                console.log("ici**********",verifyPoste[0]['COUNT(*)'], updatePlanningRequest.poste, updatePlanningRequest.start_datetime, updatePlanningRequest.end_datetime)
+            else if(updatePlanningRequest.poste !== undefined &&  updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime !== undefined){
+                const verifyPoste = await planningUsecase.verifyPoste( updatePlanningRequest.poste, updatePlanningRequest.start_datetime, updatePlanningRequest.end_datetime)
         
-                if(verifyPoste[0]['COUNT(*)'] === "1"){
+                if(verifyPoste[0]['COUNT(*)'] >= "1"){
                     res.status(404).send({ "error": `this poste is already take at this time` })
                     return
                 }
-    
             }
+
+
             // POSTE 
-            if(updatePlanningRequest.poste !== undefined &&  updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime === undefined){
-                const verifyPoste = await planningUsecase.verifyPoste( updatePlanningRequest.poste, updatedPlanning.start_datetime, updatedPlanning.end_datetime)
-
-                console.log("ici**********",verifyPoste[0]['COUNT(*)'], updatePlanningRequest.poste, updatedPlanning.start_datetime, updatedPlanning.end_datetime)
+            else if(updatePlanningRequest.poste !== undefined &&  updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime === undefined){
+                const verifyPoste = await planningUsecase.verifyPoste( updatePlanningRequest.poste, planning.start_datetime, planning.end_datetime)
         
-                if(verifyPoste[0]['COUNT(*)'] === "1"){
+                if(verifyPoste[0]['COUNT(*)'] >= "1"){
                     res.status(404).send({ "error": `this poste is already take at this time` })
                     return
                 }
     
             }
+
+
             // POSTE + END_DATETIME
             else if(updatePlanningRequest.poste !== undefined &&  updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime !== undefined){
-                const verifyPoste = await planningUsecase.verifyPoste( updatePlanningRequest.poste, updatedPlanning.start_datetime, updatedPlanning.end_datetime)
-
-                console.log("ici**********",verifyPoste[0]['COUNT(*)'], updatePlanningRequest.poste, updatedPlanning.start_datetime, updatePlanningRequest.end_datetime)
+                const verifyPoste = await planningUsecase.verifyPoste( updatePlanningRequest.poste, planning.start_datetime, updatePlanningRequest.end_datetime)
         
-                if(verifyPoste[0]['COUNT(*)'] === "1"){
+                if(verifyPoste[0]['COUNT(*)'] >= "1"){
                     res.status(404).send({ "error": `this poste is already take at this time` })
                     return
                 }
     
             }
+
+
             //POSTE + START_DATETIME
             else if(updatePlanningRequest.poste !== undefined &&  updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime === undefined){
-                const verifyPoste = await planningUsecase.verifyPoste( updatePlanningRequest.poste, updatedPlanning.start_datetime, updatedPlanning.end_datetime)
-
-                console.log("ici**********",verifyPoste[0]['COUNT(*)'], updatePlanningRequest.poste, updatePlanningRequest.start_datetime, updatedPlanning.end_datetime)
+                const verifyPoste = await planningUsecase.verifyPoste( updatePlanningRequest.poste, updatePlanningRequest.start_datetime, planning.end_datetime)
         
-                if(verifyPoste[0]['COUNT(*)'] === "1"){
+                if(verifyPoste[0]['COUNT(*)'] >= "1"){
                     res.status(404).send({ "error": `this poste is already take at this time` })
                     return
                 }
     
             }
+
+            // START_DATETIME
+            else if(updatePlanningRequest.poste === undefined &&  updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime === undefined){
+                const verifyPoste = await planningUsecase.verifyPoste( planning.poste, updatePlanningRequest.start_datetime, planning.end_datetime)
+        
+                if(verifyPoste[0]['COUNT(*)'] >= "1"){
+                    res.status(404).send({ "error": `this poste is already take at this time` })
+                    return
+                }
+    
+            }
+
+            // END_DATETIME
+            else if(updatePlanningRequest.poste === undefined &&  updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime !== undefined){
+                const verifyPoste = await planningUsecase.verifyPoste( planning.poste, planning.start_datetime, updatePlanningRequest.end_datetime)
+        
+                if(verifyPoste[0]['COUNT(*)'] >= "1"){
+                    res.status(404).send({ "error": `this poste is already take at this time` })
+                    return
+                }
+    
+            }
+
+            const updatedPlanning = await planningUsecase.updatePlanning(updatePlanningRequest.id, { ...updatePlanningRequest })
 
             res.status(200).send(updatedPlanning)
         } catch (error) {

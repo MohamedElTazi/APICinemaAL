@@ -76,7 +76,7 @@ export class ShowtimeUsecase {
 
     async updateShowtime(id: number, { special_notes, start_datetime, end_datetime }: UpdateShowtimeParams): Promise<Showtime | null> {
         const repo = this.db.getRepository(Showtime)
-        const Showtimefound = await repo.findOneBy({ id })
+        const Showtimefound = await this.foundShowtime(id)
         if (Showtimefound === null) return null
 
         if (special_notes) {
@@ -91,6 +91,13 @@ export class ShowtimeUsecase {
 
         const ShowtimeUpdate = await repo.save(Showtimefound)
         return ShowtimeUpdate
+    }
+
+    async foundShowtime(id: number): Promise<Showtime | null> {
+        const repo = this.db.getRepository(Showtime)
+        const Showtimefound = await repo.findOneBy({ id })
+        if (Showtimefound === null) return null
+        return Showtimefound
     }
 
     async getMovieDuration(movieId: number, start_datetime: Date) {
