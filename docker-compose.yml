@@ -1,5 +1,17 @@
 version: '3.8'
 services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - mysql-db
+
   mysql-db:
     image: mysql:latest
     environment:
@@ -11,6 +23,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./data:/docker-entrypoint-initdb.d
     restart: unless-stopped
 
   phpmyadmin:
@@ -21,6 +34,7 @@ services:
       - mysql-db
     environment:
       - PMA_HOST=mysql-db
+
 volumes:
   mysql-data:
     driver: local
