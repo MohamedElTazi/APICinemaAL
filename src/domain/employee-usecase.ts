@@ -12,19 +12,17 @@ export interface ListEmployeeRequest {
 }
 export interface UpdateEmployeeParams {
     name: string
-    working_hours: string
 }
 
 export class EmployeeUsecase {
     constructor(private db: DataSource) {}
-    async updateEmployee(id: number, {name,  working_hours}: UpdateEmployeeParams): Promise<Employee | undefined> {
+    async updateEmployee(id: number, {name}: UpdateEmployeeParams): Promise<Employee | undefined> {
         const repo = this.db.getRepository(Employee)
         const employeeToUpdate = await repo.findOneBy({id})
         if (!employeeToUpdate) return undefined
 
         if(name){
             employeeToUpdate.name = name
-            employeeToUpdate.working_hours = working_hours
         }
         const employeeUpdated = await repo.save(employeeToUpdate)
         return employeeUpdated
