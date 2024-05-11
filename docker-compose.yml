@@ -1,40 +1,30 @@
-version: '3.8'
-services:
-  app:
-    build: .
-    volumes:
-      - .:/app
-      - /app/node_modules
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-    depends_on:
-      - mysql-db
+version: '3'
 
-  mysql-db:
+services:
+  db:
     image: mysql:latest
+    container_name: mysql-db
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: CinemaNode
-      MYSQL_USER: root
+      MYSQL_USER: my_user
       MYSQL_PASSWORD: root
     ports:
       - "3306:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
-      - ./data:/docker-entrypoint-initdb.d
-    restart: unless-stopped
+      - mysql_data:/var/lib/mysql
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    ports:
-      - "8080:80"
-    depends_on:
-      - mysql-db
+  api:
+    build: .
     environment:
-      - PMA_HOST=mysql-db
+      DATABASE_URL: mysql://root:root@db:3306/CinemaNode
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
 
 volumes:
-  mysql-data:
+  mysql_data:
     driver: local
+
