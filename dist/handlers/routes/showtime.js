@@ -20,7 +20,7 @@ const date_fns_1 = require("date-fns");
 const date_fns_tz_1 = require("date-fns-tz");
 const planning_usecase_1 = require("../../domain/planning-usecase");
 const ShowtimeHandler = (app) => {
-    app.post("/showtimes", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/showtimes", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const reqBodyStartDatetime = req.body.start_datetime;
         req.body.start_datetime = req.body.start_datetime + "Z";
         const validation = showtime_validator_1.createShowtimeValidation.validate(req.body);
@@ -87,7 +87,7 @@ const ShowtimeHandler = (app) => {
             res.status(500).json({ error: "Internal Server Error" });
         }
     }));
-    app.get("/showtimes", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/showtimes", auth_middleware_1.authMiddlewareAll, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         const validation = showtime_validator_1.listShowtimeValidation.validate(req.query);
         if (validation.error) {
@@ -110,7 +110,7 @@ const ShowtimeHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/showtimes/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/showtimes/:id", auth_middleware_1.authMiddlewareAll, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = showtime_validator_1.showtimeIdValidation.validate(req.params);
             if (validationResult.error) {
@@ -153,7 +153,7 @@ const ShowtimeHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/showtimes/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/showtimes/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = showtime_validator_1.updateShowtimeValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));

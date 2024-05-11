@@ -136,7 +136,7 @@ const SalleHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/salles/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/salles/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = salle_validator_1.updateSalleValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));

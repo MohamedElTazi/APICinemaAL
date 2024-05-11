@@ -158,7 +158,8 @@ export class TicketUsecase {
             ticket.is_super, 
             ticket.price, 
             ticket.nb_tickets, 
-            movie.title, 
+            movie.title,
+            showtime.id, 
             showtime.start_datetime, 
             showtime.end_datetime, 
             showtime.special_notes 

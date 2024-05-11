@@ -15,8 +15,9 @@ const database_1 = require("../../database/database");
 const ticketShowtimeAccesses_1 = require("../../database/entities/ticketShowtimeAccesses");
 const ticketShowtimeAccesses_validator_1 = require("../validators/ticketShowtimeAccesses-validator");
 const ticketShowtimeAccesses_usecase_1 = require("../../domain/ticketShowtimeAccesses-usecase");
+const auth_middleware_1 = require("../middleware/auth-middleware");
 const TicketShowtimeAccessessHandler = (app) => {
-    app.get("/ticketShowtimeAccesses", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/ticketShowtimeAccesses", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         try {
             const validation = ticketShowtimeAccesses_validator_1.listAccessTicketShowTimeAccessesValidation.validate(req.query);
@@ -40,7 +41,7 @@ const TicketShowtimeAccessessHandler = (app) => {
             res.status(500).send({ error: 'Internal server error' });
         }
     }));
-    app.get("/ticketShowtimeAccesses/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/ticketShowtimeAccesses/:id", auth_middleware_1.authMiddlewareAll, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = ticketShowtimeAccesses_validator_1.ticketAccessIdValidation.validate(req.params);
             if (validationResult.error) {
@@ -61,7 +62,7 @@ const TicketShowtimeAccessessHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.post("/ticketShowtimeAccesses", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/ticketShowtimeAccesses", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             // Validez les données de la requête
             const validation = ticketShowtimeAccesses_validator_1.accessTicketValidation.validate(req.body);

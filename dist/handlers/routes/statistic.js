@@ -12,8 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StatisticHandler = void 0;
 const database_1 = require("../../database/database");
 const statistic_usecase_1 = require("../../domain/statistic-usecase");
+const auth_middleware_1 = require("../middleware/auth-middleware");
 const StatisticHandler = (app) => {
-    app.get("/statistics/sallesAttendance", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/statistics/sallesAttendance", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const statisticUsecase = new statistic_usecase_1.StatisticUsecase(database_1.AppDataSource);
             const statistic = yield statisticUsecase.getAttendanceSalles();
@@ -28,7 +29,7 @@ const StatisticHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/statistics/totalAttendance", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/statistics/totalAttendance", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const statisticUsecase = new statistic_usecase_1.StatisticUsecase(database_1.AppDataSource);
             const statistic = yield statisticUsecase.getTotalAttendance();
@@ -43,7 +44,7 @@ const StatisticHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/statistics/realTimeAttendanceRate", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/statistics/realTimeAttendanceRate", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const statisticUsecase = new statistic_usecase_1.StatisticUsecase(database_1.AppDataSource);
             const statistic = yield statisticUsecase.realTimeAttendanceRate();
@@ -58,7 +59,7 @@ const StatisticHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/statistics/filmPerformance", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/statistics/filmPerformance", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const statisticUsecase = new statistic_usecase_1.StatisticUsecase(database_1.AppDataSource);
             const statistic = yield statisticUsecase.filmPerformance();
@@ -73,7 +74,7 @@ const StatisticHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/statistics/numberOfTicketsPurchasedPerUser", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/statistics/numberOfTicketsPurchasedPerUser", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const statisticUsecase = new statistic_usecase_1.StatisticUsecase(database_1.AppDataSource);
             const statistic = yield statisticUsecase.numberOfTicketsPurchasedUser();
@@ -88,7 +89,7 @@ const StatisticHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/statistics/transactionDetailsUser", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/statistics/transactionDetailsUser", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const statisticUsecase = new statistic_usecase_1.StatisticUsecase(database_1.AppDataSource);
             const statistic = yield statisticUsecase.transactionDetailsUser();
@@ -103,7 +104,7 @@ const StatisticHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/statistics/usersAccessCurrentSessions", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/statistics/usersAccessCurrentSessions", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const statisticUsecase = new statistic_usecase_1.StatisticUsecase(database_1.AppDataSource);
             const statistic = yield statisticUsecase.usersAccessCurrentSessions();
@@ -118,7 +119,7 @@ const StatisticHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/statistics/mostWatchedMovie", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/statistics/mostWatchedMovie", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const statisticUsecase = new statistic_usecase_1.StatisticUsecase(database_1.AppDataSource);
             const statistic = yield statisticUsecase.mostWatchedMovie();
@@ -133,7 +134,7 @@ const StatisticHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/statistics/listOfFilmsByPopularity", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/statistics/listOfFilmsByPopularity", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const statisticUsecase = new statistic_usecase_1.StatisticUsecase(database_1.AppDataSource);
             const statistic = yield statisticUsecase.listOfFilmsByPopularity();
@@ -148,7 +149,7 @@ const StatisticHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/statistics/numberScreeningsPerFilm", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/statistics/numberScreeningsPerFilm", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const statisticUsecase = new statistic_usecase_1.StatisticUsecase(database_1.AppDataSource);
             const statistic = yield statisticUsecase.numberScreeningsPerFilm();

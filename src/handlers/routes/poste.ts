@@ -4,11 +4,11 @@ import { generateValidationErrorMessage } from "../validators/generate-validatio
 import { createPosteValidation, listPosteValidation, posteIdValidation , updatePosteValidation} from "../validators/poste-validator";
 import { Poste } from "../../database/entities/poste";
 import { PosteUsecase } from "../../domain/poste-usecase";
-import { authMiddlewareAdmin } from "../middleware/auth-middleware";
+import { authMiddlewareAdmin, authMiddlewareSuperAdmin } from "../middleware/auth-middleware";
 
 export const PosteHandler = (app: express.Express) => {
 
-    app.get("/postes/:id",  async (req: Request, res: Response) => {
+    app.get("/postes/:id", authMiddlewareSuperAdmin ,async (req: Request, res: Response) => {
         try {
             const validationResult = posteIdValidation.validate(req.params)
             if(validationResult.error) {
@@ -30,7 +30,7 @@ export const PosteHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/postes", async (req: Request, res: Response) => {
+    app.get("/postes", authMiddlewareSuperAdmin,async (req: Request, res: Response) => {
         const validation = listPosteValidation.validate(req.query)
 
         if(validation.error) {
@@ -54,7 +54,7 @@ export const PosteHandler = (app: express.Express) => {
         }
     })
 
-    app.post("/postes", async (req: Request, res: Response) => {
+    app.post("/postes",authMiddlewareSuperAdmin, async (req: Request, res: Response) => {
         const validation = createPosteValidation.validate(req.body)
         if(validation.error) {
             res.status(400).send(generateValidationErrorMessage(validation.error.details))
@@ -75,7 +75,7 @@ export const PosteHandler = (app: express.Express) => {
         }
     })
 
-    app.patch("/postes/:id", async (req: Request, res: Response) => {
+    app.patch("/postes/:id",authMiddlewareSuperAdmin ,async (req: Request, res: Response) => {
 
             const validation = updatePosteValidation.validate({...req.params, ...req.body})
 
@@ -118,7 +118,7 @@ export const PosteHandler = (app: express.Express) => {
         }
     })
 
-    app.delete("/postes/:id", async (req: Request, res: Response) => {
+    app.delete("/postes/:id", authMiddlewareSuperAdmin ,async (req: Request, res: Response) => {
         try {
             const validationResult = posteIdValidation.validate(req.params)
     

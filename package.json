@@ -6,6 +6,7 @@
   "scripts": {
     "start": "ts-node dist/index.js",
     "start:dev": "nodemon -e ts --exec ts-node src/index.ts",
+    "build": "npm install && rimraf ./build && tsc",
     "typeorm": "typeorm-ts-node-commonjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

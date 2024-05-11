@@ -19,7 +19,7 @@ const transaction_usecase_1 = require("../../domain/transaction-usecase");
 const user_validator_1 = require("../validators/user-validator");
 const user_1 = require("../../database/entities/user");
 const TransactionHandler = (app) => {
-    app.post("/transactions", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/transactions", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = transaction_validator_1.createTransactionValidation.validate(req.body);
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -36,7 +36,7 @@ const TransactionHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/transactions", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/transactions", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         const validation = transaction_validator_1.listTransactionValidation.validate(req.query);
         if (validation.error) {
@@ -60,7 +60,7 @@ const TransactionHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/transactions/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/transactions/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = transaction_validator_1.transactionIdValidation.validate(req.params);
             if (validationResult.error) {
@@ -81,7 +81,7 @@ const TransactionHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/transactions/clients/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/transactions/clients/:id", auth_middleware_1.authMiddlewareAll, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = user_validator_1.userIdValidation.validate(req.params);
             if (validationResult.error) {
@@ -104,7 +104,7 @@ const TransactionHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/transactions/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/transactions/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = transaction_validator_1.updateTransactionValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -129,7 +129,7 @@ const TransactionHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.post("/transactions/buyTicket/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/transactions/buyTicket/:id", auth_middleware_1.authMiddlewareUser, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = transaction_validator_1.buyTicketValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -213,7 +213,7 @@ const TransactionHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/transactions/withdrawBalance/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/transactions/withdrawBalance/:id", auth_middleware_1.authMiddlewareUser, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = transaction_validator_1.updateMoneyValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -260,7 +260,7 @@ const TransactionHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.post("/transactions/useSuperTicket/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/transactions/useSuperTicket/:id", auth_middleware_1.authMiddlewareUser, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = transaction_validator_1.useSuperTicketValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));

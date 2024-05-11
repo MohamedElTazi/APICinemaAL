@@ -5,9 +5,10 @@ import { generateValidationErrorMessage } from "../validators/generate-validatio
 
 import { UserUsecase } from "../../domain/user-usecase";
 import { StatisticUsecase } from "../../domain/statistic-usecase";
+import { authMiddlewareAdmin } from "../middleware/auth-middleware";
 
 export const StatisticHandler = (app: express.Express) => {
-    app.get("/statistics/sallesAttendance", async (req: Request, res: Response) => {
+    app.get("/statistics/sallesAttendance", authMiddlewareAdmin,async (req: Request, res: Response) => {
         try {
             const statisticUsecase = new StatisticUsecase(AppDataSource);
 
@@ -25,7 +26,7 @@ export const StatisticHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/statistics/totalAttendance", async (req: Request, res: Response) => {
+    app.get("/statistics/totalAttendance", authMiddlewareAdmin,async (req: Request, res: Response) => {
         try {
             const statisticUsecase = new StatisticUsecase(AppDataSource);
 
@@ -44,7 +45,7 @@ export const StatisticHandler = (app: express.Express) => {
     })
 
 
-    app.get("/statistics/realTimeAttendanceRate", async (req: Request, res: Response) => {
+    app.get("/statistics/realTimeAttendanceRate",authMiddlewareAdmin, async (req: Request, res: Response) => {
         try {
             const statisticUsecase = new StatisticUsecase(AppDataSource);
 
@@ -63,7 +64,7 @@ export const StatisticHandler = (app: express.Express) => {
     })
 
 
-    app.get("/statistics/filmPerformance", async (req: Request, res: Response) => {
+    app.get("/statistics/filmPerformance",authMiddlewareAdmin, async (req: Request, res: Response) => {
         try {
             const statisticUsecase = new StatisticUsecase(AppDataSource);
 
@@ -83,7 +84,7 @@ export const StatisticHandler = (app: express.Express) => {
     
 
 
-    app.get("/statistics/numberOfTicketsPurchasedPerUser", async (req: Request, res: Response) => {
+    app.get("/statistics/numberOfTicketsPurchasedPerUser", authMiddlewareAdmin,async (req: Request, res: Response) => {
         try {
             const statisticUsecase = new StatisticUsecase(AppDataSource);
 
@@ -103,7 +104,7 @@ export const StatisticHandler = (app: express.Express) => {
 
 
 
-    app.get("/statistics/transactionDetailsUser", async (req: Request, res: Response) => {
+    app.get("/statistics/transactionDetailsUser",authMiddlewareAdmin,async (req: Request, res: Response) => {
         try {
             const statisticUsecase = new StatisticUsecase(AppDataSource);
 
@@ -121,7 +122,7 @@ export const StatisticHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/statistics/usersAccessCurrentSessions", async (req: Request, res: Response) => {
+    app.get("/statistics/usersAccessCurrentSessions",authMiddlewareAdmin, async (req: Request, res: Response) => {
         try {
             const statisticUsecase = new StatisticUsecase(AppDataSource);
 
@@ -139,7 +140,7 @@ export const StatisticHandler = (app: express.Express) => {
         }
     })
     
-    app.get("/statistics/mostWatchedMovie", async (req: Request, res: Response) => {
+    app.get("/statistics/mostWatchedMovie",authMiddlewareAdmin, async (req: Request, res: Response) => {
         try {
             const statisticUsecase = new StatisticUsecase(AppDataSource);
 
@@ -158,7 +159,7 @@ export const StatisticHandler = (app: express.Express) => {
     })
 
 
-    app.get("/statistics/listOfFilmsByPopularity", async (req: Request, res: Response) => {
+    app.get("/statistics/listOfFilmsByPopularity", authMiddlewareAdmin,async (req: Request, res: Response) => {
         try {
             const statisticUsecase = new StatisticUsecase(AppDataSource);
 
@@ -177,7 +178,7 @@ export const StatisticHandler = (app: express.Express) => {
     })
 
 
-    app.get("/statistics/numberScreeningsPerFilm", async (req: Request, res: Response) => {
+    app.get("/statistics/numberScreeningsPerFilm",authMiddlewareAdmin, async (req: Request, res: Response) => {
         try {
             const statisticUsecase = new StatisticUsecase(AppDataSource);
 

@@ -7,6 +7,7 @@ import { User } from "../../database/entities/user";
 import { sign } from "jsonwebtoken";
 import { Token } from "../../database/entities/token";
 import { UserUsecase } from "../../domain/user-usecase";
+import { authMiddlewareAdmin, authMiddlewareAll } from "../middleware/auth-middleware";
 
 export const UserHandler = (app: express.Express) => {
     app.post('/auth/signup', async (req: Request, res: Response) => {
@@ -108,7 +109,7 @@ export const UserHandler = (app: express.Express) => {
     })
 
 
-    app.get("/users/infos" ,async (req: Request, res: Response) => {
+    app.get("/users/infos",authMiddlewareAdmin ,async (req: Request, res: Response) => {
 
         const userUsecase = new UserUsecase(AppDataSource);
 
@@ -127,7 +128,7 @@ export const UserHandler = (app: express.Express) => {
         }
     });
 
-    app.get("/users/infos/:id", async (req: Request, res: Response) => {
+    app.get("/users/infos/:id",authMiddlewareAll ,async (req: Request, res: Response) => {
         try {
             const validationResult = userIdValidation.validate(req.params)
     

@@ -3,14 +3,14 @@ import { generateValidationErrorMessage } from "../validators/generate-validatio
 import {  createMovieValidation, listMovieValidation, moviePlanningValidation, movieIdValidation, updateMovieValidation } from "../validators/movie-validator";
 import { AppDataSource } from "../../database/database";
 import { Movie } from "../../database/entities/movie";
-import { authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
+import { authMiddlewareAll, authMiddlewareAdmin } from "../middleware/auth-middleware";
 import { MovieUsecase } from "../../domain/movie-usecase";
 
 
 export const MovieHandler = (app: express.Express) => {
     
 
-    app.get("/movies", async (req: Request, res: Response) => {
+    app.get("/movies", authMiddlewareAll ,async (req: Request, res: Response) => {
         const validation = listMovieValidation.validate(req.query)
 
     if (validation.error) {
@@ -89,7 +89,7 @@ export const MovieHandler = (app: express.Express) => {
 
 
 
-    app.get("/movies/available/" ,async (req: Request, res: Response) => {
+    app.get("/movies/available/", authMiddlewareAll ,async (req: Request, res: Response) => {
 
 
         const movieUsecase = new MovieUsecase(AppDataSource);
@@ -113,7 +113,7 @@ export const MovieHandler = (app: express.Express) => {
 
 
 
-    app.post("/movies", async (req: Request, res: Response) => {
+    app.post("/movies", authMiddlewareAdmin ,async (req: Request, res: Response) => {
         const validation = createMovieValidation.validate(req.body)
     
         if (validation.error) {
@@ -140,7 +140,7 @@ export const MovieHandler = (app: express.Express) => {
     })
     
 
-    app.delete("/movies/:id", async (req: Request, res: Response) => {
+    app.delete("/movies/:id", authMiddlewareAdmin ,async (req: Request, res: Response) => {
         try {
             const validationResult = movieIdValidation.validate(req.params)
     
@@ -168,7 +168,7 @@ export const MovieHandler = (app: express.Express) => {
 
 
     
-    app.get("/movies/:id", async (req: Request, res: Response) => {
+    app.get("/movies/:id", authMiddlewareAll ,async (req: Request, res: Response) => {
         try {
             const validationResult = movieIdValidation.validate(req.params)
     
@@ -194,7 +194,7 @@ export const MovieHandler = (app: express.Express) => {
     
 
     
-    app.patch("/movies/:id", async (req: Request, res: Response) => {
+    app.patch("/movies/:id", authMiddlewareAdmin ,async (req: Request, res: Response) => {
     
         const validation = updateMovieValidation.validate({ ...req.params, ...req.body })
     

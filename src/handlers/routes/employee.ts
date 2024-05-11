@@ -4,11 +4,11 @@ import { generateValidationErrorMessage } from "../validators/generate-validatio
 import { createEmployeeValidation, listEmployeeValidation, employeeIdValidation , updateEmployeeValidation} from "../validators/employee-validator";
 import { Employee } from "../../database/entities/employee";
 import { EmployeeUsecase } from "../../domain/employee-usecase";
-import { authMiddlewareAdmin } from "../middleware/auth-middleware";
+import { authMiddlewareAdmin, authMiddlewareSuperAdmin } from "../middleware/auth-middleware";
 
 export const EmployeeHandler = (app: express.Express) => {
 
-    app.get("/employees/:id",  async (req: Request, res: Response) => {
+    app.get("/employees/:id", authMiddlewareSuperAdmin ,async (req: Request, res: Response) => {
         try {
             const validationResult = employeeIdValidation.validate(req.params)
             if(validationResult.error) {
@@ -30,7 +30,7 @@ export const EmployeeHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/employees", async (req: Request, res: Response) => {
+    app.get("/employees", authMiddlewareSuperAdmin ,async (req: Request, res: Response) => {
         const validation = listEmployeeValidation.validate(req.query)
 
         if(validation.error) {
@@ -55,7 +55,7 @@ export const EmployeeHandler = (app: express.Express) => {
     })
 
 
-    app.post("/employees", async (req: Request, res: Response) => {
+    app.post("/employees", authMiddlewareSuperAdmin ,async (req: Request, res: Response) => {
         const validation = createEmployeeValidation.validate(req.body)
         if(validation.error) {
             res.status(400).send(generateValidationErrorMessage(validation.error.details))
@@ -75,7 +75,7 @@ export const EmployeeHandler = (app: express.Express) => {
         }
     })
 
-    app.patch("/employees/:id", async (req: Request, res: Response) => {
+    app.patch("/employees/:id", authMiddlewareSuperAdmin ,async (req: Request, res: Response) => {
 
         const validation = updateEmployeeValidation.validate({...req.params, ...req.body})
 
@@ -114,7 +114,7 @@ export const EmployeeHandler = (app: express.Express) => {
 })
 
 
-app.delete("/employees/:id", async (req: Request, res: Response) => {
+app.delete("/employees/:id", authMiddlewareSuperAdmin ,async (req: Request, res: Response) => {
     try {
         const validationResult = employeeIdValidation.validate(req.params)
 

@@ -15,8 +15,9 @@ const generate_validation_message_1 = require("../validators/generate-validation
 const employee_validator_1 = require("../validators/employee-validator");
 const employee_1 = require("../../database/entities/employee");
 const employee_usecase_1 = require("../../domain/employee-usecase");
+const auth_middleware_1 = require("../middleware/auth-middleware");
 const EmployeeHandler = (app) => {
-    app.get("/employees/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/employees/:id", auth_middleware_1.authMiddlewareSuperAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = employee_validator_1.employeeIdValidation.validate(req.params);
             if (validationResult.error) {
@@ -37,7 +38,7 @@ const EmployeeHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/employees", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/employees", auth_middleware_1.authMiddlewareSuperAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         const validation = employee_validator_1.listEmployeeValidation.validate(req.query);
         if (validation.error) {
@@ -59,7 +60,7 @@ const EmployeeHandler = (app) => {
             console.log(error);
         }
     }));
-    app.post("/employees", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/employees", auth_middleware_1.authMiddlewareSuperAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = employee_validator_1.createEmployeeValidation.validate(req.body);
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -76,7 +77,7 @@ const EmployeeHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/employees/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/employees/:id", auth_middleware_1.authMiddlewareSuperAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = employee_validator_1.updateEmployeeValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -103,7 +104,7 @@ const EmployeeHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.delete("/employees/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.delete("/employees/:id", auth_middleware_1.authMiddlewareSuperAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = employee_validator_1.employeeIdValidation.validate(req.params);
             if (validationResult.error) {

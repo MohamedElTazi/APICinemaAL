@@ -4,11 +4,12 @@ import { AppDataSource } from "../../database/database";
 import { TicketShowtimeAccesses } from "../../database/entities/ticketShowtimeAccesses";
 import { accessTicketValidation, createAccessTicketShowTimeAccessesValidation, listAccessTicketShowTimeAccessesValidation, ticketAccessIdValidation, updateTicketAccesValidation } from "../validators/ticketShowtimeAccesses-validator";
 import { TicketAccesUsecase } from "../../domain/ticketShowtimeAccesses-usecase";
+import { authMiddlewareAdmin, authMiddlewareAll } from "../middleware/auth-middleware";
 
 
 export const TicketShowtimeAccessessHandler = (app: express.Express) => {
 
-    app.get("/ticketShowtimeAccesses", async (req: Request, res: Response) => {
+    app.get("/ticketShowtimeAccesses", authMiddlewareAdmin ,async (req: Request, res: Response) => {
         try {
             const validation = listAccessTicketShowTimeAccessesValidation.validate(req.query);
 
@@ -43,7 +44,7 @@ export const TicketShowtimeAccessessHandler = (app: express.Express) => {
     });
 
 
-    app.get("/ticketShowtimeAccesses/:id", async (req: Request, res: Response) => {
+    app.get("/ticketShowtimeAccesses/:id", authMiddlewareAll ,async (req: Request, res: Response) => {
         try {
             const validationResult = ticketAccessIdValidation.validate(req.params)
     
@@ -66,7 +67,7 @@ export const TicketShowtimeAccessessHandler = (app: express.Express) => {
         }
     })
 
-    app.post("/ticketShowtimeAccesses", async (req: Request, res: Response) => {
+    app.post("/ticketShowtimeAccesses", authMiddlewareAdmin,async (req: Request, res: Response) => {
         try {
             // Validez les données de la requête
             const validation = accessTicketValidation.validate(req.body);

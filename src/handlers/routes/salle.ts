@@ -160,7 +160,7 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/salles/:id" ,async (req: Request, res: Response) => {
+    app.patch("/salles/:id",authMiddlewareAdmin ,async (req: Request, res: Response) => {
 
         const validation = updateSalleValidation.validate({ ...req.params, ...req.body })
 

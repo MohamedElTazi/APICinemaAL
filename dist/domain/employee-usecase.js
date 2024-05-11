@@ -16,14 +16,13 @@ class EmployeeUsecase {
         this.db = db;
     }
     updateEmployee(id_1, _a) {
-        return __awaiter(this, arguments, void 0, function* (id, { name, working_hours }) {
+        return __awaiter(this, arguments, void 0, function* (id, { name }) {
             const repo = this.db.getRepository(employee_1.Employee);
             const employeeToUpdate = yield repo.findOneBy({ id });
             if (!employeeToUpdate)
                 return undefined;
             if (name) {
                 employeeToUpdate.name = name;
-                employeeToUpdate.working_hours = working_hours;
             }
             const employeeUpdated = yield repo.save(employeeToUpdate);
             return employeeUpdated;

@@ -5,9 +5,10 @@ import { generateValidationErrorMessage } from '../validators/generate-validatio
 import { AppDataSource } from '../../database/database';
 import { Ticket } from "../../database/entities/ticket";
 import { TicketUsecase } from '../../domain/ticket-usecase';
+import { authMiddlewareAdmin, authMiddlewareAll } from '../middleware/auth-middleware';
 export const TicketHandler = (app: express.Express) => {
 
-    app.get("/tickets", async (req: Request, res: Response) => {
+    app.get("/tickets",authMiddlewareAdmin, async (req: Request, res: Response) => {
         try {
             const validation = listTicketValidation.validate(req.query);
 
@@ -36,7 +37,7 @@ export const TicketHandler = (app: express.Express) => {
         }
     });
 
-    app.get("/tickets/infos" ,async (req: Request, res: Response) => {
+    app.get("/tickets/infos",authMiddlewareAdmin ,async (req: Request, res: Response) => {
 
         const ticketUsecase = new TicketUsecase(AppDataSource);
 
@@ -55,7 +56,7 @@ export const TicketHandler = (app: express.Express) => {
         }
     });
 
-    app.get("/tickets/infos/:id", async (req: Request, res: Response) => {
+    app.get("/tickets/infos/:id", authMiddlewareAll,async (req: Request, res: Response) => {
         try {
             const validationResult = ticketIdValidation.validate(req.params)
     
@@ -84,7 +85,7 @@ export const TicketHandler = (app: express.Express) => {
         }
     })
 
-    app.post("/tickets", async (req: Request, res: Response) => {
+    app.post("/tickets", authMiddlewareAdmin ,async (req: Request, res: Response) => {
         const validation = createTicketValidation.validate(req.body)
     
         if (validation.error) {
@@ -112,7 +113,7 @@ export const TicketHandler = (app: express.Express) => {
     })
 
 
-    app.get("/tickets/:id", async (req: Request, res: Response) => {
+    app.get("/tickets/:id", authMiddlewareAll ,async (req: Request, res: Response) => {
         try {
             const validationResult = ticketIdValidation.validate(req.params)
     
@@ -137,7 +138,7 @@ export const TicketHandler = (app: express.Express) => {
         }
     })
     
-    app.patch("/tickets/:id", async (req: Request, res: Response) => {
+    app.patch("/tickets/:id",authMiddlewareAdmin ,async (req: Request, res: Response) => {
     
         const validation = updateTicketValidation.validate({ ...req.params, ...req.body })
     
@@ -182,7 +183,7 @@ export const TicketHandler = (app: express.Express) => {
     
 
     
-    app.delete("/tickets/:id", async (req: Request, res: Response) => {
+    app.delete("/tickets/:id",authMiddlewareAdmin, async (req: Request, res: Response) => {
         try {
             const validationResult = ticketIdValidation.validate(req.params)
     

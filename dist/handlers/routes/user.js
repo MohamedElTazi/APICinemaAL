@@ -18,6 +18,7 @@ const user_1 = require("../../database/entities/user");
 const jsonwebtoken_1 = require("jsonwebtoken");
 const token_1 = require("../../database/entities/token");
 const user_usecase_1 = require("../../domain/user-usecase");
+const auth_middleware_1 = require("../middleware/auth-middleware");
 const UserHandler = (app) => {
     app.post('/auth/signup', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
@@ -104,7 +105,7 @@ const UserHandler = (app) => {
             return;
         }
     }));
-    app.get("/users/infos", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/users/infos", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const userUsecase = new user_usecase_1.UserUsecase(database_1.AppDataSource);
         const query = yield userUsecase.getUsersInfos();
         if (query === null) {
@@ -119,7 +120,7 @@ const UserHandler = (app) => {
             res.status(500).json({ error: "Internal Server Error" });
         }
     }));
-    app.get("/users/infos/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/users/infos/:id", auth_middleware_1.authMiddlewareAll, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = user_validator_1.userIdValidation.validate(req.params);
             if (validationResult.error) {

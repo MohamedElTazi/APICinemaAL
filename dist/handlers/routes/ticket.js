@@ -15,8 +15,9 @@ const generate_validation_message_1 = require("../validators/generate-validation
 const database_1 = require("../../database/database");
 const ticket_1 = require("../../database/entities/ticket");
 const ticket_usecase_1 = require("../../domain/ticket-usecase");
+const auth_middleware_1 = require("../middleware/auth-middleware");
 const TicketHandler = (app) => {
-    app.get("/tickets", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/tickets", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         try {
             const validation = ticket_validator_1.listTicketValidation.validate(req.query);
@@ -40,7 +41,7 @@ const TicketHandler = (app) => {
             res.status(500).send({ error: 'Internal server error' });
         }
     }));
-    app.get("/tickets/infos", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/tickets/infos", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const ticketUsecase = new ticket_usecase_1.TicketUsecase(database_1.AppDataSource);
         const query = yield ticketUsecase.getTicketsInfos();
         if (query === null) {
@@ -55,7 +56,7 @@ const TicketHandler = (app) => {
             res.status(500).json({ error: "Internal Server Error" });
         }
     }));
-    app.get("/tickets/infos/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/tickets/infos/:id", auth_middleware_1.authMiddlewareAll, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = ticket_validator_1.ticketIdValidation.validate(req.params);
             if (validationResult.error) {
@@ -80,7 +81,7 @@ const TicketHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.post("/tickets", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/tickets", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = ticket_validator_1.createTicketValidation.validate(req.body);
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -98,7 +99,7 @@ const TicketHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/tickets/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/tickets/:id", auth_middleware_1.authMiddlewareAll, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = ticket_validator_1.ticketIdValidation.validate(req.params);
             if (validationResult.error) {
@@ -119,7 +120,7 @@ const TicketHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/tickets/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/tickets/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = ticket_validator_1.updateTicketValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -149,7 +150,7 @@ const TicketHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.delete("/tickets/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.delete("/tickets/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = ticket_validator_1.ticketIdValidation.validate(req.params);
             if (validationResult.error) {

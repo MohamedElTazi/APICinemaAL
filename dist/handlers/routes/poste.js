@@ -15,8 +15,9 @@ const generate_validation_message_1 = require("../validators/generate-validation
 const poste_validator_1 = require("../validators/poste-validator");
 const poste_1 = require("../../database/entities/poste");
 const poste_usecase_1 = require("../../domain/poste-usecase");
+const auth_middleware_1 = require("../middleware/auth-middleware");
 const PosteHandler = (app) => {
-    app.get("/postes/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/postes/:id", auth_middleware_1.authMiddlewareSuperAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = poste_validator_1.posteIdValidation.validate(req.params);
             if (validationResult.error) {
@@ -37,7 +38,7 @@ const PosteHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/postes", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/postes", auth_middleware_1.authMiddlewareSuperAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         const validation = poste_validator_1.listPosteValidation.validate(req.query);
         if (validation.error) {
@@ -59,7 +60,7 @@ const PosteHandler = (app) => {
             console.log(error);
         }
     }));
-    app.post("/postes", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/postes", auth_middleware_1.authMiddlewareSuperAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = poste_validator_1.createPosteValidation.validate(req.body);
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -76,7 +77,7 @@ const PosteHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/postes/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/postes/:id", auth_middleware_1.authMiddlewareSuperAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = poste_validator_1.updatePosteValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -103,7 +104,7 @@ const PosteHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.delete("/postes/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.delete("/postes/:id", auth_middleware_1.authMiddlewareSuperAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = poste_validator_1.posteIdValidation.validate(req.params);
             if (validationResult.error) {

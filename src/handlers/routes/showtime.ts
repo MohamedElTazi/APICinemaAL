@@ -14,7 +14,7 @@ import { PlanningUsecase } from "../../domain/planning-usecase";
 export const ShowtimeHandler = (app: express.Express) => {
 
     
-    app.post("/showtimes" ,async (req: Request, res: Response) => {
+    app.post("/showtimes",authMiddlewareAdmin ,async (req: Request, res: Response) => {
         const reqBodyStartDatetime = req.body.start_datetime
         req.body.start_datetime = req.body.start_datetime+"Z"
 
@@ -112,7 +112,7 @@ export const ShowtimeHandler = (app: express.Express) => {
 
     });
 
-    app.get("/showtimes", async (req: Request, res: Response) => {
+    app.get("/showtimes",authMiddlewareAll, async (req: Request, res: Response) => {
         const validation = listShowtimeValidation.validate(req.query)
 
         if (validation.error) {
@@ -137,7 +137,7 @@ export const ShowtimeHandler = (app: express.Express) => {
         }
     })
     
-    app.get("/showtimes/:id", async (req: Request, res: Response) => {
+    app.get("/showtimes/:id",authMiddlewareAll, async (req: Request, res: Response) => {
         try {
             const validationResult = showtimeIdValidation.validate(req.params)
 
@@ -188,7 +188,7 @@ export const ShowtimeHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/showtimes/:id", async (req: Request, res: Response) => {
+    app.patch("/showtimes/:id",authMiddlewareAdmin, async (req: Request, res: Response) => {
 
         const validation = updateShowtimeValidation.validate({ ...req.params, ...req.body })
 

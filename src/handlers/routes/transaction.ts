@@ -10,7 +10,7 @@ import { User } from "../../database/entities/user";
 
 export const TransactionHandler = (app: express.Express) => {
 
-    app.post("/transactions" ,async (req: Request, res: Response) => {
+    app.post("/transactions", authMiddlewareAdmin ,async (req: Request, res: Response) => {
         const validation = createTransactionValidation.validate(req.body)
 
         if (validation.error) {
@@ -32,7 +32,7 @@ export const TransactionHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/transactions",async (req: Request, res: Response) => {
+    app.get("/transactions", authMiddlewareAdmin,async (req: Request, res: Response) => {
         const validation = listTransactionValidation.validate(req.query)
 
 
@@ -64,7 +64,7 @@ export const TransactionHandler = (app: express.Express) => {
     })
 
 
-    app.get("/transactions/:id",async (req: Request, res: Response) => {
+    app.get("/transactions/:id", authMiddlewareAdmin,async (req: Request, res: Response) => {
         try {
             const validationResult = transactionIdValidation.validate(req.params)
 
@@ -87,7 +87,7 @@ export const TransactionHandler = (app: express.Express) => {
         }
     })
 
-    app.get("/transactions/clients/:id",async (req: Request, res: Response) => {
+    app.get("/transactions/clients/:id", authMiddlewareAll,async (req: Request, res: Response) => {
         try {
             const validationResult = userIdValidation.validate(req.params)
 
@@ -117,7 +117,7 @@ export const TransactionHandler = (app: express.Express) => {
 
 
 
-    app.patch("/transactions/:id" ,async (req: Request, res: Response) => {
+    app.patch("/transactions/:id", authMiddlewareAdmin ,async (req: Request, res: Response) => {
 
         const validation = updateTransactionValidation.validate({ ...req.params, ...req.body })
 
@@ -151,7 +151,7 @@ export const TransactionHandler = (app: express.Express) => {
     })
 
 
-    app.post("/transactions/buyTicket/:id" ,async (req: Request, res: Response) => {
+    app.post("/transactions/buyTicket/:id", authMiddlewareUser ,async (req: Request, res: Response) => {
         const validation = buyTicketValidation.validate({...req.params, ...req.body})
 
         if (validation.error) {
@@ -255,7 +255,7 @@ export const TransactionHandler = (app: express.Express) => {
         }
     })
 
-    app.patch("/transactions/withdrawBalance/:id" ,async (req: Request, res: Response) => {
+    app.patch("/transactions/withdrawBalance/:id", authMiddlewareUser ,async (req: Request, res: Response) => {
     
         
         const validation = updateMoneyValidation.validate({ ...req.params, ...req.body })
@@ -318,7 +318,7 @@ export const TransactionHandler = (app: express.Express) => {
 
 
 
-    app.post("/transactions/useSuperTicket/:id" ,async (req: Request, res: Response) => {
+    app.post("/transactions/useSuperTicket/:id", authMiddlewareUser ,async (req: Request, res: Response) => {
             const validation = useSuperTicketValidation.validate({...req.params, ...req.body})
 
         if (validation.error) {

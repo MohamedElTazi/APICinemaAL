@@ -17,7 +17,7 @@ const movie_1 = require("../../database/entities/movie");
 const auth_middleware_1 = require("../middleware/auth-middleware");
 const movie_usecase_1 = require("../../domain/movie-usecase");
 const MovieHandler = (app) => {
-    app.get("/movies", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/movies", auth_middleware_1.authMiddlewareAll, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         const validation = movie_validator_1.listMovieValidation.validate(req.query);
         if (validation.error) {
@@ -73,7 +73,7 @@ const MovieHandler = (app) => {
             res.status(500).json({ error: "Internal Server Error" });
         }
     }));
-    app.get("/movies/available/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/movies/available/", auth_middleware_1.authMiddlewareAll, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const movieUsecase = new movie_usecase_1.MovieUsecase(database_1.AppDataSource);
         const query = yield movieUsecase.getMovieAvailable();
         if (query === null) {
@@ -89,7 +89,7 @@ const MovieHandler = (app) => {
             res.status(500).json({ error: "Internal Server Error" });
         }
     }));
-    app.post("/movies", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.post("/movies", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = movie_validator_1.createMovieValidation.validate(req.body);
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -108,7 +108,7 @@ const MovieHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.delete("/movies/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.delete("/movies/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = movie_validator_1.movieIdValidation.validate(req.params);
             if (validationResult.error) {
@@ -130,7 +130,7 @@ const MovieHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.get("/movies/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.get("/movies/:id", auth_middleware_1.authMiddlewareAll, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validationResult = movie_validator_1.movieIdValidation.validate(req.params);
             if (validationResult.error) {
@@ -151,7 +151,7 @@ const MovieHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/movies/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/movies/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = movie_validator_1.updateMovieValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
