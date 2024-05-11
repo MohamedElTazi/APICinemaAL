@@ -92,15 +92,7 @@ export const MovieHandler = (app: express.Express) => {
     });
 
 
-        try {
-            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
-
-            res.status(200).send(planning);
-        } catch (error) {
-            console.error("Error fetching planning:", error);
-            res.status(500).json({ error: "Internal Server Error" });
-        }
-    });
+ 
 
     app.get("/movies/available/" ,async (req: Request, res: Response) => {
 
@@ -113,6 +105,15 @@ export const MovieHandler = (app: express.Express) => {
             res.status(404).send(Error("Error fetching planning"))
             return
         }
+       try {
+            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
+    
+            res.status(200).send(planning);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
 
 
     app.get("/movies/available/" ,async (req: Request, res: Response) => {
