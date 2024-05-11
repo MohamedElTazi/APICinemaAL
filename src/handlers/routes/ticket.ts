@@ -1,14 +1,14 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { listTicketValidation,createTicketValidation,ticketIdValidation,updateTicketValidation } from "../validators/ticket-validator";
+import { listTicketValidation,createTicketValidation, ticketIdValidation, updateTicketValidation } from "../validators/ticket-validator";
 import { generateValidationErrorMessage } from '../validators/generate-validation-message';
-import { TicketUsecase } from "../../domain/ticket-usecase";
 import { AppDataSource } from '../../database/database';
 import { Ticket } from "../../database/entities/ticket";
-export const ticketHandler = (app: express.Express) => {
+import { TicketUsecase } from '../../domain/ticket-usecase';
+export const TicketHandler = (app: express.Express) => {
+
     app.get("/tickets", async (req: Request, res: Response) => {
         try {
-            // Validation de la requête
             const validation = listTicketValidation.validate(req.query);
 
             if (validation.error) {
@@ -16,33 +16,73 @@ export const ticketHandler = (app: express.Express) => {
                 res.status(400).send(generateValidationErrorMessage(validation.error.details));
                 return;
             }
-
             
-            console.log('Requête valide:', req.query);
-            
-            const listTicketRequest = validation.value;
+            const listMovieRequest = validation.value;
             let limit = 20;
-            if (listTicketRequest.limit) {
-                limit = listTicketRequest.limit;
-                console.log('Limite:', limit);
+            if (listMovieRequest.limit) {
+                limit = listMovieRequest.limit;
             }
-            const page = listTicketRequest.page ?? 1;
-          
+            const page = listMovieRequest.page ?? 1;
+
             const ticketUsecase = new TicketUsecase(AppDataSource);
-      
-       
-            const listTickets = await ticketUsecase.listTickets({ ...listTicketRequest, page, limit });
-           
+
+            const listTickets = await ticketUsecase.listTickets({ ...listMovieRequest, page, limit });
             
             res.status(200).send(listTickets);
 
         } catch (error) {
-            
             console.log('Erreur lors de la récupération des tickets:', error);
             res.status(500).send({ error: 'Internal server error' });
         }
     });
 
+    app.get("/tickets/infos" ,async (req: Request, res: Response) => {
+
+        const ticketUsecase = new TicketUsecase(AppDataSource);
+
+        const query = await ticketUsecase.getTicketsInfos();
+
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }
+
+        try {
+            res.status(200).send(query);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
+    app.get("/tickets/infos/:id", async (req: Request, res: Response) => {
+        try {
+            const validationResult = ticketIdValidation.validate(req.params)
+    
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+            const ticketId = validationResult.value;
+
+            const ticketUsecase = new TicketUsecase(AppDataSource);
+
+            let ticket = await ticketUsecase.getTicketInfos(ticketId.id);
+            if (ticket === null) {
+                res.status(404).send({ "error": `movie ${ticketId.id} not found` });
+                return;
+            }
+
+            if (ticket.length === 0) {
+                const ticketUsecase = new TicketUsecase(AppDataSource);
+                ticket = await ticketUsecase.getOneTicket(ticketId.id)
+            }
+            res.status(200).send(ticket);
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
 
     app.post("/tickets", async (req: Request, res: Response) => {
         const validation = createTicketValidation.validate(req.body)
@@ -53,14 +93,17 @@ export const ticketHandler = (app: express.Express) => {
         }
     
         const ticketRequest = validation.value
+        console.log(ticketRequest)
+
+
         const ticketRepo = AppDataSource.getRepository(Ticket)
-        console.log("ok")
         try {
     
             const ticketCreated = await ticketRepo.save(
                 ticketRequest
             )
 
+            
             res.status(201).send(ticketCreated)
         } catch (error) {
             console.log(error);
@@ -68,7 +111,7 @@ export const ticketHandler = (app: express.Express) => {
         }
     })
 
-    
+
     app.get("/tickets/:id", async (req: Request, res: Response) => {
         try {
             const validationResult = ticketIdValidation.validate(req.params)
@@ -79,12 +122,14 @@ export const ticketHandler = (app: express.Express) => {
             }
             const ticketId = validationResult.value
     
-            const ticketRepository = AppDataSource.getRepository(Ticket)
-            const ticket = await ticketRepository.findOneBy({ id: ticketId.id })
+            const ticketUsecase = new TicketUsecase(AppDataSource);
+            const ticket = await ticketUsecase.getOneTicket(ticketId.id)
+
             if (ticket === null) {
                 res.status(404).send({ "error": `ticket ${ticketId.id} not found` })
                 return
             }
+
             res.status(200).send(ticket)
         } catch (error) {
             console.log(error)
@@ -114,19 +159,21 @@ export const ticketHandler = (app: express.Express) => {
             }
     
     
-            const updatedMovie = await ticketUsecase.updateTicket(
-                UpdateticketRequest.id,
-                { ...UpdateticketRequest }
-                )
+            const updatedTicket = await ticketUsecase.updateTicket(UpdateticketRequest.id,{ ...UpdateticketRequest})
     
-            if (updatedMovie === null) {
+            if (updatedTicket === null) {
                 res.status(404).send({ "error": `ticket ${UpdateticketRequest.id} not found `})
+                return
+            }
+
+            
+            if(updatedTicket === "No data to update"){
+                res.status(400).send({ "error": `No data to update`})
                 return
             }
     
     
-    
-            res.status(200).send(updatedMovie)
+            res.status(200).send(updatedTicket)
         } catch (error) {
             console.log(error)
             res.status(500).send({ error: "Internal error" })
@@ -152,14 +199,12 @@ export const ticketHandler = (app: express.Express) => {
                 return
             }
     
-            const TicketDeleted = await MovieRepository.remove(ticket)
-            res.status(200).send(TicketDeleted)
+            await MovieRepository.remove(ticket)
+            res.status(200).send("Successfully deleted")
         } catch (error) {
             console.log(error)
             res.status(500).send({ error: "Internal error" })
         }
     })
-    
 
-
-   };
+};

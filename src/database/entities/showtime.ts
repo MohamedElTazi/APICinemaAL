@@ -16,10 +16,9 @@ export class Showtime {
         movie: Movie;
     
         @Column()
-        start_datetime: Date;  // Date et heure de début
-    
+        start_datetime: Date;
         @Column()
-        end_datetime: Date;  // Date et heure de fin
+        end_datetime: Date;  
     
         @Column()
         special_notes: string;
@@ -35,6 +34,5 @@ export class Showtime {
             this.end_datetime = end_datetime;
             this.special_notes = special_notes;
             this.ticket_showtime_accesses = ticket_showtime_accesses;
-
         }
 }

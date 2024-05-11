@@ -4,7 +4,7 @@ import { createSalleValidation, listSalleValidation, salleIdValidation, sallePla
 import { AppDataSource } from "../../database/database";
 import { Salle } from "../../database/entities/salle";
 import { SalleUsecase } from "../../domain/salle-usecase";
-import { authMiddlewareAdmin, authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
+import { authMiddlewareAdmin, authMiddlewareAll} from "../middleware/auth-middleware";
 import { toZonedTime } from "date-fns-tz";
 
 export const SalleHandler = (app: express.Express) => {
@@ -87,7 +87,7 @@ export const SalleHandler = (app: express.Express) => {
 
 
         const salleUsecase = new SalleUsecase(AppDataSource);
-        const query = await salleUsecase.getMoviePlanning(startDate as string, endDate as string, salleId.id);
+        const query = await salleUsecase.getSallePlanning(startDate as string, endDate as string, salleId.id);
 
         if(query === null){
             res.status(404).send(Error("Error fetching planning"))
@@ -157,7 +157,7 @@ export const SalleHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/salles/:id",authMiddlewareAdmin ,async (req: Request, res: Response) => {
+    app.patch("/salles/:id" ,async (req: Request, res: Response) => {
 
         const validation = updateSalleValidation.validate({ ...req.params, ...req.body })
 

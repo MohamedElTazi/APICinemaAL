@@ -5,11 +5,19 @@ import { AppDataSource } from "../../database/database";
 import { Movie } from "../../database/entities/movie";
 import { authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
 import { MovieUsecase } from "../../domain/movie-usecase";
-import { Showtime } from "../../database/entities/showtime";
 
 
 export const MovieHandler = (app: express.Express) => {
     
+    /**
+     * @openapi
+     * /movies:
+     *   get:
+     *     description: Get all movies
+     *     responses:
+     *       200:
+     *         description: Success
+     */
     app.get("/movies", async (req: Request, res: Response) => {
         const validation = listMovieValidation.validate(req.query)
 
@@ -32,7 +40,7 @@ export const MovieHandler = (app: express.Express) => {
     } catch (error) {
         console.log(error)
     }
-    })
+})
 
     app.get("/movies/planning/:id",authMiddlewareAll ,async (req: Request, res: Response) => {
 
@@ -63,35 +71,14 @@ export const MovieHandler = (app: express.Express) => {
             return
         }
 
+        const movieUsecase = new MovieUsecase(AppDataSource);
 
-        let query = AppDataSource
-        .getRepository(Showtime)
-        .createQueryBuilder("showtime")
-        .leftJoinAndSelect("showtime.salle", "salle")
-        .leftJoinAndSelect("showtime.movie", "movie")
-        .select([
-            "salle.name",
-            "salle.description",
-            "salle.type",
-            "movie.title",
-            "movie.description",
-            "showtime.start_datetime",
-            "showtime.end_datetime",
-            "showtime.special_notes"
-        ])
-        .where("salle.maintenance_status = false")
-        .andWhere("salle.id = :id", { id: movieId.id });
+        const query = await movieUsecase.getMoviePlanning(startDate as string, endDate as string, movieId.id);
 
-        if (startDate && endDate) {
-            endDate = endDate + " 23:59:59"
-            query = query.andWhere("showtime.start_datetime >= :startDate AND showtime.end_datetime <= :endDate", { startDate, endDate });
-        }else if(startDate && !endDate){
-            query = query.andWhere("showtime.start_datetime >= :startDate", { startDate });
-        }else if(!startDate && endDate){
-            endDate = endDate + " 23:59:59"
-            query = query.andWhere("showtime.end_datetime <= :endDate", { endDate });
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
         }
-
 
         try {
             const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
@@ -104,6 +91,31 @@ export const MovieHandler = (app: express.Express) => {
     });
 
 
+
+    app.get("/movies/available/" ,async (req: Request, res: Response) => {
+
+
+        const movieUsecase = new MovieUsecase(AppDataSource);
+
+        const query = await movieUsecase.getMovieAvailable();
+
+        if(query === null){
+            res.status(404).send(Error("Error fetching planning"))
+            return
+        }
+
+        try {
+            const movieAvailable = await query.orderBy("showtime.start_datetime", "ASC").getMany();
+
+            res.status(200).send(movieAvailable);
+        } catch (error) {
+            console.error("Error fetching planning:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    });
+
+
+
     app.post("/movies", async (req: Request, res: Response) => {
         const validation = createMovieValidation.validate(req.body)
     
@@ -114,7 +126,10 @@ export const MovieHandler = (app: express.Express) => {
     
         const movieRequest = validation.value
         const movieRepo = AppDataSource.getRepository(Movie)
-        console.log("ok")
+
+        const movieUsecase = new MovieUsecase(AppDataSource);
+
+        movieRequest.duration = movieUsecase.formatTime(+movieRequest.duration)
         try {
     
             const movieCreated = await movieRepo.save(
@@ -200,11 +215,14 @@ export const MovieHandler = (app: express.Express) => {
                 return
             }
     
+            if(UpdateMovieRequest.duration){
+                const movieUsecase = new MovieUsecase(AppDataSource)
+                movieUsecase.updateShowtimeEndDatetimesOnFilmDurationChange(UpdateMovieRequest.id, +UpdateMovieRequest.duration)
+                UpdateMovieRequest.duration = movieUsecase.formatTime(+UpdateMovieRequest.duration)
+            }
+                
     
-            const updatedMovie = await movieUsecase.updateMovie(
-                UpdateMovieRequest.id,
-                { ...UpdateMovieRequest }
-                )
+            const updatedMovie = await movieUsecase.updateMovie(UpdateMovieRequest.id,{ ...UpdateMovieRequest })
     
             if (updatedMovie === null) {
                 res.status(404).send({ "error": `Movie ${UpdateMovieRequest.id} not found `})

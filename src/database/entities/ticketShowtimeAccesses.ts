@@ -1,4 +1,4 @@
-import {Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 import { Ticket } from "./ticket";
 import { Showtime } from "./showtime";
 

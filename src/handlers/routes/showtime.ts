@@ -7,12 +7,13 @@ import { ShowtimeUsecase } from "../../domain/showtime-usecase";
 import { authMiddlewareAdmin, authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
 import { format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
+import {DataSource} from "typeorm";
 
 
 export const ShowtimeHandler = (app: express.Express) => {
 
     
-    app.post("/showtimes", authMiddlewareAdmin ,async (req: Request, res: Response) => {
+    app.post("/showtimes" ,async (req: Request, res: Response) => {
         const reqBodyStartDatetime = req.body.start_datetime
         req.body.start_datetime = req.body.start_datetime+"Z"
 
@@ -47,6 +48,8 @@ export const ShowtimeHandler = (app: express.Express) => {
 
         showtimeRequest.start_datetime = reqBodyStartDatetime
 
+        console.log(await showtimeUsecase.isOverlap(showtimeRequest))
+
         if(await showtimeUsecase.isOverlap(showtimeRequest)){
             res.status(404).send({ "error": `New showtime is overlap with other showtime` })
             return  
@@ -59,6 +62,95 @@ export const ShowtimeHandler = (app: express.Express) => {
             res.status(201).send(ShowtimeCreated)
         } catch (error) {
             console.log(error);
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+
+
+    app.patch("/showtimes/:id", async (req: Request, res: Response) => {
+
+        const validation = updateShowtimeValidation.validate({ ...req.params, ...req.body })
+
+        if (validation.error) {
+            res.status(400).send(generateValidationErrorMessage(validation.error.details))
+            return
+        }
+
+
+        let reqBodyStartDatetime
+        let reqBodyEndDatetime
+        const showtimeRepository = AppDataSource.getRepository(Showtime)
+        const Showtimefound = await showtimeRepository.findOneBy({ id: +req.params.id })
+
+
+        if (Showtimefound === null) {
+            res.status(404).send({ "error": `showtime ${req.params.id} not found` })
+            return
+        }
+
+        if((req.body.start_datetime || req.body.end_datetime) && !req.body.salle){
+            res.status(404).send({ "error": `Salle is required to update the datetime` })
+            return
+        }
+
+        if(req.body.start_datetime || req.body.end_datetime){
+            if(req.body.start_datetime){
+                reqBodyStartDatetime = req.body.start_datetime
+                req.body.start_datetime = req.body.start_datetime+"Z"
+            }else{
+                if (Showtimefound === null) {
+                    res.status(404).send({ "error": `showtime ${req.params.id} not found` })
+                    return
+                }
+                req.body.start_datetime = Showtimefound.start_datetime
+            }
+
+            if(req.body.end_datetime){
+                reqBodyEndDatetime = req.body.end_datetime
+                req.body.end_datetime = req.body.end_datetime+"Z"
+            }else{
+                req.body.end_datetime = Showtimefound.end_datetime
+            }
+    
+        }else if(req.body.salle && !req.body.start_datetime && !req.body.end_datetime){
+            req.body.start_datetime = Showtimefound.start_datetime
+            req.body.end_datetime = Showtimefound.end_datetime
+        } 
+
+
+
+
+        const updateShowtimeRequest = validation.value
+
+
+        
+
+        try {
+            const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
+
+
+            const updatedShowtime = await showtimeUsecase.updateShowtime(updateShowtimeRequest.id, { ...updateShowtimeRequest })
+
+            if (updatedShowtime === null) {
+                res.status(404).send({ "error": `Salle ${updateShowtimeRequest.id} not found` })
+                return
+            }
+
+
+
+            updatedShowtime.start_datetime = reqBodyStartDatetime
+
+            updatedShowtime.end_datetime = reqBodyEndDatetime
+
+            console.log(await showtimeUsecase.isOverlap(updatedShowtime))
+            if(await showtimeUsecase.isOverlap(updatedShowtime)){
+                res.status(404).send({ "error": `New showtime is overlap with other showtime` })
+                return  
+            }
+
+            res.status(200).send(updatedShowtime)
+        } catch (error) {
+            console.log(error)
             res.status(500).send({ error: "Internal error" })
         }
     })
@@ -134,8 +226,8 @@ export const ShowtimeHandler = (app: express.Express) => {
             }
             const showtimeId = validationResult.value
 
-            const showtimeRepository = AppDataSource.getRepository(Showtime)
-            const showtime = await showtimeRepository.findOneBy({ id: showtimeId.id })
+            const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
+            const showtime = await showtimeUsecase.getOneShowtime(showtimeId.id)
             if (showtime === null) {
                 res.status(404).send({ "error": `showtime ${showtimeId.id} not found` })
                 return
@@ -203,32 +295,5 @@ export const ShowtimeHandler = (app: express.Express) => {
     })
 
 
-    app.patch("/showtimes/:id", authMiddlewareAdmin, async (req: Request, res: Response) => {
 
-        const validation = updateShowtimeValidation.validate({ ...req.params, ...req.body })
-
-        if (validation.error) {
-            res.status(400).send(generateValidationErrorMessage(validation.error.details))
-            return
-        }
-
-        const updateShowtimeRequest = validation.value
-
-        try {
-            const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
-
-
-            const updatedShowtime = await showtimeUsecase.updateShowtime(updateShowtimeRequest.id, { ...updateShowtimeRequest })
-            
-            if (updatedShowtime === null) {
-                res.status(404).send({ "error": `Salle ${updateShowtimeRequest.id} not found` })
-                return
-            }
-
-            res.status(200).send(updatedShowtime)
-        } catch (error) {
-            console.log(error)
-            res.status(500).send({ error: "Internal error" })
-        }
-    })
 }
