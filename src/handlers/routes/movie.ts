@@ -5,11 +5,19 @@ import { AppDataSource } from "../../database/database";
 import { Movie } from "../../database/entities/movie";
 import { authMiddlewareAll, authMiddlewareUser } from "../middleware/auth-middleware";
 import { MovieUsecase } from "../../domain/movie-usecase";
-import { Showtime } from "../../database/entities/showtime";
 
 
 export const MovieHandler = (app: express.Express) => {
     
+    /**
+     * @openapi
+     * /movies:
+     *   get:
+     *     description: Get all movies
+     *     responses:
+     *       200:
+     *         description: Success
+     */
     app.get("/movies", async (req: Request, res: Response) => {
         const validation = listMovieValidation.validate(req.query)
 

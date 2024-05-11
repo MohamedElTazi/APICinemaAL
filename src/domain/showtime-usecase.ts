@@ -30,7 +30,6 @@ export class ShowtimeUsecase {
     constructor(private readonly db: DataSource) { }
 
     async listShowtime(listShowtimeFilter: ListShowtimeFilter): Promise<{ Showtimes: Showtime[]; totalCount: number; }> {
-        console.log(listShowtimeFilter)
         const query = this.db.createQueryBuilder(Showtime, 'showtime')
         if (listShowtimeFilter.salle) {
             query.andWhere('showtime.salle <= :salle', { salle: listShowtimeFilter.salle })
@@ -54,6 +53,7 @@ export class ShowtimeUsecase {
         .take(listShowtimeFilter.limit)
 
         const [Showtimes, totalCount] = await query.getManyAndCount()
+        
         return {
             Showtimes,
             totalCount

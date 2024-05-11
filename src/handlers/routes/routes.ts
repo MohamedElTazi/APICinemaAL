@@ -12,6 +12,7 @@ import { StatisticHandler } from "./statistic";
 
 export const initRoutes = (app: express.Express) => {
 
+
     app.get("/health", (res: Response) => {
         res.send({ "message": "OP LE S" })
     })
