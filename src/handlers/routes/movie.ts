@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { query, Request, Response } from "express";
 import { generateValidationErrorMessage } from "../validators/generate-validation-message";
 import {  createMovieValidation, listMovieValidation, moviePlanningValidation, movieIdValidation, updateMovieValidation } from "../validators/movie-validator";
 import { AppDataSource } from "../../database/database";
@@ -9,15 +9,7 @@ import { MovieUsecase } from "../../domain/movie-usecase";
 
 export const MovieHandler = (app: express.Express) => {
     
-    /**
-     * @openapi
-     * /movies:
-     *   get:
-     *     description: Get all movies
-     *     responses:
-     *       200:
-     *         description: Success
-     */
+
     app.get("/movies", async (req: Request, res: Response) => {
         const validation = listMovieValidation.validate(req.query)
 
@@ -40,7 +32,8 @@ export const MovieHandler = (app: express.Express) => {
     } catch (error) {
         console.log(error)
     }
-})
+    });
+
 
     app.get("/movies/planning/:id",authMiddlewareAll ,async (req: Request, res: Response) => {
 
@@ -92,7 +85,9 @@ export const MovieHandler = (app: express.Express) => {
     });
 
 
- 
+
+
+
 
     app.get("/movies/available/" ,async (req: Request, res: Response) => {
 
@@ -105,38 +100,16 @@ export const MovieHandler = (app: express.Express) => {
             res.status(404).send(Error("Error fetching planning"))
             return
         }
-       try {
+        try {
             const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
-    
+
             res.status(200).send(planning);
         } catch (error) {
             console.error("Error fetching planning:", error);
             res.status(500).json({ error: "Internal Server Error" });
         }
-    });
+    })
 
-
-    app.get("/movies/available/" ,async (req: Request, res: Response) => {
-
-
-        const movieUsecase = new MovieUsecase(AppDataSource);
-
-        const query = await movieUsecase.getMovieAvailable();
-
-        if(query === null){
-            res.status(404).send(Error("Error fetching planning"))
-            return
-        }
-
-        try {
-            const movieAvailable = await query.orderBy("showtime.start_datetime", "ASC").getMany();
-
-            res.status(200).send(movieAvailable);
-        } catch (error) {
-            console.error("Error fetching planning:", error);
-            res.status(500).json({ error: "Internal Server Error" });
-        }
-    });
 
 
 
@@ -167,7 +140,6 @@ export const MovieHandler = (app: express.Express) => {
     })
     
 
-    
     app.delete("/movies/:id", async (req: Request, res: Response) => {
         try {
             const validationResult = movieIdValidation.validate(req.params)
@@ -192,6 +164,9 @@ export const MovieHandler = (app: express.Express) => {
             res.status(500).send({ error: "Internal error" })
         }
     })
+
+
+
     
     app.get("/movies/:id", async (req: Request, res: Response) => {
         try {
@@ -217,6 +192,7 @@ export const MovieHandler = (app: express.Express) => {
     })
     
     
+
     
     app.patch("/movies/:id", async (req: Request, res: Response) => {
     
@@ -263,3 +239,463 @@ export const MovieHandler = (app: express.Express) => {
     })
     
 }
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Movie:
+ *       type: object
+ *       required:
+ *         - title
+ *         - duration
+ *         - description
+ *         - genre
+ *         - showtimes
+ *       properties:
+ *         id:
+ *           type: number
+ *           description: The ID of the movie
+ *         title:
+ *           type: string
+ *           description: The title of the movie
+ *         duration:
+ *           type: string
+ *           description: The duration of the movie
+ *         description:
+ *           type: string
+ *           description: Description of the movie
+ *         genre:
+ *           type: string
+ *           description: The genre of the movie
+ *         showtimes:
+ *           type: array
+ *           items:
+ *             type: showtimes
+ *           description: Showtimes of the movie
+ * tags:
+ *  name: Movies
+ *  description: Endpoints related to  movies 
+ */
+
+/**
+* @openapi
+* /movies:
+ *   get:
+ *     tags: [Movies]
+ *     summary: Get a list of all movies
+ *     description: Retrieve a paginated list of movies.
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of items to return per page (default is 20)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number (default is 1)
+ *     responses:
+ *       200:
+ *         description: A paginated list of movies
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Movie'
+ *       400:
+ *         description: Bad request, validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ * 
+ * 
+ */
+
+/**
+ * 
+ * @openapi
+ * /movies/planning/{id}:
+ *  get:
+ *     tags: [Movies]
+ *     summary: Get movie planning by ID
+ *     description: Retrieve the planning for a specific movie by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the movie
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date for filtering the movie planning
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date for filtering the movie planning
+ *     responses:
+ *       200:
+ *         description: A list of movie planning items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: ID of the planning item
+ *                   movieId:
+ *                     type: integer
+ *                     description: ID of the movie associated with the planning item
+ *                   startDate:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Start date and time of the planning item
+ *                   endDate:
+ *                     type: string
+ *                     format: date-time
+ *                     description: End date and time of the planning item
+ *       400:
+ *         description: Bad request, validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Movie not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+
+ */
+
+
+/**
+ * @openapi
+ * /movies/available:
+ *   get:
+ *     tags: [Movies]
+ *     summary: Get available movies
+ *     description: Retrieve a list of available movies.
+ *     responses:
+ *       200:
+ *         description: A list of available movies
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: ID of the movie
+ *                   title:
+ *                     type: string
+ *                     description: Title of the movie
+ *                   duration:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Duration of the movie
+ *                   genre:
+ *                     type: string
+ *                     description: Genre of the movie
+ *       404:
+ *         description: Movies not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+
+/**
+ * @openapi
+ * /movies:
+ *   post:
+ *     tags: [Movies]
+ *     summary: Create a new movie
+ *     description: Create a new movie with the provided details.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Title of the movie
+ *               description:
+ *                type: string
+ *                description: Description of the movie
+ *               duration:
+ *                 type: string
+ *                 description: Duration of the movie in HH:MM format
+ *               genre:
+ *                 type: string
+ *                 description: Genre of the movie
+ *             required:
+ *               - title
+ *               - description
+ *               - duration
+ *               - genre
+ *     responses:
+ *       201:
+ *         description: The newly created movie
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Movie'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ * 
+ */
+
+/**
+* @openapi
+* /movies/{id}:
+*   delete:
+*     tags: [Movies]
+*     summary: Delete a movie by ID
+*     description: Delete a movie with the specified ID.
+*     parameters:
+*       - in: path
+*         name: id
+*         required: true
+*         schema:
+*           type: string
+*         description: ID of the movie to delete
+*     responses:
+*       200:
+*         description: Movie successfully deleted
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 message:
+*                   type: string
+*                   description: Success message
+*       400:
+*         description: Bad request
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 error:
+*                   type: string
+*                   description: Error message
+*       404:
+*         description: Movie not found
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 error:
+*                   type: string
+*                   description: Error message
+*       500:
+*         description: Internal server error
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 error:
+*                   type: string
+*                   description: Error message
+* 
+*/
+
+
+
+
+    /**
+ * @openapi
+ * /movies/{id}:
+ *   get:
+ *     tags: [Movies]
+ *     summary: Get a movie by ID
+ *     description: Retrieve a movie with the specified ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the movie to retrieve
+ *     responses:
+ *       200:
+ *         description: Movie found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Movie'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Movie not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+
+/**
+ * @openapi
+ * /movies/{id}:
+ *   patch:
+ *     tags: [Movies]
+ *     summary: Update a movie by ID
+ *     description: Update a movie with the specified ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the movie to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Movie'
+ *     responses:
+ *       200:
+ *         description: Movie successfully updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Movie'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       404:
+ *         description: Movie not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */

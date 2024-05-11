@@ -48,7 +48,6 @@ export class UserUsecase {
           movie m ON s.movieId = m.id
         GROUP BY
           u.id;
-        WHERE u.id = :id
         `;
         
         const users = await entityManager.query(sqlQuery);
