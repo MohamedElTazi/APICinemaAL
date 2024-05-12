@@ -38,6 +38,6 @@ function swaggerDocs(app, port) {
         res.setHeader("Content-Type", "application/json");
         res.send(swaggerSpec);
     });
-    console.log(`Docs available at http://localhost:${port}/docs`);
+    console.log(`Docs available at https://apicinemaal.onrender.com/docs/`);
 }
 exports.swaggerDocs = swaggerDocs;

@@ -6,7 +6,7 @@ require("dotenv/config");
 exports.AppDataSource = new typeorm_1.DataSource({
     type: process.env.TYPE,
     host: process.env.HOST,
-    port: process.env.PORT,
+    port: process.env.PORTDB,
     username: process.env.USERMYSQL,
     password: process.env.PASSWORD,
     database: process.env.DATABASE,

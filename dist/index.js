@@ -34,7 +34,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     (0, swagger_1.swaggerDocs)(app, port);
     (0, routes_1.initRoutes)(app);
     app.listen(port, () => {
-        console.log(`Server running on port ${port}`);
+        console.log(`Server running on https://apicinemaal.onrender.com/docs/`);
     });
 });
 main();
