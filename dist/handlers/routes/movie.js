@@ -151,7 +151,7 @@ const MovieHandler = (app) => {
             res.status(500).send({ error: "Internal error" });
         }
     }));
-    app.patch("/movies/:id", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    app.patch("/movies/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const validation = movie_validator_1.updateMovieValidation.validate(Object.assign(Object.assign({}, req.params), req.body));
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -167,9 +167,12 @@ const MovieHandler = (app) => {
             }
             if (UpdateMovieRequest.duration) {
                 const movieUsecase = new movie_usecase_1.MovieUsecase(database_1.AppDataSource);
-                const updateShowtimeEndDatetimesOnFilmDurationChange = movieUsecase.updateShowtimeEndDatetimesOnFilmDurationChange(UpdateMovieRequest.id, +UpdateMovieRequest.duration);
-                if ((yield updateShowtimeEndDatetimesOnFilmDurationChange) === "not all employees are available") {
-                    return res.status(500).send({ error: "not all employees are available" });
+                const updateShowtimeEndDatetimesOnFilmDurationChange = yield movieUsecase.updateShowtimeEndDatetimesOnFilmDurationChange(UpdateMovieRequest.id, +UpdateMovieRequest.duration);
+                if (updateShowtimeEndDatetimesOnFilmDurationChange === `Showtime not found`) {
+                    return res.status(404).send({ error: "Showtime not found" });
+                }
+                if (updateShowtimeEndDatetimesOnFilmDurationChange === "Not all employees are available") {
+                    return res.status(500).send({ error: "Not all employees are available" });
                 }
                 UpdateMovieRequest.duration = movieUsecase.formatTime(+UpdateMovieRequest.duration);
             }

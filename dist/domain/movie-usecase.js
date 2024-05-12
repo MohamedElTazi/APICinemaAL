@@ -110,53 +110,47 @@ class MovieUsecase {
     formatTime(minutes) {
         const hours = Math.floor(minutes / 60);
         const remainingMinutes = minutes % 60;
-        // Convertit les heures et les minutes en chaîne, ajoutant un zéro au début si nécessaire
         const hoursStr = hours.toString().padStart(2, '0');
         const minutesStr = remainingMinutes.toString().padStart(2, '0');
-        return `${hoursStr}:${minutesStr}:00`; // Format HH:mm:ss
+        return `${hoursStr}:${minutesStr}:00`;
     }
     updateShowtimeEndDatetimesOnFilmDurationChange(movieId, newDurationMinutes) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             const showtimes = yield this.db.getRepository(showtime_1.Showtime)
                 .createQueryBuilder("showtime")
                 .where("showtime.movieId = :movieId", { movieId })
+                .andWhere("showtime.start_datetime >= NOW()")
                 .getMany();
-            const verifShowtimesPlanning = showtimes.map((showtime) => __awaiter(this, void 0, void 0, function* () {
-                const showtimeUsecase = new showtime_usecase_1.ShowtimeUsecase(database_1.AppDataSource);
-                const planningUseCase = new planning_usecase_1.PlanningUsecase(database_1.AppDataSource);
-                const showtimeById = yield showtimeUsecase.foundShowtime(showtime.id);
+            console.log(showtimes);
+            for (const showtime of showtimes) {
+                console.log(showtime.id);
+                const showtimeById = yield new showtime_usecase_1.ShowtimeUsecase(database_1.AppDataSource).foundShowtime(showtime.id);
                 if (showtimeById === null) {
-                    console.log({ error: `Showtime not found` });
-                    return;
+                    console.log({ error: `Showtime not found for ID: ${showtime.id}` });
+                    return `Showtime not found`;
                 }
-                if ((showtime.start_datetime !== undefined && showtime.end_datetime !== undefined) ||
-                    (showtime.start_datetime !== undefined && showtime.end_datetime === undefined) ||
-                    (showtime.start_datetime === undefined && showtime.end_datetime !== undefined) ||
-                    (showtime.start_datetime === undefined && showtime.end_datetime === undefined)) {
-                    const startDatetime = showtime.start_datetime !== undefined ? showtime.start_datetime : showtimeById.start_datetime;
-                    const endDatetime = showtime.end_datetime !== undefined ? showtime.end_datetime : showtimeById.end_datetime;
-                    const verifyPlanning = yield planningUseCase.verifyPlanning(startDatetime, endDatetime);
-                    if (verifyPlanning[0].postesCouverts !== "3") {
-                        console.log({ "error": `not all employees are available` });
-                        return "not all employees are available";
-                    }
+                const startDatetime = (_a = showtime.start_datetime) !== null && _a !== void 0 ? _a : showtimeById.start_datetime;
+                const endDatetime = (_b = showtime.end_datetime) !== null && _b !== void 0 ? _b : showtimeById.end_datetime;
+                const verifyPlanning = yield new planning_usecase_1.PlanningUsecase(database_1.AppDataSource).verifyPlanning(startDatetime, endDatetime);
+                if (verifyPlanning[0].postesCouverts !== "3") {
+                    console.log({ "error": `Not all employees are available for showtime ID: ${showtime.id}` });
+                    return `Not all employees are available`;
                 }
-            }));
-            yield Promise.all(verifShowtimesPlanning);
-            const updatePromises = showtimes.map(showtime => {
+            }
+            for (const showtime of showtimes) {
                 let newEndDatetime = new Date(showtime.start_datetime.getTime() + newDurationMinutes * 60000);
                 if (isNaN(newEndDatetime.getTime())) {
-                    console.error("Failed to calculate newEndDatetime for showtime:", showtime.id);
-                    throw new Error("Invalid newEndDatetime calculated");
+                    console.error(`Failed to calculate newEndDatetime for showtime: ${showtime.id}`);
+                    continue;
                 }
-                return this.db.getRepository(showtime_1.Showtime)
+                yield this.db.getRepository(showtime_1.Showtime)
                     .createQueryBuilder()
                     .update(showtime_1.Showtime)
                     .set({ end_datetime: newEndDatetime })
                     .where("id = :id", { id: showtime.id })
                     .execute();
-            });
-            yield Promise.all(updatePromises);
+            }
         });
     }
 }
