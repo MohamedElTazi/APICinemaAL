@@ -38,5 +38,5 @@ export function swaggerDocs(app: Express, port: number) {
     res.send(swaggerSpec);
   });
 
-  console.log(`Docs available at http://localhost:${port}/docs`);
+  console.log(`Docs available at https://apicinemaal.onrender.com/docs/`);
 }
