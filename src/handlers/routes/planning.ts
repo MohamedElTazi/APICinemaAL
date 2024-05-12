@@ -167,11 +167,11 @@ export const PlanningHandler = (app: express.Express) => {
                 (updatePlanningRequest.poste === undefined &&  updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime === undefined) ||
                 (updatePlanningRequest.poste === undefined &&  updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime !== undefined)
             ) {
-                const post = updatePlanningRequest.poste !== undefined ? updatePlanningRequest.poste : planning.poste;
+                const poste = updatePlanningRequest.poste !== undefined ? updatePlanningRequest.poste : planning.poste;
                 const startDatetime = updatePlanningRequest.start_datetime !== undefined ? updatePlanningRequest.start_datetime : planning.start_datetime;
                 const endDatetime = updatePlanningRequest.end_datetime !== undefined ? updatePlanningRequest.end_datetime : planning.end_datetime;
             
-                const verifyPoste = await planningUsecase.verifyPoste( planning.poste, planning.start_datetime, updatePlanningRequest.end_datetime)
+                const verifyPoste = await planningUsecase.verifyPoste(poste, startDatetime, endDatetime)
         
                 if(verifyPoste[0]['COUNT(*)'] >= "1"){
                     res.status(404).send({ "error": `this poste is already take at this time` })
