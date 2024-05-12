@@ -194,7 +194,7 @@ export const MovieHandler = (app: express.Express) => {
     
 
     
-    app.patch("/movies/:id", authMiddlewareAdmin ,async (req: Request, res: Response) => {
+    app.patch("/movies/:id" ,async (req: Request, res: Response) => {
     
         const validation = updateMovieValidation.validate({ ...req.params, ...req.body })
     
@@ -217,7 +217,15 @@ export const MovieHandler = (app: express.Express) => {
     
             if(UpdateMovieRequest.duration){
                 const movieUsecase = new MovieUsecase(AppDataSource)
-                movieUsecase.updateShowtimeEndDatetimesOnFilmDurationChange(UpdateMovieRequest.id, +UpdateMovieRequest.duration)
+                const updateShowtimeEndDatetimesOnFilmDurationChange = await movieUsecase.updateShowtimeEndDatetimesOnFilmDurationChange(UpdateMovieRequest.id, +UpdateMovieRequest.duration)
+                if(updateShowtimeEndDatetimesOnFilmDurationChange  === `Showtime not found` ){
+                    return res.status(404).send({ error: "Showtime not found" })
+                }
+
+
+                if(updateShowtimeEndDatetimesOnFilmDurationChange  === "Not all employees are available" ){
+                    return res.status(500).send({ error: "Not all employees are available" })
+                }
                 UpdateMovieRequest.duration = movieUsecase.formatTime(+UpdateMovieRequest.duration)
             }
                 

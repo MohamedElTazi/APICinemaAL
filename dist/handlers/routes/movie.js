@@ -167,7 +167,10 @@ const MovieHandler = (app) => {
             }
             if (UpdateMovieRequest.duration) {
                 const movieUsecase = new movie_usecase_1.MovieUsecase(database_1.AppDataSource);
-                movieUsecase.updateShowtimeEndDatetimesOnFilmDurationChange(UpdateMovieRequest.id, +UpdateMovieRequest.duration);
+                const updateShowtimeEndDatetimesOnFilmDurationChange = movieUsecase.updateShowtimeEndDatetimesOnFilmDurationChange(UpdateMovieRequest.id, +UpdateMovieRequest.duration);
+                if ((yield updateShowtimeEndDatetimesOnFilmDurationChange) === "not all employees are available") {
+                    return res.status(500).send({ error: "not all employees are available" });
+                }
                 UpdateMovieRequest.duration = movieUsecase.formatTime(+UpdateMovieRequest.duration);
             }
             const updatedMovie = yield movieUsecase.updateMovie(UpdateMovieRequest.id, Object.assign({}, UpdateMovieRequest));

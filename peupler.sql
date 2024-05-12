@@ -22,6 +22,8 @@ INSERT INTO movie (title, description, duration, genre) VALUES
 ("La La Land", "L'histoire d'amour entre une actrice en devenir et un musicien de jazz.", "02:08:00", "Musical"),
 ("Gladiator", "Un général romain trahi se transforme en gladiateur pour venger la mort de sa famille.", "02:35:00", "Historique");
 
+
+
 -- Insertion dans la table showtime
 INSERT INTO showtime (salleId, movieId, start_datetime, end_datetime, special_notes) VALUES
 (1, 1, '2024-03-10 14:00:00', '2024-03-10 16:00:00', ''),
@@ -29,9 +31,8 @@ INSERT INTO showtime (salleId, movieId, start_datetime, end_datetime, special_no
 (3, 3, '2024-05-11 19:00:00', '2024-05-11-20:00:00', ''),
 (4, 4, '2024-06-01 18:00:00', '2024-06-01 20:00:00', 'Projection en 4K'),
 (5, 5, '2024-06-15 19:30:00', '2024-06-15 21:45:00', 'Séance avec orchestre live'),
-(6, 6, '2024-07-20 21:00:00', '2024-07-20 23:45:00', ''),
-(1, 1, '2024-07-20 19:20:00', '2024-07-20 21:20:00', '');
-
+(1, 1, '2024-04-23 14:00:00', '2024-04-23 16:00:00', ''),
+(6, 6, '2024-07-20 21:00:00', '2024-07-20 23:45:00', '');
 
 INSERT INTO user (firstname, lastname,email, password, role, balance) VALUES
 ('Antoine', 'Dufour','user1@example.com', '$2b$10$LKHQLFbLHw7md6jS9UIbxOGRVUV.c/4skjqzhPuEOdgHxqhvgaC2W', 'user', 100), /* password: password1 */

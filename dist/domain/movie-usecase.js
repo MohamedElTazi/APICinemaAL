@@ -12,6 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MovieUsecase = void 0;
 const movie_1 = require("../database/entities/movie");
 const showtime_1 = require("../database/entities/showtime");
+const database_1 = require("../database/database");
+const showtime_usecase_1 = require("./showtime-usecase");
+const planning_usecase_1 = require("./planning-usecase");
 class MovieUsecase {
     constructor(db) {
         this.db = db;
@@ -114,11 +117,32 @@ class MovieUsecase {
     }
     updateShowtimeEndDatetimesOnFilmDurationChange(movieId, newDurationMinutes) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(newDurationMinutes);
             const showtimes = yield this.db.getRepository(showtime_1.Showtime)
                 .createQueryBuilder("showtime")
                 .where("showtime.movieId = :movieId", { movieId })
                 .getMany();
+            const verifShowtimesPlanning = showtimes.map((showtime) => __awaiter(this, void 0, void 0, function* () {
+                const showtimeUsecase = new showtime_usecase_1.ShowtimeUsecase(database_1.AppDataSource);
+                const planningUseCase = new planning_usecase_1.PlanningUsecase(database_1.AppDataSource);
+                const showtimeById = yield showtimeUsecase.foundShowtime(showtime.id);
+                if (showtimeById === null) {
+                    console.log({ error: `Showtime not found` });
+                    return;
+                }
+                if ((showtime.start_datetime !== undefined && showtime.end_datetime !== undefined) ||
+                    (showtime.start_datetime !== undefined && showtime.end_datetime === undefined) ||
+                    (showtime.start_datetime === undefined && showtime.end_datetime !== undefined) ||
+                    (showtime.start_datetime === undefined && showtime.end_datetime === undefined)) {
+                    const startDatetime = showtime.start_datetime !== undefined ? showtime.start_datetime : showtimeById.start_datetime;
+                    const endDatetime = showtime.end_datetime !== undefined ? showtime.end_datetime : showtimeById.end_datetime;
+                    const verifyPlanning = yield planningUseCase.verifyPlanning(startDatetime, endDatetime);
+                    if (verifyPlanning[0].postesCouverts !== "3") {
+                        console.log({ "error": `not all employees are available` });
+                        return "not all employees are available";
+                    }
+                }
+            }));
+            yield Promise.all(verifShowtimesPlanning);
             const updatePromises = showtimes.map(showtime => {
                 let newEndDatetime = new Date(showtime.start_datetime.getTime() + newDurationMinutes * 60000);
                 if (isNaN(newEndDatetime.getTime())) {

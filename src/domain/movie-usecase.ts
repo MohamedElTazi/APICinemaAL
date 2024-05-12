@@ -1,6 +1,9 @@
 import { DataSource, Repository, SelectQueryBuilder } from "typeorm";
 import { Movie } from "../database/entities/movie";
 import { Showtime } from "../database/entities/showtime";
+import { AppDataSource } from "../database/database";
+import { ShowtimeUsecase } from "./showtime-usecase";
+import { PlanningUsecase } from "./planning-usecase";
 
 export interface ListMovieFilter {
     page: number
@@ -113,38 +116,65 @@ export class MovieUsecase {
         const hours = Math.floor(minutes / 60);
         const remainingMinutes = minutes % 60;
     
-        // Convertit les heures et les minutes en chaîne, ajoutant un zéro au début si nécessaire
         const hoursStr = hours.toString().padStart(2, '0');
         const minutesStr = remainingMinutes.toString().padStart(2, '0');
     
-        return `${hoursStr}:${minutesStr}:00`; // Format HH:mm:ss
+        return `${hoursStr}:${minutesStr}:00`; 
     }
+    
 
-    async updateShowtimeEndDatetimesOnFilmDurationChange(movieId: number,  newDurationMinutes: number) {
-        console.log(newDurationMinutes)
-
+    async updateShowtimeEndDatetimesOnFilmDurationChange(movieId: number, newDurationMinutes: number): Promise<void|string> {
+        
         const showtimes = await this.db.getRepository(Showtime)
-        .createQueryBuilder("showtime")
-        .where("showtime.movieId = :movieId", { movieId })
-        .getMany();
+            .createQueryBuilder("showtime")
+            .where("showtime.movieId = :movieId", { movieId })
+            .andWhere("showtime.start_datetime >= NOW()")
+            .getMany();
 
-        const updatePromises = showtimes.map(showtime => {
-        let newEndDatetime = new Date(showtime.start_datetime.getTime() + newDurationMinutes * 60000);
+        console.log(showtimes)
 
+    
+        for (const showtime of showtimes) {
 
-        if (isNaN(newEndDatetime.getTime())) {
-            console.error("Failed to calculate newEndDatetime for showtime:", showtime.id);
-            throw new Error("Invalid newEndDatetime calculated");
+            console.log(showtime.id)
+            
+            const showtimeById = await new ShowtimeUsecase(AppDataSource).foundShowtime(showtime.id);
+    
+            if (showtimeById === null) {
+                console.log({ error: `Showtime not found for ID: ${showtime.id}` });
+                return `Showtime not found`;
+            }
+            
+    
+            const startDatetime = showtime.start_datetime ?? showtimeById.start_datetime;
+            const endDatetime = showtime.end_datetime ?? showtimeById.end_datetime;
+            const verifyPlanning = await new PlanningUsecase(AppDataSource).verifyPlanning(startDatetime, endDatetime);
+    
+            if (verifyPlanning[0].postesCouverts !== "3") {
+                console.log({ "error": `Not all employees are available for showtime ID: ${showtime.id}` });
+                return `Not all employees are available`;
+            }
+
         }
+    
 
-        return this.db.getRepository(Showtime)
-            .createQueryBuilder()
-            .update(Showtime)
-            .set({ end_datetime: newEndDatetime })
-            .where("id = :id", { id: showtime.id })
-            .execute();
-    });
 
-    await Promise.all(updatePromises);
+        for (const showtime of showtimes) {
+            let newEndDatetime = new Date(showtime.start_datetime.getTime() + newDurationMinutes * 60000);
+    
+            if (isNaN(newEndDatetime.getTime())) {
+                console.error(`Failed to calculate newEndDatetime for showtime: ${showtime.id}`);
+                continue;
+            }
+    
+    
+            await this.db.getRepository(Showtime)
+                .createQueryBuilder()
+                .update(Showtime)
+                .set({ end_datetime: newEndDatetime })
+                .where("id = :id", { id: showtime.id })
+                .execute();
+        }
     }
+    
 }
