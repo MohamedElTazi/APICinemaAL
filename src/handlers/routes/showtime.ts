@@ -58,8 +58,6 @@ export const ShowtimeHandler = (app: express.Express) => {
 
         const verifyPlanning = await planningUseCase.verifyPlanning(showtimeRequest.start_datetime, showtimeRequest.end_datetime)
 
-        console.log("ici**********",verifyPlanning[0].postesCouverts)
-
         if(verifyPlanning[0].postesCouverts !== "3"){
             res.status(404).send({ "error": `not all employee are here` })
             return
@@ -212,34 +210,20 @@ export const ShowtimeHandler = (app: express.Express) => {
             }
 
             const planningUseCase = new PlanningUsecase(AppDataSource);
-            if(updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime !== undefined){
-                const verifyPlanning = await planningUseCase.verifyPlanning(updateShowtimeRequest.start_datetime, updateShowtimeRequest.end_datetime)
-    
-                console.log("ici**********",verifyPlanning[0].postesCouverts)
-        
-                if(verifyPlanning[0].postesCouverts !== "3"){
-                    res.status(404).send({ "error": `not all employee are here` })
-                    return
-                }
-            }
-            else if(updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime === undefined){
-                const verifyPlanning = await planningUseCase.verifyPlanning(updateShowtimeRequest.start_datetime, showtime.end_datetime)
-    
-                console.log("ici**********",updateShowtimeRequest.start_datetime)
-        
-                if(verifyPlanning[0].postesCouverts !== "3"){
-                    res.status(404).send({ "error": `not all employee are here` })
-                    return
-                }
-            }
-            else if(updateShowtimeRequest.start_datetime === undefined && updateShowtimeRequest.end_datetime !== undefined){
-                const verifyPlanning = await planningUseCase.verifyPlanning(showtime.start_datetime, updateShowtimeRequest.end_datetime)
-    
-                console.log("ici**********",verifyPlanning[0].postesCouverts)
-        
-                if(verifyPlanning[0].postesCouverts !== "3"){
-                    res.status(404).send({ "error": `not all employee are here` })
-                    return
+            if (
+                (updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime !== undefined) ||
+                (updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime === undefined) ||
+                (updateShowtimeRequest.start_datetime === undefined && updateShowtimeRequest.end_datetime !== undefined) ||
+                (updateShowtimeRequest.start_datetime === undefined && updateShowtimeRequest.end_datetime === undefined)
+            ) {
+                const startDatetime = updateShowtimeRequest.start_datetime !== undefined ? updateShowtimeRequest.start_datetime : showtime.start_datetime;
+                const endDatetime = updateShowtimeRequest.end_datetime !== undefined ? updateShowtimeRequest.end_datetime : showtime.end_datetime;
+            
+                const verifyPlanning = await planningUseCase.verifyPlanning(startDatetime, endDatetime);
+            
+                if (verifyPlanning[0].postesCouverts !== "3") {
+                    res.status(404).send({ "error": `not all employees are available` });
+                    return;
                 }
             }
 

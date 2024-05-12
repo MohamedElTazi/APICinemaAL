@@ -88,10 +88,17 @@ export interface TransactionIdRequest {
 
 export const updateTransactionValidation = Joi.object<UpdateTransactionRequest>({
     id: Joi.number().required(),
-    amount: Joi.number().min(1).required()
-})
+    user: Joi.number().optional(),
+    ticket: Joi.number().optional(),
+    transaction_type: Joi.string().valid('buy ticket', 'recharge balance', 'withdraw balance').optional(),
+    transaction_date: Joi.date().optional(),
+    amount: Joi.number().min(1).optional()})
 
 export interface UpdateTransactionRequest {
     id: number
-    amount?: number
+    user: User
+    ticket: Ticket
+    transaction_type: TransactionType
+    amount: number
+    transaction_date: Date
 }

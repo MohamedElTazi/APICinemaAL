@@ -29,8 +29,8 @@ export interface ListAccessTicketShowTimeAccessesRequest {
 
 export const updateTicketAccesValidation = Joi.object<UpdateTicketAccesRequest>({
     id : Joi.number().integer().required(),
-    ticket: Joi.number().integer().required(),
-    showtime:Joi.number().required(),
+    ticket: Joi.number().integer().optional(),
+    showtime:Joi.number().optional(),
 
 })
 

@@ -23,6 +23,8 @@ export class PosteUsecase {
 
         if(name){
             posteToUpdate.name = name
+        }
+        if(description){
             posteToUpdate.description = description
         }
         const PosteUpdated = await repo.save(posteToUpdate)

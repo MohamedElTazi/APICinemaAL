@@ -13,8 +13,8 @@ export interface ListTicketAccessFilter {
 
 export interface UpdateTicketAccessParams{
     id:number
-    ticket: Ticket
-    showtime : Showtime
+    ticket?: Ticket
+    showtime? : Showtime
 }
 
 export class TicketAccesUsecase {

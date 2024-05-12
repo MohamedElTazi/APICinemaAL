@@ -14,6 +14,9 @@ export interface ListSalleFilter {
 
 export interface UpdateSalleParams {
      capacity?: number
+    type?: string
+    description?: string
+    name?: string
 }
 
 export interface UpdateSalleMaintenanceParams {
@@ -55,11 +58,20 @@ export class SalleUsecase {
         }
     }
 
-    async updateSalle(id: number, { capacity }: UpdateSalleParams): Promise<Salle | null> {
+    async updateSalle(id: number, { capacity , type, description, name}: UpdateSalleParams): Promise<Salle | null> {
         const repo = this.db.getRepository(Salle)
         const Sallefound = await repo.findOneBy({ id })
         if (Sallefound === null) return null
 
+        if (name) {
+            Sallefound.name = name
+        }
+        if (type) {
+            Sallefound.type = type
+        }
+        if (description) {
+            Sallefound.description = description
+        }
         if (capacity) {
             Sallefound.capacity = capacity
         }

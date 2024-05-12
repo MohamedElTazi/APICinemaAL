@@ -131,10 +131,6 @@ export const TransactionHandler = (app: express.Express) => {
         try {
             const transactionUsecase = new TransactionUsecase(AppDataSource);
 
-            if (updateTransactionRequest.amount === undefined || updateTransactionRequest.amount < 0) {
-                res.status(404).send("error: Capacity not good")
-                return
-            }
 
             const updatedTransaction = await transactionUsecase.updateTransaction(updateTransactionRequest.id, { ...updateTransactionRequest })
             

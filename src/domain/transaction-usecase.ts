@@ -7,12 +7,15 @@ import { createTransactionValidation } from "../handlers/validators/transaction-
 import { createAccessTicketShowTimeAccessesValidation } from "../handlers/validators/ticketShowtimeAccesses-validator"
 import { TicketShowtimeAccesses } from "../database/entities/ticketShowtimeAccesses"
 import { Showtime } from "../database/entities/showtime"
-import e from "express"
-import { number } from "joi"
 import { TicketUsecase } from "./ticket-usecase"
 
 export interface UpdateTransactionParams {
+    user?: User
+    ticket?: Ticket
+    transaction_type?: TransactionType
     amount?: number
+    transaction_date?: Date
+
 }
 
 export interface ListTransactionFilter {
@@ -32,11 +35,23 @@ export class TransactionUsecase {
    constructor(private readonly db: DataSource) { }
 
 
-   async updateTransaction(id: number, { amount }: UpdateTransactionParams): Promise<Transaction | null> {
+   async updateTransaction(id: number, { user,ticket,transaction_type,amount, transaction_date }: UpdateTransactionParams): Promise<Transaction | null> {
     const repo = this.db.getRepository(Transaction)
     const Transactionfound = await repo.findOneBy({ id })
     if (Transactionfound === null) return null
 
+    if (user) {
+        Transactionfound.user = user
+    }
+    if (ticket) {
+        Transactionfound.ticket = ticket
+    }
+    if (transaction_type) {
+        Transactionfound.transaction_type = transaction_type
+    }
+    if (transaction_date) {
+        Transactionfound.transaction_date = transaction_date
+    }
     if (amount) {
         Transactionfound.amount = amount
     }

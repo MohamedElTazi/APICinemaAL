@@ -12,4 +12,6 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["ts-node", "dist/index.js"]
+#CMD ["ts-node", "dist/index.js"]
+
+CMD ts-node src/index.ts

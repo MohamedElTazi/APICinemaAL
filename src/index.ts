@@ -10,6 +10,7 @@ const main = async () => {
     const port = 3000
 
     try {
+        console.log(process.env.NODE_ENV),
 
         await AppDataSource.initialize()
         console.error("well connected to database")
