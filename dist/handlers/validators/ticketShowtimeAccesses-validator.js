@@ -17,8 +17,8 @@ exports.listAccessTicketShowTimeAccessesValidation = joi_1.default.object({
 });
 exports.updateTicketAccesValidation = joi_1.default.object({
     id: joi_1.default.number().integer().required(),
-    ticket: joi_1.default.number().integer().required(),
-    showtime: joi_1.default.number().required(),
+    ticket: joi_1.default.number().integer().optional(),
+    showtime: joi_1.default.number().optional(),
 });
 exports.ticketAccessIdValidation = joi_1.default.object({
     id: joi_1.default.number().required(),

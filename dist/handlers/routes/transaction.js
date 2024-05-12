@@ -113,10 +113,6 @@ const TransactionHandler = (app) => {
         const updateTransactionRequest = validation.value;
         try {
             const transactionUsecase = new transaction_usecase_1.TransactionUsecase(database_1.AppDataSource);
-            if (updateTransactionRequest.amount === undefined || updateTransactionRequest.amount < 0) {
-                res.status(404).send("error: Capacity not good");
-                return;
-            }
             const updatedTransaction = yield transactionUsecase.updateTransaction(updateTransactionRequest.id, Object.assign({}, updateTransactionRequest));
             if (updatedTransaction === null) {
                 res.status(404).send({ "error": `Transaction ${updateTransactionRequest.id} not found` });

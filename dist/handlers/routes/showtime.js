@@ -47,7 +47,6 @@ const ShowtimeHandler = (app) => {
         }
         const planningUseCase = new planning_usecase_1.PlanningUsecase(database_1.AppDataSource);
         const verifyPlanning = yield planningUseCase.verifyPlanning(showtimeRequest.start_datetime, showtimeRequest.end_datetime);
-        console.log("ici**********", verifyPlanning[0].postesCouverts);
         if (verifyPlanning[0].postesCouverts !== "3") {
             res.status(404).send({ "error": `not all employee are here` });
             return;
@@ -168,27 +167,15 @@ const ShowtimeHandler = (app) => {
                 return;
             }
             const planningUseCase = new planning_usecase_1.PlanningUsecase(database_1.AppDataSource);
-            if (updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime !== undefined) {
-                const verifyPlanning = yield planningUseCase.verifyPlanning(updateShowtimeRequest.start_datetime, updateShowtimeRequest.end_datetime);
-                console.log("ici**********", verifyPlanning[0].postesCouverts);
+            if ((updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime !== undefined) ||
+                (updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime === undefined) ||
+                (updateShowtimeRequest.start_datetime === undefined && updateShowtimeRequest.end_datetime !== undefined) ||
+                (updateShowtimeRequest.start_datetime === undefined && updateShowtimeRequest.end_datetime === undefined)) {
+                const startDatetime = updateShowtimeRequest.start_datetime !== undefined ? updateShowtimeRequest.start_datetime : showtime.start_datetime;
+                const endDatetime = updateShowtimeRequest.end_datetime !== undefined ? updateShowtimeRequest.end_datetime : showtime.end_datetime;
+                const verifyPlanning = yield planningUseCase.verifyPlanning(startDatetime, endDatetime);
                 if (verifyPlanning[0].postesCouverts !== "3") {
-                    res.status(404).send({ "error": `not all employee are here` });
-                    return;
-                }
-            }
-            else if (updateShowtimeRequest.start_datetime !== undefined && updateShowtimeRequest.end_datetime === undefined) {
-                const verifyPlanning = yield planningUseCase.verifyPlanning(updateShowtimeRequest.start_datetime, showtime.end_datetime);
-                console.log("ici**********", updateShowtimeRequest.start_datetime);
-                if (verifyPlanning[0].postesCouverts !== "3") {
-                    res.status(404).send({ "error": `not all employee are here` });
-                    return;
-                }
-            }
-            else if (updateShowtimeRequest.start_datetime === undefined && updateShowtimeRequest.end_datetime !== undefined) {
-                const verifyPlanning = yield planningUseCase.verifyPlanning(showtime.start_datetime, updateShowtimeRequest.end_datetime);
-                console.log("ici**********", verifyPlanning[0].postesCouverts);
-                if (verifyPlanning[0].postesCouverts !== "3") {
-                    res.status(404).send({ "error": `not all employee are here` });
+                    res.status(404).send({ "error": `not all employees are available` });
                     return;
                 }
             }

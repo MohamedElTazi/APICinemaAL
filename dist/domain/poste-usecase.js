@@ -23,6 +23,8 @@ class PosteUsecase {
                 return undefined;
             if (name) {
                 posteToUpdate.name = name;
+            }
+            if (description) {
                 posteToUpdate.description = description;
             }
             const PosteUpdated = yield repo.save(posteToUpdate);

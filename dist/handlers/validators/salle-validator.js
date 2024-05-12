@@ -21,7 +21,10 @@ exports.salleIdValidation = joi_1.default.object({
 });
 exports.updateSalleValidation = joi_1.default.object({
     id: joi_1.default.number().required(),
-    capacity: joi_1.default.number().min(1).required()
+    name: joi_1.default.string().optional(),
+    description: joi_1.default.string().optional(),
+    type: joi_1.default.string().optional(),
+    capacity: joi_1.default.number().min(1).optional()
 });
 exports.updateSalleMaintenanceValidation = joi_1.default.object({
     id: joi_1.default.number().required(),

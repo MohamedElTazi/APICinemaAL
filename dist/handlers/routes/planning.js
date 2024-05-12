@@ -130,56 +130,16 @@ const PlanningHandler = (app) => {
                 res.status(404).send({ "error": `planning ${updatePlanningRequest.id} not found` });
                 return;
             }
-            // START_DATETIME + END_DATETIME
-            if (updatePlanningRequest.poste === undefined && updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime !== undefined) {
-                const verifyPoste = yield planningUsecase.verifyPoste(planning.poste, updatePlanningRequest.start_datetime, updatePlanningRequest.end_datetime);
-                if (verifyPoste[0]['COUNT(*)'] >= "1") {
-                    res.status(404).send({ "error": `this poste is already take at this time` });
-                    return;
-                }
-            }
-            // POSTE + START_DATETIME + END_DATETIME
-            else if (updatePlanningRequest.poste !== undefined && updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime !== undefined) {
-                const verifyPoste = yield planningUsecase.verifyPoste(updatePlanningRequest.poste, updatePlanningRequest.start_datetime, updatePlanningRequest.end_datetime);
-                if (verifyPoste[0]['COUNT(*)'] >= "1") {
-                    res.status(404).send({ "error": `this poste is already take at this time` });
-                    return;
-                }
-            }
-            // POSTE 
-            else if (updatePlanningRequest.poste !== undefined && updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime === undefined) {
-                const verifyPoste = yield planningUsecase.verifyPoste(updatePlanningRequest.poste, planning.start_datetime, planning.end_datetime);
-                if (verifyPoste[0]['COUNT(*)'] >= "1") {
-                    res.status(404).send({ "error": `this poste is already take at this time` });
-                    return;
-                }
-            }
-            // POSTE + END_DATETIME
-            else if (updatePlanningRequest.poste !== undefined && updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime !== undefined) {
-                const verifyPoste = yield planningUsecase.verifyPoste(updatePlanningRequest.poste, planning.start_datetime, updatePlanningRequest.end_datetime);
-                if (verifyPoste[0]['COUNT(*)'] >= "1") {
-                    res.status(404).send({ "error": `this poste is already take at this time` });
-                    return;
-                }
-            }
-            //POSTE + START_DATETIME
-            else if (updatePlanningRequest.poste !== undefined && updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime === undefined) {
-                const verifyPoste = yield planningUsecase.verifyPoste(updatePlanningRequest.poste, updatePlanningRequest.start_datetime, planning.end_datetime);
-                if (verifyPoste[0]['COUNT(*)'] >= "1") {
-                    res.status(404).send({ "error": `this poste is already take at this time` });
-                    return;
-                }
-            }
-            // START_DATETIME
-            else if (updatePlanningRequest.poste === undefined && updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime === undefined) {
-                const verifyPoste = yield planningUsecase.verifyPoste(planning.poste, updatePlanningRequest.start_datetime, planning.end_datetime);
-                if (verifyPoste[0]['COUNT(*)'] >= "1") {
-                    res.status(404).send({ "error": `this poste is already take at this time` });
-                    return;
-                }
-            }
-            // END_DATETIME
-            else if (updatePlanningRequest.poste === undefined && updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime !== undefined) {
+            if ((updatePlanningRequest.poste !== undefined && updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime === undefined) ||
+                (updatePlanningRequest.poste !== undefined && updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime !== undefined) ||
+                (updatePlanningRequest.poste === undefined && updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime !== undefined) ||
+                (updatePlanningRequest.poste !== undefined && updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime === undefined) ||
+                (updatePlanningRequest.poste !== undefined && updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime !== undefined) ||
+                (updatePlanningRequest.poste === undefined && updatePlanningRequest.start_datetime !== undefined && updatePlanningRequest.end_datetime === undefined) ||
+                (updatePlanningRequest.poste === undefined && updatePlanningRequest.start_datetime === undefined && updatePlanningRequest.end_datetime !== undefined)) {
+                const post = updatePlanningRequest.poste !== undefined ? updatePlanningRequest.poste : planning.poste;
+                const startDatetime = updatePlanningRequest.start_datetime !== undefined ? updatePlanningRequest.start_datetime : planning.start_datetime;
+                const endDatetime = updatePlanningRequest.end_datetime !== undefined ? updatePlanningRequest.end_datetime : planning.end_datetime;
                 const verifyPoste = yield planningUsecase.verifyPoste(planning.poste, planning.start_datetime, updatePlanningRequest.end_datetime);
                 if (verifyPoste[0]['COUNT(*)'] >= "1") {
                     res.status(404).send({ "error": `this poste is already take at this time` });

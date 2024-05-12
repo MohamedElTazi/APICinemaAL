@@ -24,11 +24,23 @@ class TransactionUsecase {
         this.db = db;
     }
     updateTransaction(id_1, _a) {
-        return __awaiter(this, arguments, void 0, function* (id, { amount }) {
+        return __awaiter(this, arguments, void 0, function* (id, { user, ticket, transaction_type, amount, transaction_date }) {
             const repo = this.db.getRepository(transaction_1.Transaction);
             const Transactionfound = yield repo.findOneBy({ id });
             if (Transactionfound === null)
                 return null;
+            if (user) {
+                Transactionfound.user = user;
+            }
+            if (ticket) {
+                Transactionfound.ticket = ticket;
+            }
+            if (transaction_type) {
+                Transactionfound.transaction_type = transaction_type;
+            }
+            if (transaction_date) {
+                Transactionfound.transaction_date = transaction_date;
+            }
             if (amount) {
                 Transactionfound.amount = amount;
             }

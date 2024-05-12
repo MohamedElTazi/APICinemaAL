@@ -45,11 +45,20 @@ class SalleUsecase {
         });
     }
     updateSalle(id_1, _a) {
-        return __awaiter(this, arguments, void 0, function* (id, { capacity }) {
+        return __awaiter(this, arguments, void 0, function* (id, { capacity, type, description, name }) {
             const repo = this.db.getRepository(salle_1.Salle);
             const Sallefound = yield repo.findOneBy({ id });
             if (Sallefound === null)
                 return null;
+            if (name) {
+                Sallefound.name = name;
+            }
+            if (type) {
+                Sallefound.type = type;
+            }
+            if (description) {
+                Sallefound.description = description;
+            }
             if (capacity) {
                 Sallefound.capacity = capacity;
             }

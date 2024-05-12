@@ -41,5 +41,9 @@ exports.transactionIdValidation = joi_1.default.object({
 });
 exports.updateTransactionValidation = joi_1.default.object({
     id: joi_1.default.number().required(),
-    amount: joi_1.default.number().min(1).required()
+    user: joi_1.default.number().optional(),
+    ticket: joi_1.default.number().optional(),
+    transaction_type: joi_1.default.string().valid('buy ticket', 'recharge balance', 'withdraw balance').optional(),
+    transaction_date: joi_1.default.date().optional(),
+    amount: joi_1.default.number().min(1).optional()
 });

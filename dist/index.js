@@ -22,7 +22,8 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = (0, express_1.default)();
     const port = 3000;
     try {
-        yield database_1.AppDataSource.initialize();
+        console.log(process.env.NODE_ENV),
+            yield database_1.AppDataSource.initialize();
         console.error("well connected to database");
     }
     catch (error) {
