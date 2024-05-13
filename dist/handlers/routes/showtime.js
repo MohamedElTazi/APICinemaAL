@@ -20,6 +20,27 @@ const date_fns_1 = require("date-fns");
 const date_fns_tz_1 = require("date-fns-tz");
 const planning_usecase_1 = require("../../domain/planning-usecase");
 const ShowtimeHandler = (app) => {
+    app.get("/showtimes/count/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const validationResult = showtime_validator_1.showtimeIdValidation.validate(req.params);
+            if (validationResult.error) {
+                res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validationResult.error.details));
+                return;
+            }
+            const showtimeId = validationResult.value;
+            const showtimeUsecase = new showtime_usecase_1.ShowtimeUsecase(database_1.AppDataSource);
+            const count = yield showtimeUsecase.getCountByShowtimeId(showtimeId.id);
+            if (count === null) {
+                res.status(404).send({ "error": `showtime ${showtimeId.id} not found` });
+                return;
+            }
+            res.status(200).send("Number of spectators : " + count);
+        }
+        catch (error) {
+            console.log(error);
+            res.status(500).send({ error: "Internal error" });
+        }
+    }));
     app.post("/showtimes", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const reqBodyStartDatetime = req.body.start_datetime;
         req.body.start_datetime = req.body.start_datetime + "Z";

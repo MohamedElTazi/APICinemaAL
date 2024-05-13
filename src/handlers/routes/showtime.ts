@@ -14,6 +14,34 @@ import { PlanningUsecase } from "../../domain/planning-usecase";
 export const ShowtimeHandler = (app: express.Express) => {
 
     
+
+    app.get("/showtimes/count/:id", async (req: Request, res: Response) => {
+        try {
+            const validationResult = showtimeIdValidation.validate(req.params)
+
+            if (validationResult.error) {
+                res.status(400).send(generateValidationErrorMessage(validationResult.error.details))
+                return
+            }
+            const showtimeId = validationResult.value
+
+
+            const showtimeUsecase = new ShowtimeUsecase(AppDataSource);
+            const count = await showtimeUsecase.getCountByShowtimeId(showtimeId.id)
+
+            if (count === null) {
+                res.status(404).send({ "error": `showtime ${showtimeId.id} not found` })
+                return
+            }
+
+            res.status(200).send("Number of spectators : " + count)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({ error: "Internal error" })
+        }
+    })
+
+
     app.post("/showtimes",authMiddlewareAdmin ,async (req: Request, res: Response) => {
         const reqBodyStartDatetime = req.body.start_datetime
         req.body.start_datetime = req.body.start_datetime+"Z"
