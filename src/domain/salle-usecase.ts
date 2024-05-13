@@ -58,6 +58,14 @@ export class SalleUsecase {
         }
     }
 
+    async nbSalle(): Promise<number> {
+        const query = this.db.createQueryBuilder(Salle, 'Salle')
+
+
+        const [Salles, totalCount] = await query.getManyAndCount()
+        return totalCount      
+    }  
+
     async updateSalle(id: number, { capacity , type, description, name}: UpdateSalleParams): Promise<Salle | null> {
         const repo = this.db.getRepository(Salle)
         const Sallefound = await repo.findOneBy({ id })

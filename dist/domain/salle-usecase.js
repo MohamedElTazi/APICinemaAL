@@ -44,6 +44,13 @@ class SalleUsecase {
             };
         });
     }
+    nbSalle() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const query = this.db.createQueryBuilder(salle_1.Salle, 'Salle');
+            const [Salles, totalCount] = yield query.getManyAndCount();
+            return totalCount;
+        });
+    }
     updateSalle(id_1, _a) {
         return __awaiter(this, arguments, void 0, function* (id, { capacity, type, description, name }) {
             const repo = this.db.getRepository(salle_1.Salle);

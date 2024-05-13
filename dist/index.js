@@ -18,12 +18,19 @@ const database_1 = require("./database/database");
 require("dotenv/config");
 const swagger_1 = require("./swagger/swagger");
 require("reflect-metadata");
+const salle_1 = require("./database/entities/salle");
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = (0, express_1.default)();
     const port = 3000;
     try {
         yield database_1.AppDataSource.initialize();
         console.error("well connected to database");
+        const salleRepo = database_1.AppDataSource.getRepository(salle_1.Salle);
+        const nbSalle = yield salleRepo.count();
+        if (nbSalle < 10) {
+            console.error("You need to add at least 10 salles to the database");
+            process.exit(1);
+        }
     }
     catch (error) {
         console.log(error);

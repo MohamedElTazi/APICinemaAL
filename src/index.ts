@@ -4,6 +4,7 @@ import { AppDataSource } from "./database/database";
 import 'dotenv/config';
 import { swaggerDocs } from "./swagger/swagger";
 import "reflect-metadata"
+import { Salle } from "./database/entities/salle";
 
 const main = async () => {
     const app = express()
@@ -13,6 +14,12 @@ const main = async () => {
 
         await AppDataSource.initialize()
         console.error("well connected to database")
+        const salleRepo = AppDataSource.getRepository(Salle)
+        const nbSalle = await salleRepo.count()
+        if(nbSalle<10){
+            console.error("You need to add at least 10 salles to the database")
+            process.exit(1)
+        }
     } catch (error) {
         console.log(error)
         console.error("Cannot contact database")

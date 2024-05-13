@@ -12,7 +12,6 @@ export const SalleHandler = (app: express.Express) => {
    
 
     app.post("/salles",authMiddlewareAdmin ,async (req: Request, res: Response) => {
-        console.log(UserHandler.name)
         const validation = createSalleValidation.validate(req.body)
 
         if (validation.error) {
@@ -101,7 +100,7 @@ export const SalleHandler = (app: express.Express) => {
         }
 
         try {
-            const planning = await query.orderBy("showtime.date", "ASC").getMany();
+            const planning = await query.orderBy("showtime.start_datetime", "ASC").getMany();
 
             res.status(200).send(planning);
         } catch (error) {

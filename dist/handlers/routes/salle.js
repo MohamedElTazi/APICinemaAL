@@ -16,10 +16,8 @@ const database_1 = require("../../database/database");
 const salle_1 = require("../../database/entities/salle");
 const salle_usecase_1 = require("../../domain/salle-usecase");
 const auth_middleware_1 = require("../middleware/auth-middleware");
-const user_1 = require("./user");
 const SalleHandler = (app) => {
     app.post("/salles", auth_middleware_1.authMiddlewareAdmin, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        console.log(user_1.UserHandler.name);
         const validation = salle_validator_1.createSalleValidation.validate(req.body);
         if (validation.error) {
             res.status(400).send((0, generate_validation_message_1.generateValidationErrorMessage)(validation.error.details));
@@ -85,7 +83,7 @@ const SalleHandler = (app) => {
             return;
         }
         try {
-            const planning = yield query.orderBy("showtime.date", "ASC").getMany();
+            const planning = yield query.orderBy("showtime.start_datetime", "ASC").getMany();
             res.status(200).send(planning);
         }
         catch (error) {
